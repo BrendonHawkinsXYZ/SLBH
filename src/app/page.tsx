@@ -57,10 +57,18 @@ export default function Home() {
         <p className="text-sm tracking-[0.56px] leading-[1.245]">
           {location} | {time}
         </p>
-        {/* "coming soon" — top-right on desktop, hidden on mobile */}
-        <p className="hidden md:block text-sm tracking-[-0.84px]">
-          coming soon
-        </p>
+        {/* instagram + coming soon — top-right on desktop, hidden on mobile */}
+        <div className="hidden md:flex items-center gap-6 text-sm tracking-[-0.84px]">
+          <a
+            href="https://www.instagram.com/studiolabbh"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="relative after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-full after:bg-foreground after:origin-left after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:ease-in-out"
+          >
+            instagram
+          </a>
+          <p>coming soon</p>
+        </div>
       </div>
 
       {/* SLBH — desktop: single line at bottom-left */}
@@ -78,10 +86,18 @@ export default function Home() {
         </h1>
       </div>
 
-      {/* "coming soon" — bottom-center on mobile only */}
-      <p className="md:hidden absolute bottom-8 left-1/2 -translate-x-1/2 text-sm tracking-[-0.84px]">
-        coming soon
-      </p>
+      {/* instagram + coming soon — bottom-center on mobile only */}
+      <div className="md:hidden absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-6 text-sm tracking-[-0.84px]">
+        <a
+          href="https://www.instagram.com/studiolabbh"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="relative after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-full after:bg-foreground after:origin-left after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:ease-in-out"
+        >
+          instagram
+        </a>
+        <p>coming soon</p>
+      </div>
     </main>
   );
 }
