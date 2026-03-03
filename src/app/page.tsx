@@ -51,7 +51,7 @@ export default function Home() {
   const { location, time } = useLocationAndTime();
 
   return (
-    <main className="relative min-h-svh w-full overflow-hidden bg-background text-foreground font-[family-name:var(--font-inter)]">
+    <main className="relative min-h-svh w-full overflow-x-hidden bg-background text-foreground font-[family-name:var(--font-inter)]">
       {/* Top bar */}
       <div className="absolute top-8 left-8 right-8 flex justify-between items-start lowercase">
         <p className="anim-fade-in text-sm tracking-[0.56px] leading-[1.245]" style={{ animationDuration: '800ms', animationDelay: '300ms' }}>
