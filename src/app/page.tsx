@@ -51,7 +51,7 @@ export default function Home() {
   const { location, time } = useLocationAndTime();
 
   return (
-    <main className="relative min-h-svh w-full overflow-hidden bg-background text-foreground font-[family-name:var(--font-figtree)]">
+    <main className="relative min-h-svh w-full overflow-hidden bg-background text-foreground font-[family-name:var(--font-inter)]">
       {/* Top bar */}
       <div className="absolute top-8 left-8 right-8 flex justify-between items-start">
         <p className="text-sm tracking-[0.56px] leading-[1.245]">
@@ -72,12 +72,12 @@ export default function Home() {
       </div>
 
       {/* SLBH — desktop: single line at bottom-left */}
-      <h1 className="hidden md:block absolute bottom-0 left-8 font-[family-name:var(--font-orbitron)] font-black text-[clamp(180px,23vw,350px)] leading-[0.95] select-none">
+      <h1 className="hidden md:block absolute bottom-16 left-8 font-[family-name:var(--font-orbitron)] font-black text-[clamp(180px,23vw,350px)] leading-[0.95] select-none">
         SLBH
       </h1>
 
       {/* SL / BH — mobile: stacked at bottom-left */}
-      <div className="md:hidden absolute bottom-14 left-7">
+      <div className="md:hidden absolute bottom-28 left-7">
         <h1 className="font-[family-name:var(--font-orbitron)] font-black text-[128px] leading-[1.05] select-none">
           SL
         </h1>
@@ -87,7 +87,7 @@ export default function Home() {
       </div>
 
       {/* instagram + coming soon — bottom-center on mobile only */}
-      <div className="md:hidden absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-6 text-sm tracking-[-0.84px]">
+      <div className="md:hidden absolute bottom-14 left-1/2 -translate-x-1/2 flex items-center gap-6 text-sm tracking-[-0.84px]">
         <a
           href="https://www.instagram.com/studiolabbh"
           target="_blank"
@@ -97,6 +97,26 @@ export default function Home() {
           instagram
         </a>
         <p>coming soon</p>
+      </div>
+
+      {/* Spectrum line + footer — pinned to bottom */}
+      <div className="absolute bottom-0 left-0 right-0">
+        {/* 2px spectrum line */}
+        <div className="flex w-full" style={{ height: '2px' }}>
+          <span className="flex-1" style={{ background: '#D42B2B' }} />
+          <span className="flex-1" style={{ background: '#E86510' }} />
+          <span className="flex-1" style={{ background: '#C8C400' }} />
+          <span className="flex-1" style={{ background: '#1A8C1A' }} />
+          <span className="flex-1" style={{ background: '#0A8C7A' }} />
+          <span className="flex-1" style={{ background: '#0A1E6E' }} />
+          <span className="flex-1" style={{ background: '#5C0FAD' }} />
+        </div>
+        {/* Footer text */}
+        <div className="flex justify-between items-center px-8 py-4">
+          <p className="font-[family-name:var(--font-orbitron)] text-[10px] tracking-[0.2em] text-foreground/40 uppercase">
+            AFFECTIVE COMPUTATIONAL GEOMETRY · STUDIO LAB BH
+          </p>
+        </div>
       </div>
     </main>
   );
