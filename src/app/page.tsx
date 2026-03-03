@@ -53,7 +53,7 @@ export default function Home() {
   return (
     <main className="relative min-h-svh w-full overflow-hidden bg-background text-foreground font-[family-name:var(--font-inter)]">
       {/* Top bar */}
-      <div className="absolute top-8 left-8 right-8 flex justify-between items-start">
+      <div className="absolute top-8 left-8 right-8 flex justify-between items-start lowercase">
         <p className="text-sm tracking-[0.56px] leading-[1.245]">
           {location} | {time}
         </p>
@@ -87,7 +87,7 @@ export default function Home() {
       </div>
 
       {/* instagram + coming soon — bottom-center on mobile only */}
-      <div className="md:hidden absolute bottom-14 left-1/2 -translate-x-1/2 flex items-center gap-6 text-sm tracking-[-0.84px]">
+      <div className="md:hidden absolute bottom-20 left-1/2 -translate-x-1/2 flex items-center gap-6 text-sm tracking-[-0.84px] lowercase">
         <a
           href="https://www.instagram.com/studiolabbh"
           target="_blank"
@@ -112,8 +112,13 @@ export default function Home() {
           <span className="flex-1" style={{ background: '#5C0FAD' }} />
         </div>
         {/* Footer text */}
-        <div className="flex justify-between items-center px-8 py-4">
-          <p className="font-[family-name:var(--font-orbitron)] text-[10px] tracking-[0.2em] text-foreground/40 uppercase">
+        <div className="flex justify-end items-center px-8 py-4">
+          {/* Mobile — abbreviated */}
+          <p className="md:hidden font-[family-name:var(--font-orbitron)] text-[9px] tracking-[0.15em] text-foreground/40 uppercase">
+            ACG · STUDIO LAB BH
+          </p>
+          {/* Desktop — full */}
+          <p className="hidden md:block font-[family-name:var(--font-orbitron)] text-[10px] tracking-[0.2em] text-foreground/40 uppercase">
             AFFECTIVE COMPUTATIONAL GEOMETRY · STUDIO LAB BH
           </p>
         </div>
