@@ -51,7 +51,7 @@ export default function Home() {
   const { location, time } = useLocationAndTime();
 
   return (
-    <main className="relative min-h-svh w-full overflow-x-hidden bg-background text-foreground font-[family-name:var(--font-inter)]">
+    <main className="relative min-h-svh w-full overflow-hidden bg-background text-foreground font-[family-name:var(--font-inter)]">
       {/* Top bar */}
       <div className="absolute top-8 left-8 right-8 flex justify-between items-start lowercase">
         <p className="anim-fade-in text-sm tracking-[0.56px] leading-[1.245]" style={{ animationDuration: '800ms', animationDelay: '300ms' }}>
@@ -100,7 +100,7 @@ export default function Home() {
       </div>
 
       {/* Spectrum line — all viewports, instant with background */}
-      <div className="absolute left-0 right-0 flex" style={{ bottom: '1px', height: '2px' }}>
+      <div className="fixed bottom-0 left-0 right-0 z-10 flex" style={{ height: '2px' }}>
         <span className="flex-1" style={{ background: '#D42B2B' }} />
         <span className="flex-1" style={{ background: '#E86510' }} />
         <span className="flex-1" style={{ background: '#C8C400' }} />
