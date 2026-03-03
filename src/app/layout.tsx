@@ -8,9 +8,9 @@ const orbitron = localFont({
   weight: "900",
 });
 
-const figtree = localFont({
-  src: "../fonts/figtree-latin-400-normal.woff2",
-  variable: "--font-figtree",
+const inter = localFont({
+  src: "../fonts/inter-latin-400-normal.woff2",
+  variable: "--font-inter",
   weight: "400",
 });
 
@@ -28,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${orbitron.variable} ${figtree.variable} antialiased`}
+        className={`${orbitron.variable} ${inter.variable} antialiased`}
       >
         {children}
       </body>
