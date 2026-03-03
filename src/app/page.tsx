@@ -114,12 +114,12 @@ export default function Home() {
         {/* Footer text */}
         <div className="flex justify-end items-center px-8 py-4">
           {/* Mobile — abbreviated */}
-          <p className="md:hidden font-[family-name:var(--font-orbitron)] text-[9px] tracking-[0.15em] text-foreground/40 lowercase">
-            acg · studio lab bh
+          <p className="md:hidden font-[family-name:var(--font-orbitron)] text-[9px] tracking-[0.15em] text-foreground/40 uppercase">
+            ACG · STUDIO LAB BH
           </p>
           {/* Desktop — full */}
-          <p className="hidden md:block font-[family-name:var(--font-orbitron)] text-[10px] tracking-[0.2em] text-foreground/40 lowercase">
-            affective computational geometry · studio lab bh
+          <p className="hidden md:block font-[family-name:var(--font-orbitron)] text-[10px] tracking-[0.2em] text-foreground/40 uppercase">
+            AFFECTIVE COMPUTATIONAL GEOMETRY · STUDIO LAB BH
           </p>
         </div>
       </div>
