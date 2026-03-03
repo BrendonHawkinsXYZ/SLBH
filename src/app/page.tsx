@@ -77,7 +77,7 @@ export default function Home() {
       </h1>
 
       {/* SL / BH — mobile: stacked at bottom-left */}
-      <div className="anim-fade-up md:hidden absolute bottom-7 left-7" style={{ animationDuration: '1000ms', animationDelay: '800ms' }}>
+      <div className="anim-fade-up md:hidden absolute bottom-16 left-6" style={{ animationDuration: '1000ms', animationDelay: '800ms' }}>
         <h1 className="font-[family-name:var(--font-orbitron)] font-black text-[128px] leading-[1.05] select-none">
           SL
         </h1>
@@ -87,7 +87,7 @@ export default function Home() {
       </div>
 
       {/* instagram + coming soon — bottom-center on mobile only */}
-      <div className="anim-fade-in md:hidden absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-6 text-sm tracking-[-0.84px] lowercase" style={{ animationDuration: '600ms', animationDelay: '300ms' }}>
+      <div className="anim-fade-in md:hidden absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-6 text-sm tracking-[-0.84px] lowercase" style={{ animationDuration: '600ms', animationDelay: '300ms' }}>
         <a
           href="https://www.instagram.com/studiolabbh"
           target="_blank"
