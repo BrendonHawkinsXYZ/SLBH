@@ -77,7 +77,7 @@ export default function Home() {
       </h1>
 
       {/* SL / BH — mobile: stacked at bottom-left */}
-      <div className="md:hidden absolute bottom-28 left-7">
+      <div className="md:hidden absolute bottom-14 left-7">
         <h1 className="font-[family-name:var(--font-orbitron)] font-black text-[128px] leading-[1.05] select-none">
           SL
         </h1>
@@ -87,7 +87,7 @@ export default function Home() {
       </div>
 
       {/* instagram + coming soon — bottom-center on mobile only */}
-      <div className="md:hidden absolute bottom-20 left-1/2 -translate-x-1/2 flex items-center gap-6 text-sm tracking-[-0.84px] lowercase">
+      <div className="md:hidden absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-6 text-sm tracking-[-0.84px] lowercase">
         <a
           href="https://www.instagram.com/studiolabbh"
           target="_blank"
@@ -99,9 +99,9 @@ export default function Home() {
         <p>coming soon</p>
       </div>
 
-      {/* Spectrum line + footer — pinned to bottom */}
+      {/* Footer — spectrum line + text */}
       <div className="absolute bottom-0 left-0 right-0">
-        {/* 2px spectrum line */}
+        {/* 2px spectrum line — always present */}
         <div className="flex w-full" style={{ height: '2px' }}>
           <span className="flex-1" style={{ background: '#D42B2B' }} />
           <span className="flex-1" style={{ background: '#E86510' }} />
@@ -111,14 +111,9 @@ export default function Home() {
           <span className="flex-1" style={{ background: '#0A1E6E' }} />
           <span className="flex-1" style={{ background: '#5C0FAD' }} />
         </div>
-        {/* Footer text */}
-        <div className="flex justify-end items-center px-8 py-4">
-          {/* Mobile — abbreviated */}
-          <p className="md:hidden font-[family-name:var(--font-orbitron)] text-[9px] tracking-[0.15em] text-foreground/40 uppercase">
-            ACG · STUDIO LAB BH
-          </p>
-          {/* Desktop — full */}
-          <p className="hidden md:block font-[family-name:var(--font-orbitron)] text-[10px] tracking-[0.2em] text-foreground/40 uppercase">
+        {/* ACG text — desktop only */}
+        <div className="hidden md:flex justify-between items-center px-8 py-4">
+          <p className="font-[family-name:var(--font-orbitron)] text-[10px] tracking-[0.2em] text-foreground/40 uppercase">
             AFFECTIVE COMPUTATIONAL GEOMETRY · STUDIO LAB BH
           </p>
         </div>
