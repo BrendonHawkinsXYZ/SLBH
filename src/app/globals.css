@@ -4,3 +4,23 @@
   --color-background: #0A0A0A;
   --color-foreground: #F5F5F3;
 }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.anim-fade-up {
+  opacity: 0;
+  animation: fadeUp ease-out forwards;
+}
+
+.anim-fade-in {
+  opacity: 0;
+  animation: fadeIn ease-out forwards;
+}
