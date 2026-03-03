@@ -78,10 +78,10 @@ export default function Home() {
 
       {/* SL / BH — mobile: stacked at bottom-left */}
       <div className="anim-fade-up md:hidden absolute bottom-16 left-6" style={{ animationDuration: '1000ms', animationDelay: '800ms' }}>
-        <h1 className="font-[family-name:var(--font-orbitron)] font-black text-[150px] leading-[0.90] select-none">
+        <h1 className="font-[family-name:var(--font-orbitron)] font-black text-[128px] leading-[1.05] select-none">
           SL
         </h1>
-        <h1 className="font-[family-name:var(--font-orbitron)] font-black text-[150px] leading-[0.90] select-none">
+        <h1 className="font-[family-name:var(--font-orbitron)] font-black text-[128px] leading-[1.05] select-none">
           BH
         </h1>
       </div>
