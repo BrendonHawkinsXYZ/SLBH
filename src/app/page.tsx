@@ -58,7 +58,7 @@ export default function Home() {
           {location} | {time}
         </p>
         {/* instagram + coming soon — top-right on desktop, hidden on mobile */}
-        <div className="anim-fade-in hidden md:flex items-center gap-6 text-sm tracking-[-0.84px]" style={{ animationDuration: '600ms', animationDelay: '1000ms' }}>
+        <div className="anim-fade-in hidden md:flex items-center gap-6 text-sm tracking-[-0.84px]" style={{ animationDuration: '600ms', animationDelay: '300ms' }}>
           <a
             href="https://www.instagram.com/studiolabbh"
             target="_blank"
@@ -72,12 +72,12 @@ export default function Home() {
       </div>
 
       {/* SLBH — desktop: single line at bottom-left */}
-      <h1 className="anim-fade-up hidden md:block absolute bottom-16 left-8 font-[family-name:var(--font-orbitron)] font-black text-[clamp(180px,23vw,350px)] leading-[0.95] select-none" style={{ animationDuration: '1000ms', animationDelay: '600ms' }}>
+      <h1 className="anim-fade-up hidden md:block absolute bottom-8 left-8 font-[family-name:var(--font-orbitron)] font-black text-[clamp(180px,23vw,350px)] leading-[0.95] select-none" style={{ animationDuration: '1000ms', animationDelay: '800ms' }}>
         SLBH
       </h1>
 
       {/* SL / BH — mobile: stacked at bottom-left */}
-      <div className="anim-fade-up md:hidden absolute bottom-14 left-7" style={{ animationDuration: '1000ms', animationDelay: '600ms' }}>
+      <div className="anim-fade-up md:hidden absolute bottom-7 left-7" style={{ animationDuration: '1000ms', animationDelay: '800ms' }}>
         <h1 className="font-[family-name:var(--font-orbitron)] font-black text-[128px] leading-[1.05] select-none">
           SL
         </h1>
@@ -87,7 +87,7 @@ export default function Home() {
       </div>
 
       {/* instagram + coming soon — bottom-center on mobile only */}
-      <div className="anim-fade-in md:hidden absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-6 text-sm tracking-[-0.84px] lowercase" style={{ animationDuration: '600ms', animationDelay: '1000ms' }}>
+      <div className="anim-fade-in md:hidden absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-6 text-sm tracking-[-0.84px] lowercase" style={{ animationDuration: '600ms', animationDelay: '300ms' }}>
         <a
           href="https://www.instagram.com/studiolabbh"
           target="_blank"
@@ -99,8 +99,8 @@ export default function Home() {
         <p>coming soon</p>
       </div>
 
-      {/* Spectrum line — all viewports */}
-      <div className="anim-fade-in absolute bottom-0 left-0 right-0 flex" style={{ height: '2px', animationDuration: '400ms', animationDelay: '1200ms' }}>
+      {/* Spectrum line — all viewports, instant with background */}
+      <div className="absolute bottom-0 left-0 right-0 flex" style={{ height: '2px' }}>
         <span className="flex-1" style={{ background: '#D42B2B' }} />
         <span className="flex-1" style={{ background: '#E86510' }} />
         <span className="flex-1" style={{ background: '#C8C400' }} />
