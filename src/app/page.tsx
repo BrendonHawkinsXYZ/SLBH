@@ -100,7 +100,7 @@ export default function Home() {
       </div>
 
       {/* Spectrum line — all viewports, instant with background */}
-      <div className="absolute bottom-0 left-0 right-0 flex" style={{ height: '2px' }}>
+      <div className="absolute left-0 right-0 flex" style={{ bottom: '1px', height: '2px' }}>
         <span className="flex-1" style={{ background: '#D42B2B' }} />
         <span className="flex-1" style={{ background: '#E86510' }} />
         <span className="flex-1" style={{ background: '#C8C400' }} />
