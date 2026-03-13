@@ -8,9 +8,27 @@ const orbitron = localFont({
   weight: "900",
 });
 
+const orbitronRegular = localFont({
+  src: "../fonts/orbitron-latin-400-normal.woff2",
+  variable: "--font-orbitron-regular",
+  weight: "400",
+});
+
+const orbitronExtrabold = localFont({
+  src: "../fonts/orbitron-latin-800-normal.woff2",
+  variable: "--font-orbitron-extrabold",
+  weight: "800",
+});
+
 const inter = localFont({
   src: "../fonts/inter-latin-400-normal.woff2",
   variable: "--font-inter",
+  weight: "400",
+});
+
+const figtree = localFont({
+  src: "../fonts/figtree-latin-400-normal.woff2",
+  variable: "--font-figtree",
   weight: "400",
 });
 
@@ -28,7 +46,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${orbitron.variable} ${inter.variable} antialiased`}
+        className={`${orbitron.variable} ${orbitronRegular.variable} ${orbitronExtrabold.variable} ${inter.variable} ${figtree.variable} antialiased`}
       >
         {children}
       </body>
