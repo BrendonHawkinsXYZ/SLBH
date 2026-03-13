@@ -1,103 +1,111 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Header from "@/components/Header";
+import Timestamp from "@/components/Timestamp";
+import Footer from "@/components/Footer";
+import OrbCanvas from "@/components/OrbCanvas";
+import EmotionStack from "@/components/EmotionStack";
+import MetricsBlock from "@/components/MetricsBlock";
+import DeltaDisplay from "@/components/DeltaDisplay";
+import HeadlineBlock from "@/components/HeadlineBlock";
+import { fetchAllChromaData } from "@/lib/chroma";
+import type { ChromaPageData } from "@/lib/chroma-types";
 
-function useLocationAndTime() {
-  const [location, setLocation] = useState("United States");
-  const [time, setTime] = useState("");
+export default function Home() {
+  const [data, setData] = useState<ChromaPageData | null>(null);
 
   useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      const formatted = now.toLocaleString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
-      const timeStr = now.toLocaleTimeString("en-US", {
-        hour12: false,
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      });
-      setTime(`${formatted} | ${timeStr}`);
-    };
-
-    // Attempt geolocation for city/region
-    if ("geolocation" in navigator) {
-      fetch("https://ipapi.co/json/")
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.city) {
-            setLocation(data.city);
-          } else if (data.country_name) {
-            setLocation(data.country_name);
-          }
-        })
-        .catch(() => {
-          // Keep default
-        });
-    }
-
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
+    fetchAllChromaData().then(setData);
+    const interval = setInterval(() => {
+      fetchAllChromaData().then(setData);
+    }, 60_000);
     return () => clearInterval(interval);
   }, []);
 
-  return { location, time };
-}
-
-export default function Home() {
-  const { location, time } = useLocationAndTime();
+  const hasData = data !== null;
 
   return (
-    <main className="relative min-h-svh w-full overflow-x-hidden bg-background text-foreground font-[family-name:var(--font-inter)]">
-      {/* Top bar */}
-      <div className="absolute top-8 left-8 right-8 flex justify-between items-start lowercase">
-        <p className="anim-fade-in text-sm tracking-[0.56px] leading-[1.245]" style={{ animationDuration: '800ms', animationDelay: '300ms' }}>
-          {location} | {time}
-        </p>
-        {/* instagram + coming soon — top-right on desktop, hidden on mobile */}
-        <div className="anim-fade-in hidden md:flex items-center gap-6 text-sm tracking-[-0.84px]" style={{ animationDuration: '600ms', animationDelay: '300ms' }}>
-          <a
-            href="https://www.instagram.com/studiolabbh"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="relative after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-full after:bg-foreground after:origin-left after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:ease-in-out"
+    <div className="relative w-full h-screen h-[100dvh] flex flex-col overflow-hidden bg-background text-foreground">
+      {/* Header */}
+      <Header />
+
+      {/* Timestamp — absolute center on desktop, relative row on tablet/mobile */}
+      <div className="hidden lg:block absolute left-1/2 top-8 -translate-x-1/2 z-10">
+        <Timestamp />
+      </div>
+      <div className="lg:hidden flex justify-center pt-2 px-6">
+        <Timestamp />
+      </div>
+
+      {/* Main content */}
+      <main
+        className={`
+          flex-1 min-h-0
+          grid grid-cols-[minmax(300px,420px)_1fr] grid-rows-[auto_auto_1fr_auto]
+          gap-x-10 gap-y-0
+          px-[38px] pt-[100px]
+          max-lg:grid-cols-[minmax(240px,360px)_1fr] max-lg:px-8 max-lg:pt-[60px] max-lg:gap-x-6
+          max-md:flex max-md:flex-col max-md:px-6 max-md:pt-2 max-md:gap-0
+        `}
+      >
+        {/* ═══ LEFT COLUMN — DESKTOP/TABLET ═══ */}
+
+        {/* Emotion Stack */}
+        {hasData && (
+          <div className="col-start-1 row-start-1 self-start anim-slide-left-emo max-md:order-2 max-md:w-1/2 max-md:anim-slide-up-delta">
+            <EmotionStack emotions={data.emotions.top_emotions} />
+          </div>
+        )}
+
+        {/* Metrics Block */}
+        {hasData && (
+          <div
+            className={`
+              col-start-1 row-start-2 mt-8
+              anim-slide-left-metrics
+              max-md:order-2 max-md:self-end max-md:text-right max-md:w-1/2 max-md:mt-[-66px]
+            `}
           >
-            instagram
-          </a>
-          <p>coming soon</p>
+            <MetricsBlock
+              volatility={data.fieldState.volatility_score}
+              coherence={data.fieldState.coherence_score}
+              confidence={data.delta.confidence}
+            />
+          </div>
+        )}
+
+        {/* Headline + Body — pushed to bottom */}
+        <div className="col-start-1 row-start-3 self-end pb-5 anim-slide-up-headline max-md:order-3 max-md:self-auto max-md:pb-0 max-md:mt-3">
+          <HeadlineBlock />
         </div>
-      </div>
 
-      {/* SLBH — desktop: single line at bottom-left */}
-      <h1 className="anim-fade-up hidden md:block absolute bottom-8 left-8 font-[family-name:var(--font-orbitron)] font-black text-[clamp(180px,23vw,350px)] leading-[0.95] select-none" style={{ animationDuration: '1000ms', animationDelay: '800ms' }}>
-        SLBH
-      </h1>
+        {/* Body copy animation wrapper — separate delay on mobile */}
+        {/* Body copy delay is handled inside HeadlineBlock via the p tag */}
 
-      {/* SL / BH — mobile: stacked at bottom-left */}
-      <div className="anim-fade-up md:hidden absolute bottom-16 left-6" style={{ animationDuration: '1000ms', animationDelay: '800ms' }}>
-        <h1 className="font-[family-name:var(--font-orbitron)] font-black text-[128px] leading-[1.05] select-none">
-          SL
-        </h1>
-        <h1 className="font-[family-name:var(--font-orbitron)] font-black text-[128px] leading-[1.05] select-none">
-          BH
-        </h1>
-      </div>
-
-      {/* instagram + coming soon — bottom-center on mobile only */}
-      <div className="anim-fade-in md:hidden absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-6 text-sm tracking-[-0.84px] lowercase" style={{ animationDuration: '600ms', animationDelay: '300ms' }}>
-        <a
-          href="https://www.instagram.com/studiolabbh"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="relative after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-full after:bg-foreground after:origin-left after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:ease-in-out"
+        {/* ═══ RIGHT ZONE — ORB + DELTA ═══ */}
+        <div
+          className={`
+            col-start-2 row-start-1 row-span-4
+            flex flex-col items-center justify-center
+            max-md:order-1 max-md:flex-1 max-md:min-h-0 max-md:mb-1
+          `}
         >
-          instagram
-        </a>
-        <p>coming soon</p>
-      </div>
-    </main>
+          {hasData && (
+            <>
+              <div className="anim-orb-reveal">
+                <OrbCanvas colorHistory={data.colorHistory} />
+              </div>
+              <div className="mt-6 anim-slide-up-delta max-md:mt-2 max-md:mb-0">
+                <DeltaDisplay magnitude={data.delta.delta_magnitude} />
+              </div>
+            </>
+          )}
+        </div>
+      </main>
+
+      {/* Footer */}
+      <Footer />
+    </div>
   );
 }
