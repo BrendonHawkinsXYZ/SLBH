@@ -34,6 +34,13 @@ export interface ColorData {
   created_at: string;
 }
 
+export interface ApiEmotionEntry {
+  emotion_id: string;
+  weight: number;
+  rank: number;
+  percentage: number;
+}
+
 export interface EmotionEntry {
   label: string;
   score: number;
@@ -43,8 +50,8 @@ export interface EmotionData {
   id: string;
   parent_id: string;
   parent_type: string;
-  top_emotions: EmotionEntry[];
-  display_distribution: EmotionEntry[] | null;
+  top_emotions: ApiEmotionEntry[];
+  display_distribution: ApiEmotionEntry[] | null;
   taxonomy_version: string;
   derived_model_version: string;
   projection_version: string;
@@ -82,9 +89,13 @@ export interface HSLColor {
   hsl_l: number;
 }
 
+export interface MappedEmotionData extends Omit<EmotionData, "top_emotions"> {
+  top_emotions: (ApiEmotionEntry & EmotionEntry)[];
+}
+
 export interface ChromaPageData {
   fieldState: FieldState;
-  emotions: EmotionData;
+  emotions: MappedEmotionData;
   delta: DeltaData;
   currentColor: ColorData;
   colorHistory: HSLColor[];

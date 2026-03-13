@@ -44,7 +44,7 @@ export default function Home() {
           flex-1 min-h-0
           grid grid-cols-[minmax(300px,420px)_1fr] grid-rows-[auto_auto_1fr_auto]
           gap-x-10 gap-y-0
-          px-[38px] pt-[100px]
+          px-10 pt-[100px]
           max-lg:grid-cols-[minmax(240px,360px)_1fr] max-lg:px-8 max-lg:pt-[60px] max-lg:gap-x-6
           max-md:flex max-md:flex-col max-md:px-6 max-md:pt-2 max-md:gap-0
         `}
@@ -64,7 +64,7 @@ export default function Home() {
             className={`
               col-start-1 row-start-2 mt-8
               anim-slide-left-metrics
-              max-md:order-2 max-md:self-end max-md:text-right max-md:w-1/2 max-md:mt-[-66px]
+              max-md:order-2 max-md:self-end max-md:text-right max-md:w-1/2 max-md:mt-[-64px]
             `}
           >
             <MetricsBlock

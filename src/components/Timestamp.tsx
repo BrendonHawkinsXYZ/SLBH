@@ -26,7 +26,7 @@ export default function Timestamp() {
     <div
       role="timer"
       aria-live="polite"
-      className="anim-chrome text-sm uppercase text-[#F6F6F6] whitespace-nowrap font-[family-name:var(--font-inter)] max-md:font-[family-name:var(--font-figtree)] max-md:text-[13px] max-md:tracking-[0.04em]"
+      className="anim-chrome text-sm uppercase text-[#F6F6F6] whitespace-nowrap font-[family-name:var(--font-inter)] max-md:font-[family-name:var(--font-figtree)] max-md:text-xs max-md:tracking-[0.04em]"
       style={{ fontVariantNumeric: "tabular-nums" }}
     >
       {text}

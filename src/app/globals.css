@@ -52,7 +52,7 @@
 }
 
 @keyframes slideUpSmall {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -80,7 +80,7 @@
 
 .anim-slide-up-delta {
   opacity: 0;
-  transform: translateY(6px);
+  transform: translateY(8px);
   animation: slideUpSmall 900ms var(--ease-out) var(--d-delta) forwards;
 }
 
