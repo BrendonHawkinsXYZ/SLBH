@@ -53,7 +53,7 @@ export default function OrbCanvas({ colorHistory }: OrbCanvasProps) {
     const L = Math.round(col.hsl_l * 100);
 
     const renderStart = performance.now();
-    const revealDuration = 2500;
+    const revealDuration = 1000;
     let t = 0;
 
     function draw() {
