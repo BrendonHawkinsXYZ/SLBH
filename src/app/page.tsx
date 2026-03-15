@@ -11,6 +11,7 @@ import DeltaDisplay from "@/components/DeltaDisplay";
 import HeadlineBlock from "@/components/HeadlineBlock";
 import { fetchAllChromaData } from "@/lib/chroma";
 import type { ChromaPageData } from "@/lib/chroma-types";
+import MissionSection from "@/components/MissionSection";
 
 export default function Home() {
   const [data, setData] = useState<ChromaPageData | null>(null);
@@ -26,7 +27,9 @@ export default function Home() {
   const hasData = data !== null;
 
   return (
-    <div className="relative w-full h-screen h-[100dvh] flex flex-col overflow-hidden bg-background text-foreground">
+    <div className="relative w-full bg-background text-foreground">
+      {/* Viewport-locked dashboard */}
+      <div className="relative w-full h-screen h-[100dvh] flex flex-col overflow-hidden">
       {/* Header */}
       <Header />
 
@@ -103,6 +106,19 @@ export default function Home() {
           )}
         </div>
       </main>
+
+      {/* Scroll indicator */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 pointer-events-none z-10 scroll-indicator max-md:bottom-4">
+        <div className="w-px h-6 bg-[rgba(245,245,243,0.5)] max-md:h-4" />
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true">
+          <path d="M1 1l4 4 4-4" stroke="rgba(245,245,243,0.5)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+
+      </div>{/* end viewport-locked dashboard */}
+
+      {/* Mission section */}
+      <MissionSection />
 
       {/* Footer */}
       <Footer />

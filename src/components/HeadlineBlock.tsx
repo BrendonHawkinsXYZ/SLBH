@@ -10,11 +10,10 @@ export default function HeadlineBlock() {
         </span>{" "}
         of Human Emotion
       </h1>
-      <p className="mt-6 font-[family-name:var(--font-inter)] text-base leading-[1.6] text-[#A0A0A0] max-w-[420px] max-lg:text-sm max-md:text-xs max-md:leading-[1.5] max-md:max-w-[320px] max-md:mt-2">
-        Studio Lab BH models collective emotional states as infrastructure.
-        Treating affect as a fluid dynamic system, we apply meteorological
-        methods to observe, predict, and visualize the emotional currents
-        shaping human behavior.
+      <p className="anim-slide-up-body mt-6 font-[family-name:var(--font-inter)] text-base leading-[1.6] text-[#A0A0A0] max-w-[420px] max-lg:text-sm max-md:text-xs max-md:leading-[1.5] max-md:max-w-[320px] max-md:mt-2">
+        We advance the science of human emotion by translating foundational
+        theory into measurable systems, computational models, and real-world
+        applications.
       </p>
     </div>
   );

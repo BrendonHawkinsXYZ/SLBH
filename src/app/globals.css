@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+html {
+  scroll-behavior: smooth;
+}
+
 @theme {
   --color-background: #0A0A0A;
   --color-foreground: #F5F5F3;
@@ -16,13 +20,13 @@
   --dur: 800ms;
   --dur-slow: 1200ms;
 
-  --d-orb: 0ms;
-  --d-delta: 1600ms;
-  --d-emo: 2000ms;
-  --d-metrics: 2300ms;
-  --d-headline: 2600ms;
-  --d-body: 2900ms;
-  --d-chrome: 3200ms;
+  --d-chrome:   0ms;
+  --d-headline: 300ms;
+  --d-body:     600ms;
+  --d-orb:      0ms;
+  --d-delta:    400ms;
+  --d-emo:      700ms;
+  --d-metrics:  1000ms;
 }
 
 ::selection {
@@ -117,4 +121,34 @@
 .anim-chrome {
   opacity: 0;
   animation: fadeIn var(--dur-slow) var(--ease) var(--d-chrome) forwards;
+}
+
+/* ═══ ORB BLUR (responsive) ═══ */
+
+.orb-blur { filter: blur(10px); }
+@media (max-width: 768px) { .orb-blur { filter: blur(6px); } }
+
+/* ═══ SCROLL INDICATOR ═══ */
+
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.25; transform: translateY(0); }
+  50%       { opacity: 0.6;  transform: translateY(4px); }
+}
+
+.scroll-indicator {
+  animation: scrollPulse 2s var(--ease-drift) 4s infinite both;
+  opacity: 0;
+}
+
+/* ═══ MISSION SCROLL REVEAL ═══ */
+
+.mission-reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+}
+
+.mission-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
