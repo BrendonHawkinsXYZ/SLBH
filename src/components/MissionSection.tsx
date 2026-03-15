@@ -172,11 +172,11 @@ export default function MissionSection() {
             subtitle="Dynamic Systems Approach"
           />
           <p className="font-[family-name:var(--font-inter)] text-[16px] text-[#A0A0A0] leading-[1.7]">
-            Studio Lab BH approaches emotion not as transient states, but as
-            dynamic, interconnected systems. By synthesizing computational
-            modeling, affective science, and design research, we construct
-            frameworks capable of observing, mapping, and translating complex
-            emotional topographies into legible data structures.
+            Studio Lab BH treats emotion as a dynamic, interconnected system. By
+            synthesizing computational modeling, affective science, and design
+            research, we construct frameworks for observing, mapping, and
+            translating complex emotional topographies into legible data
+            structures.
           </p>
         </div>
 
