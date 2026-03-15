@@ -9,16 +9,13 @@ import type {
   HSLColor,
 } from "./chroma-types";
 
-function getApiBase(): string {
-  if (typeof window !== "undefined") return "/api/chroma";
-  // Server-side: need absolute URL to route through the local proxy
-  const origin =
-    process.env.NEXT_PUBLIC_BASE_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
-  return `${origin}/api/chroma`;
-}
-
-const API_BASE = getApiBase();
+// Client: route through /api/chroma proxy (URL stays hidden from browser)
+// Server: call the external API directly — CHROMA_API_URL is a non-NEXT_PUBLIC_ var
+//         so Next.js strips it from client bundles; it never reaches the browser
+const API_BASE =
+  typeof window === "undefined"
+    ? process.env.CHROMA_API_URL || "https://chroma-vesa.onrender.com"
+    : "/api/chroma";
 const FIELD_ID = "us_collective";
 
 async function fetchJSON<T>(path: string): Promise<T> {

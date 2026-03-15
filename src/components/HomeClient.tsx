@@ -17,7 +17,8 @@ export default function HomeClient({ initialData }: { initialData: ChromaPageDat
   const [data, setData] = useState<ChromaPageData | null>(initialData);
 
   useEffect(() => {
-    // Initial data already provided by server — just set up the refresh interval
+    // If server-side prefetch failed for any reason, fetch immediately on mount
+    if (!data) fetchAllChromaData().then((d) => { if (d) setData(d); });
     const interval = setInterval(() => {
       fetchAllChromaData().then((d) => { if (d) setData(d); });
     }, 60_000);
