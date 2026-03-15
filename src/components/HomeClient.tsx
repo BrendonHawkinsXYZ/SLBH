@@ -78,32 +78,34 @@ export default function HomeClient({ initialData }: { initialData: ChromaPageDat
           </div>
         )}
 
+        {/* Delta — left column, between metrics and headline */}
+        {hasData && (
+          <div className="col-start-1 row-start-3 self-start mt-8 anim-slide-up-delta max-md:order-2 max-md:mt-3 max-md:w-full">
+            <DeltaDisplay magnitude={data.delta.delta_magnitude} />
+          </div>
+        )}
+
         {/* Headline + Body — pushed to bottom */}
         <div className="col-start-1 row-start-3 self-end pb-5 anim-slide-up-headline max-md:order-3 max-md:self-auto max-md:pb-0 max-md:mt-3">
           <HeadlineBlock />
         </div>
 
-        {/* Body copy animation wrapper — separate delay on mobile */}
-        {/* Body copy delay is handled inside HeadlineBlock via the p tag */}
-
-        {/* ═══ RIGHT ZONE — ORB + DELTA ═══ */}
+        {/* ═══ RIGHT ZONE — ORB ═══ */}
         <div
           className={`
             col-start-2 row-start-1 row-span-4
-            flex flex-col items-center justify-center
+            relative flex flex-col items-center justify-center
             max-md:order-1 max-md:flex-1 max-md:min-h-0 max-md:mb-1
           `}
         >
           {hasData && (
-            <>
-              <div className="anim-orb-reveal">
-                <OrbCanvas colorHistory={data.colorHistory} />
-              </div>
-              <div className="mt-6 anim-slide-up-delta max-md:mt-2 max-md:mb-0">
-                <DeltaDisplay magnitude={data.delta.delta_magnitude} />
-              </div>
-            </>
+            <div className="anim-orb-reveal">
+              <OrbCanvas colorHistory={data.colorHistory} />
+            </div>
           )}
+          <p className="absolute bottom-5 text-[10px] tracking-[0.18em] uppercase text-[rgba(245,245,243,0.28)] max-md:hidden">
+            Current United States Emotional Field State
+          </p>
         </div>
       </main>
 
