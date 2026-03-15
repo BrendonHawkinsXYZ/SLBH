@@ -30,6 +30,7 @@ export default function OrbCanvas({ colorHistory }: OrbCanvasProps) {
     }
 
     const d = getOrbSize();
+    const blurPx = d <= 340 ? 6 : 10;
     const dpr = window.devicePixelRatio || 1;
     canvas.width = d * dpr;
     canvas.height = d * dpr;
@@ -76,8 +77,10 @@ export default function OrbCanvas({ colorHistory }: OrbCanvasProps) {
       grad.addColorStop(0.96, `hsla(0,0%,3.9%,${revealEased})`);
       grad.addColorStop(1,    `hsla(0,0%,3.9%,${revealEased})`);
 
+      ctx!.filter = `blur(${blurPx}px)`;
       ctx!.fillStyle = grad;
       ctx!.fillRect(0, 0, w, h);
+      ctx!.filter = "none";
 
       // Structural stroke circles
       const pulseScale = 1 + pulse;
@@ -119,7 +122,7 @@ export default function OrbCanvas({ colorHistory }: OrbCanvasProps) {
     <canvas
       ref={canvasRef}
       id="orb"
-      className="block rounded-full orb-blur"
+      className="block rounded-full"
       aria-label="Affective field visualization — current emotional color"
     />
   );
