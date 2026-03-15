@@ -96,7 +96,7 @@ export default function HomeClient({ initialData }: { initialData: ChromaPageDat
           className={`
             col-start-2 row-start-1 row-span-4
             relative flex flex-col items-center justify-center
-            -translate-x-[100px] max-md:translate-x-0
+            translate-x-[100px] max-md:translate-x-0
             max-md:order-1 max-md:flex-1 max-md:min-h-0 max-md:mb-1
           `}
         >
