@@ -123,11 +123,6 @@ html {
   animation: fadeIn var(--dur-slow) var(--ease) var(--d-chrome) forwards;
 }
 
-/* ═══ ORB BLUR (responsive) ═══ */
-
-.orb-blur { filter: blur(10px); }
-@media (max-width: 768px) { .orb-blur { filter: blur(6px); } }
-
 /* ═══ SCROLL INDICATOR ═══ */
 
 @keyframes scrollPulse {
