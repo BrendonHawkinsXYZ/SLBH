@@ -9,7 +9,16 @@ import type {
   HSLColor,
 } from "./chroma-types";
 
-const API_BASE = "/api/chroma";
+function getApiBase(): string {
+  if (typeof window !== "undefined") return "/api/chroma";
+  // Server-side: need absolute URL to route through the local proxy
+  const origin =
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+  return `${origin}/api/chroma`;
+}
+
+const API_BASE = getApiBase();
 const FIELD_ID = "us_collective";
 
 async function fetchJSON<T>(path: string): Promise<T> {
@@ -20,25 +29,32 @@ async function fetchJSON<T>(path: string): Promise<T> {
 
 export async function fetchAllChromaData(): Promise<ChromaPageData | null> {
   try {
-    // Step 1: Get history + delta in parallel (always available)
-    const [historyRes, deltaRes] = await Promise.all([
+    // Hop 1: history + delta + current all in parallel
+    const [historyRes, deltaRes, currentOrNull] = await Promise.all([
       fetchJSON<FieldHistoryResponse>(`/field/${FIELD_ID}/history?limit=7`),
       fetchJSON<DeltaStreamResponse>(`/delta/stream?field_context_id=${FIELD_ID}&limit=1`),
+      fetchJSON<FieldState>(`/field/${FIELD_ID}/current`).catch(() => null),
     ]);
 
-    // Step 2: Get current state — fall back to history[0] if /current 404s
-    let current: FieldState;
-    try {
-      current = await fetchJSON<FieldState>(`/field/${FIELD_ID}/current`);
-    } catch {
-      if (historyRes.results.length === 0) return null;
-      current = historyRes.results[0];
-    }
+    const current: FieldState | null = currentOrNull ?? historyRes.results[0] ?? null;
+    if (!current) return null;
 
-    // Step 3: Fetch emotions for current state and map field names
-    const rawEmotions = await fetchJSON<EmotionData>(
-      `/interpretability/emotions/${current.id}?parent_type=field_state`,
-    );
+    const historyStates = historyRes.results;
+    const allStates = [current, ...historyStates];
+    const uniqueIds = [...new Set(allStates.map((s) => s.id))];
+
+    // Hop 2: emotions + all colors in parallel (both only need current.id / allStates)
+    const [rawEmotions, colorResults] = await Promise.all([
+      fetchJSON<EmotionData>(`/interpretability/emotions/${current.id}?parent_type=field_state`),
+      Promise.all(
+        uniqueIds.map(async (id) => {
+          const colors = await fetchJSON<ColorData[]>(
+            `/interpretability/color/${id}?parent_type=field_state`,
+          );
+          return { id, color: colors[0] };
+        }),
+      ),
+    ]);
 
     const mappedEmotions: MappedEmotionData = {
       ...rawEmotions,
@@ -49,20 +65,7 @@ export async function fetchAllChromaData(): Promise<ChromaPageData | null> {
       })),
     };
 
-    // Step 4: Fetch colors for current + history states
-    const historyStates = historyRes.results;
-    const allStates = [current, ...historyStates];
-    const uniqueIds = [...new Set(allStates.map((s) => s.id))];
-
     const colorMap = new Map<string, ColorData>();
-    const colorResults = await Promise.all(
-      uniqueIds.map(async (id) => {
-        const colors = await fetchJSON<ColorData[]>(
-          `/interpretability/color/${id}?parent_type=field_state`,
-        );
-        return { id, color: colors[0] };
-      }),
-    );
     for (const { id, color } of colorResults) {
       if (color) colorMap.set(id, color);
     }
