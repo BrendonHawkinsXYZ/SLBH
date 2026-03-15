@@ -9,7 +9,16 @@ import type {
   HSLColor,
 } from "./chroma-types";
 
-const API_BASE = "/api/chroma";
+function getApiBase(): string {
+  if (typeof window !== "undefined") return "/api/chroma";
+  // Server-side: need absolute URL to route through the local proxy
+  const origin =
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+  return `${origin}/api/chroma`;
+}
+
+const API_BASE = getApiBase();
 const FIELD_ID = "us_collective";
 
 async function fetchJSON<T>(path: string): Promise<T> {
