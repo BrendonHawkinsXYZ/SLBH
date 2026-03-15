@@ -96,6 +96,7 @@ export default function HomeClient({ initialData }: { initialData: ChromaPageDat
           className={`
             col-start-2 row-start-1 row-span-4
             relative flex flex-col items-center justify-center
+            -translate-x-[100px] max-md:translate-x-0
             max-md:order-1 max-md:flex-1 max-md:min-h-0 max-md:mb-1
           `}
         >
@@ -104,17 +105,17 @@ export default function HomeClient({ initialData }: { initialData: ChromaPageDat
               <OrbCanvas colorHistory={data.colorHistory} />
             </div>
           )}
-          <p className="absolute bottom-5 text-[10px] tracking-[0.18em] uppercase text-[rgba(245,245,243,0.28)] max-md:hidden">
+          <p className="mt-4 text-[10px] tracking-[0.18em] uppercase text-[rgba(245,245,243,0.28)] max-md:hidden">
             Current United States Emotional Field State
           </p>
         </div>
       </main>
 
       {/* Scroll indicator */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 pointer-events-none z-10 scroll-indicator max-md:bottom-4">
-        <div className="w-px h-6 bg-[rgba(245,245,243,0.5)] max-md:h-4" />
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 pointer-events-none z-10 scroll-indicator max-md:hidden">
+        <div className="w-px h-6 bg-[rgba(245,245,243,0.5)]" />
         <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true">
-          <path d="M1 1l4 4 4-4" stroke="rgba(245,245,243,0.5)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M1 1l4 4 4-4" stroke="rgba(245,245,243,0.5)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       </div>
 
