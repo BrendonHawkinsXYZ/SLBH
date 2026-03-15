@@ -11,6 +11,7 @@ import DeltaDisplay from "@/components/DeltaDisplay";
 import HeadlineBlock from "@/components/HeadlineBlock";
 import { fetchAllChromaData } from "@/lib/chroma";
 import type { ChromaPageData } from "@/lib/chroma-types";
+import MissionSection from "@/components/MissionSection";
 
 export default function Home() {
   const [data, setData] = useState<ChromaPageData | null>(null);
@@ -26,7 +27,9 @@ export default function Home() {
   const hasData = data !== null;
 
   return (
-    <div className="relative w-full h-screen h-[100dvh] flex flex-col overflow-hidden bg-background text-foreground">
+    <div className="relative w-full bg-background text-foreground">
+      {/* Viewport-locked dashboard */}
+      <div className="relative w-full h-screen h-[100dvh] flex flex-col overflow-hidden">
       {/* Header */}
       <Header />
 
@@ -103,6 +106,11 @@ export default function Home() {
           )}
         </div>
       </main>
+
+      </div>{/* end viewport-locked dashboard */}
+
+      {/* Mission section */}
+      <MissionSection />
 
       {/* Footer */}
       <Footer />

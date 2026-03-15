@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+html {
+  scroll-behavior: smooth;
+}
+
 @theme {
   --color-background: #0A0A0A;
   --color-foreground: #F5F5F3;
@@ -117,4 +121,17 @@
 .anim-chrome {
   opacity: 0;
   animation: fadeIn var(--dur-slow) var(--ease) var(--d-chrome) forwards;
+}
+
+/* ═══ MISSION SCROLL REVEAL ═══ */
+
+.mission-reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+}
+
+.mission-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }

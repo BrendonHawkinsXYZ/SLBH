@@ -11,7 +11,16 @@ export default function Header() {
       >
         SLBH
       </Link>
-      <nav>
+      <nav className="flex items-center gap-8">
+        <a
+          href="#mission"
+          className="font-[family-name:var(--font-inter)] text-sm uppercase text-[#F6F6F6] no-underline transition-opacity duration-[800ms] max-md:text-xs"
+          style={{ transitionTimingFunction: "var(--ease-drift)" }}
+          onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.5")}
+          onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+        >
+          MISSION
+        </a>
         <a
           href="mailto:brendon@studiolabbh.xyz"
           className="font-[family-name:var(--font-inter)] text-sm uppercase text-[#F6F6F6] no-underline transition-opacity duration-[800ms] max-md:text-xs"
