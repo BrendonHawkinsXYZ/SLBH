@@ -31,8 +31,7 @@ const REVEAL_VARIANTS = {
 export function Publications() {
   return (
     <section
-      className="hairline-t hairline-b"
-      style={{ paddingTop: 80, paddingBottom: 80 }}
+      className="hairline-t hairline-b pub-section"
     >
       <div className="container-page">
         <motion.header
@@ -113,11 +112,13 @@ export function Publications() {
           .pub-link:hover > *:not(.pub-title) {
             opacity: 0.55;
           }
+          .pub-section { padding-top: 56px; padding-bottom: 56px; }
+          @media (min-width: 768px) { .pub-section { padding-top: 80px; padding-bottom: 80px; } }
           .pub-date { opacity: 0.72; font-size: 11px; }
           .pub-title {
             font-family: var(--font-orbitron), sans-serif;
             font-weight: 500;
-            font-size: 20px;
+            font-size: clamp(14px, 2vw, 20px);
             letter-spacing: 0;
             line-height: 1.25;
           }
@@ -134,7 +135,7 @@ export function Publications() {
               grid-template-columns: 1fr auto;
               gap: 8px;
             }
-            .pub-link .pub-title { grid-column: 1 / -1; order: 1; }
+            .pub-link .pub-title { grid-column: 1 / -1; order: 1; font-size: 15px; }
             .pub-link .pub-date  { order: 2; }
             .pub-link .pub-status{ order: 3; justify-self: end; }
             .pub-link .pub-venue { order: 4; grid-column: 1 / -1; text-align: left; }
