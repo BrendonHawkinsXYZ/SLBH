@@ -30,7 +30,7 @@ export function Footer() {
           © 2026 Studio Lab BH
         </span>
         <Link
-          href="https://instagram.com/studiolab.bh"
+          href="https://instagram.com/studiolabbh"
           target="_blank"
           rel="noreferrer noopener"
           className="t-label link-quiet"
