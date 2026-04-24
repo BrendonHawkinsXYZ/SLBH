@@ -1,54 +1,49 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import { Orbitron, Inter, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
+import { StatusBar } from "@/components/StatusBar";
+import { Nav } from "@/components/Nav";
+import { Footer } from "@/components/Footer";
 
-const orbitron = localFont({
-  src: "../fonts/orbitron-latin-900-normal.woff2",
+const orbitron = Orbitron({
+  subsets: ["latin"],
+  weight: ["400", "500"],
   variable: "--font-orbitron",
-  weight: "900",
+  display: "swap",
 });
 
-const orbitronRegular = localFont({
-  src: "../fonts/orbitron-latin-400-normal.woff2",
-  variable: "--font-orbitron-regular",
-  weight: "400",
-});
-
-const orbitronExtrabold = localFont({
-  src: "../fonts/orbitron-latin-800-normal.woff2",
-  variable: "--font-orbitron-extrabold",
-  weight: "800",
-});
-
-const inter = localFont({
-  src: "../fonts/inter-latin-400-normal.woff2",
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["300", "400", "500"],
   variable: "--font-inter",
-  weight: "400",
+  display: "swap",
 });
 
-const figtree = localFont({
-  src: "../fonts/figtree-latin-400-normal.woff2",
-  variable: "--font-figtree",
-  weight: "400",
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-plex-mono",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "SLBH — Studio Lab BH",
+  title: "Studio Lab BH",
   description:
-    "Studio Lab BH is an applied research and product studio.",
+    "Studio Lab BH is a systems research lab working across affect, systems, data, and time.",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
       <body
-        className={`${orbitron.variable} ${orbitronRegular.variable} ${orbitronExtrabold.variable} ${inter.variable} ${figtree.variable} antialiased`}
+        className={`${orbitron.variable} ${inter.variable} ${plexMono.variable}`}
       >
-        {children}
+        <StatusBar />
+        <Nav />
+        <main>{children}</main>
+        <Footer />
       </body>
     </html>
   );
