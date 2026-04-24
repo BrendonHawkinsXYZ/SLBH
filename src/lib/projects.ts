@@ -16,21 +16,33 @@ export type Project = {
   index: string;
   discipline: string[];
   status: ProjectStatus;
-  cover: string;
-  thumbnail: string;
   summary: string;
   related: string[];
   links: ProjectLink[];
+  coverPath: string;     // resolved public URL or "" if not found
+  thumbnailPath: string; // resolved public URL or "" if not found
 };
 
 const CONTENT_DIR = path.join(process.cwd(), "content/projects");
+const PUBLIC_DIR = path.join(process.cwd(), "public/projects");
+const EXTS = ["webp", "jpg", "jpeg", "png"];
+
+function findImage(slug: string, base: string): string {
+  for (const ext of EXTS) {
+    if (fs.existsSync(path.join(PUBLIC_DIR, slug, `${base}.${ext}`))) {
+      return `/projects/${slug}/${base}.${ext}`;
+    }
+  }
+  return "";
+}
 
 export function getAllProjects(): Project[] {
   const dirs = fs
     .readdirSync(CONTENT_DIR)
-    .filter((name) =>
-      fs.statSync(path.join(CONTENT_DIR, name)).isDirectory() &&
-      fs.existsSync(path.join(CONTENT_DIR, name, "index.mdx"))
+    .filter(
+      (name) =>
+        fs.statSync(path.join(CONTENT_DIR, name)).isDirectory() &&
+        fs.existsSync(path.join(CONTENT_DIR, name, "index.mdx"))
     );
 
   const projects: Project[] = dirs.map((slug) => {
@@ -48,11 +60,11 @@ export function getAllProjects(): Project[] {
         d.toUpperCase()
       ),
       status: (data.status ?? "ongoing") as ProjectStatus,
-      cover: data.cover ?? "cover.webp",
-      thumbnail: data.thumbnail ?? "thumbnail.webp",
       summary: data.summary ?? "",
       related: (data.related ?? []) as string[],
       links: (data.links ?? []) as ProjectLink[],
+      coverPath: findImage(slug, "cover"),
+      thumbnailPath: findImage(slug, "thumbnail"),
     };
   });
 

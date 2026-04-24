@@ -66,17 +66,17 @@ export function ProjectIndex({ projects }: { projects: Project[] }) {
           transition: "opacity 0.4s ease",
         }}
       >
-        {hovered && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={`/projects/${hovered}/cover.webp`}
-            alt=""
-            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).style.display = "none";
-            }}
-          />
-        )}
+        {(() => {
+          const p = projects.find((p) => p.slug === hovered);
+          return p?.coverPath ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={p.coverPath}
+              alt=""
+              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+            />
+          ) : null;
+        })()}
         <div
           style={{
             position: "absolute",
@@ -128,22 +128,14 @@ export function ProjectIndex({ projects }: { projects: Project[] }) {
               className="proj-mobile-link link-quiet"
             >
               <div className="proj-mobile-thumb">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={`/projects/${p.slug}/thumbnail.webp`}
-                  alt={p.title}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    display: "block",
-                    position: "relative",
-                    zIndex: 1,
-                  }}
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).style.display = "none";
-                  }}
-                />
+                {p.thumbnailPath && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={p.thumbnailPath}
+                    alt={p.title}
+                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                  />
+                )}
               </div>
               <div className="proj-mobile-meta">
                 <span className="t-h3" style={{ letterSpacing: "-0.01em", display: "block", marginBottom: 8 }}>
