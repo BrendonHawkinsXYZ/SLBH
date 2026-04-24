@@ -9,7 +9,6 @@ const STICKY_OFFSET = 72;
 const LINKS = [
   { href: "/research", label: "Research" },
   { href: "/projects", label: "Projects" },
-  { href: "/diagrams", label: "Diagrams" },
   { href: "/studio", label: "Studio" },
 ];
 
@@ -93,7 +92,7 @@ export function Nav() {
           ))}
           <li>
             <Link
-              href="/studio#contact"
+              href="mailto:Brendon@studiolabbh.xyz"
               className="t-nav link-quiet"
               style={{
                 color: "var(--ground)",
@@ -194,7 +193,7 @@ export function Nav() {
           ))}
           <li style={{ paddingTop: 32 }}>
             <Link
-              href="/studio#contact"
+              href="mailto:Brendon@studiolabbh.xyz"
               className="t-nav link-quiet"
               onClick={close}
               style={{
