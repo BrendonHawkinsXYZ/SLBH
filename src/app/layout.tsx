@@ -39,10 +39,11 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${orbitron.variable} ${inter.variable} ${plexMono.variable}`}
+        style={{ minHeight: "100dvh", display: "flex", flexDirection: "column" }}
       >
         <StatusBar />
         <Nav />
-        <main>{children}</main>
+        <main style={{ flex: 1, display: "flex", flexDirection: "column" }}>{children}</main>
         <Footer />
       </body>
     </html>

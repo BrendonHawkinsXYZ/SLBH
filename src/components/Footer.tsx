@@ -5,8 +5,7 @@ export function Footer() {
     <footer
       className="hairline-t"
       style={{
-        padding: "48px var(--pad-x-mobile)",
-        marginTop: 120,
+        padding: "24px var(--pad-x-mobile)",
       }}
     >
       <div
