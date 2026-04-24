@@ -1,16 +1,29 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { motion } from "motion/react";
 import { FieldMark } from "@/components/FieldMark";
 import { revealVariants, revealTransition, EASE_OUT, DURATIONS } from "@/lib/motion";
 
-const GRADIENT =
-  "radial-gradient(circle at 32% 30%, #F5E9A8 0%, #F0D4A0 12%, #E89BB8 28%, #B89CE0 48%, #7B8FE0 68%, #3E5FA8 88%)";
-
 const BASE_RADIUS = 520;
 
+function randomGradient(): string {
+  const base = Math.random() * 360;
+  const stops = Array.from({ length: 6 }, (_, i) => {
+    const h = (base + i * 50 + (Math.random() - 0.5) * 22) % 360;
+    const s = 38 + Math.random() * 28;
+    const l = 63 + Math.random() * 17;
+    const pct = Math.round(i * (96 / 5));
+    return `hsl(${Math.round((h + 360) % 360)},${Math.round(s)}%,${Math.round(l)}%) ${pct}%`;
+  });
+  const cx = 18 + Math.random() * 56;
+  const cy = 10 + Math.random() * 56;
+  return `radial-gradient(circle at ${Math.round(cx)}% ${Math.round(cy)}%, ${stops.join(", ")})`;
+}
+
 export function HomeSurface() {
+  const [gradient] = useState(randomGradient);
   return (
     <section
       style={{
@@ -41,10 +54,10 @@ export function HomeSurface() {
         <div
           className="field-pulse"
           style={{
-            width: BASE_RADIUS,
-            height: BASE_RADIUS,
+            width: "min(520px, 92vw)",
+            height: "min(520px, 92vw)",
             borderRadius: "50%",
-            background: GRADIENT,
+            background: gradient,
             willChange: "transform",
           }}
         />
