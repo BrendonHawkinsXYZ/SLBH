@@ -11,8 +11,7 @@ const REVEAL_VARIANTS = {
 export function Editorial() {
   return (
     <section
-      className="container-page"
-      style={{ paddingTop: 120, paddingBottom: 120 }}
+      className="container-page editorial-section"
     >
       <Block
         kicker="02 / THESIS"
@@ -119,10 +118,12 @@ function Block({
         </>
       )}
       <style>{`
+        .editorial-section { padding-top: 72px; padding-bottom: 72px; }
+        @media (min-width: 768px) { .editorial-section { padding-top: 120px; padding-bottom: 120px; } }
         .editorial-block {
           display: grid;
           grid-template-columns: 1fr;
-          gap: 48px;
+          gap: 40px;
           align-items: center;
         }
         .editorial-art, .editorial-text {

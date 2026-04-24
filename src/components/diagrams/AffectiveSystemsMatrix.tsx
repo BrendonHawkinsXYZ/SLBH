@@ -1,5 +1,6 @@
 /* Affective Systems Matrix, FIG. 01
-   Inline SVG poster. 4:5 ratio, dark register. */
+   Inline SVG poster. 4:5 ratio, dark register.
+   4-col grid: row-label col + 3 data cols. 5-row grid: header + 4 data rows. */
 
 const COLUMNS = ["AFFECT", "EMOTION", "SENTIMENT"] as const;
 const ROWS = ["INDIVIDUAL", "DYADIC", "GROUP", "CULTURE"] as const;
@@ -34,15 +35,26 @@ export function AffectiveSystemsMatrix() {
   const VB_W = 400;
   const VB_H = 500;
 
-  const headerY = 56;
-  const matrixX = 70;
-  const matrixY = 120;
-  const matrixW = 300;
-  const matrixH = 320;
-  const colW = 75;
-  const rowLabelW = matrixX - 10;
-  const rowH = matrixH / ROWS.length;
-  const headerRowH = 40;
+  const MX = 40;
+  const MY = 76;
+  const CW = 80;           // all 4 cols equal (row-label + 3 data)
+  const MW = CW * 4;       // 320
+  const HDR_H = 44;
+  const ROW_H = 78;
+  const MH = HDR_H + ROW_H * 4;   // 356
+  const MB = MY + MH;              // 432
+
+  const rowLabelCX = MX + CW / 2;
+  const colCX = (c: number) => MX + CW * (c + 1) + CW / 2;
+  const hdrCY = MY + HDR_H / 2;
+  const rowCY = (r: number) => MY + HDR_H + ROW_H * r + ROW_H / 2;
+
+  const vDivX = [MX + CW, MX + CW * 2, MX + CW * 3];
+  const hDivY = [
+    MY + HDR_H + ROW_H,
+    MY + HDR_H + ROW_H * 2,
+    MY + HDR_H + ROW_H * 3,
+  ];
 
   return (
     <svg
@@ -55,23 +67,24 @@ export function AffectiveSystemsMatrix() {
 
       <text
         x={VB_W / 2}
-        y={headerY}
+        y={36}
         fill="var(--signal)"
         fontFamily="var(--font-orbitron), sans-serif"
         fontWeight={500}
-        fontSize={16}
+        fontSize={14}
         letterSpacing="0.12em"
         textAnchor="middle"
       >
         AFFECTIVE SYSTEMS MATRIX
       </text>
 
+      {/* Temporal resolution axis */}
       <text
-        x={matrixX + matrixW / 2}
-        y={matrixY - 22}
+        x={(MX + CW + MX + MW) / 2}
+        y={62}
         fill="var(--signal)"
         fontFamily="var(--font-plex-mono), monospace"
-        fontSize={8}
+        fontSize={7}
         letterSpacing="0.14em"
         opacity={0.55}
         textAnchor="middle"
@@ -79,38 +92,106 @@ export function AffectiveSystemsMatrix() {
         TEMPORAL RESOLUTION →
       </text>
 
+      {/* Temporal arrow line */}
+      <line
+        x1={MX + CW + 6}
+        y1={66}
+        x2={MX + MW - 6}
+        y2={66}
+        stroke="rgba(245,245,243,0.28)"
+        strokeWidth={0.5}
+      />
+      <polygon
+        points={`${MX + MW - 6},${63.5} ${MX + MW},${66} ${MX + MW - 6},${68.5}`}
+        fill="rgba(245,245,243,0.4)"
+      />
+
+      {/* Social scale axis rotated */}
       <text
-        x={18}
-        y={matrixY + matrixH / 2}
+        x={16}
+        y={MY + MH / 2}
         fill="var(--signal)"
         fontFamily="var(--font-plex-mono), monospace"
-        fontSize={8}
+        fontSize={7}
         letterSpacing="0.14em"
         opacity={0.55}
         textAnchor="middle"
-        transform={`rotate(-90, 18, ${matrixY + matrixH / 2})`}
+        transform={`rotate(-90, 16, ${MY + MH / 2})`}
       >
-        ↑ SOCIAL SCALE
+        SOCIAL SCALE
       </text>
 
-      <rect
-        x={matrixX}
-        y={matrixY}
-        width={matrixW}
-        height={headerRowH}
-        fill="none"
-        stroke="rgba(245,245,243,0.32)"
-        strokeWidth={0.6}
+      {/* Social scale arrow */}
+      <line
+        x1={27}
+        y1={MB - 6}
+        x2={27}
+        y2={MY + 6}
+        stroke="rgba(245,245,243,0.28)"
+        strokeWidth={0.5}
       />
+      <polygon
+        points={`${24.5},${MY + 6} ${27},${MY} ${29.5},${MY + 6}`}
+        fill="rgba(245,245,243,0.4)"
+      />
+
+      {/* Outer rect */}
+      <rect
+        x={MX}
+        y={MY}
+        width={MW}
+        height={MH}
+        fill="none"
+        stroke="rgba(245,245,243,0.45)"
+        strokeWidth={0.7}
+      />
+
+      {/* Vertical dividers */}
+      {vDivX.map((x, i) => (
+        <line
+          key={`v-${i}`}
+          x1={x}
+          y1={MY}
+          x2={x}
+          y2={MB}
+          stroke="rgba(245,245,243,0.22)"
+          strokeWidth={0.4}
+        />
+      ))}
+
+      {/* Header / data separator */}
+      <line
+        x1={MX}
+        y1={MY + HDR_H}
+        x2={MX + MW}
+        y2={MY + HDR_H}
+        stroke="rgba(245,245,243,0.45)"
+        strokeWidth={0.5}
+      />
+
+      {/* Row dividers */}
+      {hDivY.map((y, i) => (
+        <line
+          key={`h-${i}`}
+          x1={MX}
+          y1={y}
+          x2={MX + MW}
+          y2={y}
+          stroke="rgba(245,245,243,0.18)"
+          strokeWidth={0.3}
+        />
+      ))}
+
+      {/* Column headers */}
       {COLUMNS.map((col, i) => (
         <text
           key={col}
-          x={matrixX + (i + 0.5) * colW + 0}
-          y={matrixY + headerRowH / 2 + 3}
+          x={colCX(i)}
+          y={hdrCY + 3.5}
           fill="var(--signal)"
           fontFamily="var(--font-orbitron), sans-serif"
           fontWeight={500}
-          fontSize={10}
+          fontSize={9}
           letterSpacing="0.12em"
           textAnchor="middle"
         >
@@ -118,56 +199,35 @@ export function AffectiveSystemsMatrix() {
         </text>
       ))}
 
-      <rect
-        x={matrixX}
-        y={matrixY + headerRowH}
-        width={matrixW}
-        height={matrixH - headerRowH}
-        fill="none"
-        stroke="rgba(245,245,243,0.32)"
-        strokeWidth={0.6}
-      />
-
-      {COLUMNS.slice(1).map((_, i) => (
-        <line
-          key={`v-${i}`}
-          x1={matrixX + (i + 1) * colW}
-          y1={matrixY}
-          x2={matrixX + (i + 1) * colW}
-          y2={matrixY + matrixH}
-          stroke="rgba(245,245,243,0.18)"
-          strokeWidth={0.4}
-        />
-      ))}
-
+      {/* Row labels + cell data */}
       {ROWS.map((row, r) => {
-        const y = matrixY + headerRowH + (r + 0.5) * ((matrixH - headerRowH) / ROWS.length);
+        const cy = rowCY(r);
         return (
           <g key={row}>
             <text
-              x={matrixX - 8}
-              y={y + 3}
+              x={rowLabelCX}
+              y={cy + 3.5}
               fill="var(--signal)"
               fontFamily="var(--font-orbitron), sans-serif"
-              fontWeight={500}
-              fontSize={9}
-              letterSpacing="0.12em"
-              textAnchor="end"
+              fontWeight={400}
+              fontSize={8}
+              letterSpacing="0.1em"
+              textAnchor="middle"
             >
               {row}
             </text>
             {COLUMNS.map((col, c) => {
               const [w1, w2] = CELLS[row][col];
-              const cellX = matrixX + (c + 0.5) * colW;
+              const cx = colCX(c);
               return (
                 <g key={col}>
                   <text
-                    x={cellX}
-                    y={y - 3}
+                    x={cx}
+                    y={w2 ? cy - 3 : cy + 3.5}
                     fill="var(--signal)"
                     fontFamily="var(--font-orbitron), sans-serif"
-                    fontWeight={400}
-                    fontSize={7.5}
+                    fontWeight={300}
+                    fontSize={7}
                     letterSpacing="0.08em"
                     textAnchor="middle"
                   >
@@ -175,12 +235,12 @@ export function AffectiveSystemsMatrix() {
                   </text>
                   {w2 && (
                     <text
-                      x={cellX}
-                      y={y + 8}
+                      x={cx}
+                      y={cy + 9}
                       fill="var(--signal)"
                       fontFamily="var(--font-orbitron), sans-serif"
-                      fontWeight={400}
-                      fontSize={7.5}
+                      fontWeight={300}
+                      fontSize={7}
                       letterSpacing="0.08em"
                       textAnchor="middle"
                     >
@@ -194,52 +254,23 @@ export function AffectiveSystemsMatrix() {
         );
       })}
 
-      <g
-        stroke="rgba(245,245,243,0.32)"
-        strokeWidth={0.6}
-        fill="none"
-      >
-        <line
-          x1={matrixX + matrixW + 6}
-          y1={matrixY - 14}
-          x2={matrixX + matrixW + 24}
-          y2={matrixY - 14}
-        />
-        <polygon
-          points={`${matrixX + matrixW + 24},${matrixY - 17} ${matrixX + matrixW + 30},${matrixY - 14} ${matrixX + matrixW + 24},${matrixY - 11}`}
-          fill="rgba(245,245,243,0.55)"
-          stroke="none"
-        />
-        <line
-          x1={matrixX - rowLabelW - 16}
-          y1={matrixY + matrixH - 6}
-          x2={matrixX - rowLabelW - 16}
-          y2={matrixY + matrixH - 24}
-        />
-        <polygon
-          points={`${matrixX - rowLabelW - 19},${matrixY + matrixH - 24} ${matrixX - rowLabelW - 16},${matrixY + matrixH - 30} ${matrixX - rowLabelW - 13},${matrixY + matrixH - 24}`}
-          fill="rgba(245,245,243,0.55)"
-          stroke="none"
-        />
-      </g>
-
       <text
-        x={matrixX}
-        y={VB_H - 30}
+        x={MX}
+        y={VB_H - 28}
         fill="var(--signal)"
         fontFamily="var(--font-plex-mono), monospace"
-        fontSize={8}
+        fontSize={7.5}
         letterSpacing="0.14em"
         opacity={0.55}
       >
         AFFECTIVE COMPUTATIONAL GEOMETRY
       </text>
       <text
-        x={matrixX + matrixW}
-        y={VB_H - 30}
+        x={MX + MW}
+        y={VB_H - 28}
         fill="var(--signal)"
         fontFamily="var(--font-plex-mono), monospace"
-        fontSize={8}
+        fontSize={7.5}
         letterSpacing="0.14em"
         opacity={0.55}
         textAnchor="end"

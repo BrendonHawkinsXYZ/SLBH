@@ -43,8 +43,7 @@ const REVEAL_VARIANTS = {
 export function Instruments() {
   return (
     <section
-      className="container-page"
-      style={{ paddingTop: 120, paddingBottom: 120 }}
+      className="container-page instr-section"
     >
       <motion.header
         initial="hidden"
@@ -104,15 +103,26 @@ export function Instruments() {
       </div>
 
       <style>{`
+        .instr-section { padding-top: 72px; padding-bottom: 72px; }
+        @media (min-width: 768px) { .instr-section { padding-top: 120px; padding-bottom: 120px; } }
         .instruments-grid {
           display: grid;
           grid-template-columns: 1fr;
-          gap: 48px;
+          gap: 56px;
+        }
+        @media (min-width: 600px) {
+          .instruments-grid { grid-template-columns: repeat(2, 1fr); gap: 48px; }
         }
         @media (min-width: 900px) {
-          .instruments-grid {
-            grid-template-columns: repeat(3, 1fr);
-          }
+          .instruments-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        .vignette-circle {
+          width: 100%;
+          aspect-ratio: 1 / 1;
+          max-width: 280px;
+        }
+        @media (min-width: 900px) {
+          .vignette-circle { max-width: none; }
         }
       `}</style>
     </section>
@@ -122,10 +132,8 @@ export function Instruments() {
 function Vignette({ kind }: { kind: Instrument["vignette"] }) {
   return (
     <div
+      className="vignette-circle"
       style={{
-        width: "100%",
-        aspectRatio: "1 / 1",
-        maxWidth: 320,
         borderRadius: "50%",
         overflow: "hidden",
         position: "relative",

@@ -3,10 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-const FALLBACK_LAT = 40.787;
-const FALLBACK_LON = -73.9754;
-const GEO_TIMEOUT_MS = 3000;
-
 function formatClock(date: Date) {
   const time = new Intl.DateTimeFormat(undefined, {
     hour: "2-digit",
@@ -21,94 +17,136 @@ function formatClock(date: Date) {
   return `${time} ${tz}`.trim();
 }
 
-function formatCoords(lat: number, lon: number) {
-  const ns = lat >= 0 ? "N" : "S";
-  const ew = lon >= 0 ? "E" : "W";
-  return `${Math.abs(lat).toFixed(4)}°${ns} · ${Math.abs(lon).toFixed(4)}°${ew}`;
+const TZ_CITY: Record<string, string> = {
+  "America/New_York": "New York",
+  "America/Chicago": "Chicago",
+  "America/Denver": "Denver",
+  "America/Phoenix": "Phoenix",
+  "America/Los_Angeles": "Los Angeles",
+  "America/Anchorage": "Anchorage",
+  "Pacific/Honolulu": "Honolulu",
+  "America/Toronto": "Toronto",
+  "America/Vancouver": "Vancouver",
+  "America/Montreal": "Montréal",
+  "America/Mexico_City": "Mexico City",
+  "America/Sao_Paulo": "São Paulo",
+  "America/Argentina/Buenos_Aires": "Buenos Aires",
+  "America/Bogota": "Bogotá",
+  "America/Lima": "Lima",
+  "America/Santiago": "Santiago",
+  "Europe/London": "London",
+  "Europe/Paris": "Paris",
+  "Europe/Berlin": "Berlin",
+  "Europe/Madrid": "Madrid",
+  "Europe/Rome": "Rome",
+  "Europe/Amsterdam": "Amsterdam",
+  "Europe/Brussels": "Brussels",
+  "Europe/Zurich": "Zürich",
+  "Europe/Vienna": "Vienna",
+  "Europe/Warsaw": "Warsaw",
+  "Europe/Prague": "Prague",
+  "Europe/Stockholm": "Stockholm",
+  "Europe/Oslo": "Oslo",
+  "Europe/Copenhagen": "Copenhagen",
+  "Europe/Helsinki": "Helsinki",
+  "Europe/Athens": "Athens",
+  "Europe/Istanbul": "Istanbul",
+  "Europe/Moscow": "Moscow",
+  "Asia/Dubai": "Dubai",
+  "Asia/Karachi": "Karachi",
+  "Asia/Kolkata": "Mumbai",
+  "Asia/Dhaka": "Dhaka",
+  "Asia/Bangkok": "Bangkok",
+  "Asia/Jakarta": "Jakarta",
+  "Asia/Singapore": "Singapore",
+  "Asia/Shanghai": "Shanghai",
+  "Asia/Tokyo": "Tokyo",
+  "Asia/Seoul": "Seoul",
+  "Asia/Taipei": "Taipei",
+  "Asia/Hong_Kong": "Hong Kong",
+  "Asia/Kuala_Lumpur": "Kuala Lumpur",
+  "Asia/Riyadh": "Riyadh",
+  "Asia/Tel_Aviv": "Tel Aviv",
+  "Australia/Sydney": "Sydney",
+  "Australia/Melbourne": "Melbourne",
+  "Australia/Perth": "Perth",
+  "Pacific/Auckland": "Auckland",
+  "Africa/Johannesburg": "Johannesburg",
+  "Africa/Cairo": "Cairo",
+  "Africa/Lagos": "Lagos",
+  "Africa/Nairobi": "Nairobi",
+};
+
+function getCityFromTimezone(): string {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (TZ_CITY[tz]) return TZ_CITY[tz];
+    // Fall back to humanizing the city part of the IANA name
+    const part = tz.split("/").pop() ?? tz;
+    return part.replace(/_/g, " ");
+  } catch {
+    return "New York";
+  }
 }
 
 export function StatusBar() {
   const [clock, setClock] = useState<string | null>(null);
-  const [coords, setCoords] = useState<string | null>(null);
+  const [city, setCity] = useState<string | null>(null);
 
   useEffect(() => {
     setClock(formatClock(new Date()));
+    setCity(getCityFromTimezone());
     const id = window.setInterval(() => {
       setClock(formatClock(new Date()));
     }, 1000);
     return () => window.clearInterval(id);
   }, []);
 
-  useEffect(() => {
-    let settled = false;
-    const applyFallback = () => {
-      if (settled) return;
-      settled = true;
-      setCoords(formatCoords(FALLBACK_LAT, FALLBACK_LON));
-    };
-
-    if (typeof navigator === "undefined" || !navigator.geolocation) {
-      applyFallback();
-      return;
-    }
-
-    const timer = window.setTimeout(applyFallback, GEO_TIMEOUT_MS);
-
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        if (settled) return;
-        settled = true;
-        window.clearTimeout(timer);
-        setCoords(formatCoords(pos.coords.latitude, pos.coords.longitude));
-      },
-      () => {
-        window.clearTimeout(timer);
-        applyFallback();
-      },
-      { timeout: GEO_TIMEOUT_MS, maximumAge: 60_000 },
-    );
-
-    return () => window.clearTimeout(timer);
-  }, []);
-
   return (
     <div
-      className="hairline-b"
+      className="hairline-b status-bar"
       style={{
         background: "var(--status-bg)",
         height: 40,
-        padding: "10px 28px",
+        padding: "0 28px",
         display: "flex",
         alignItems: "center",
         gap: 16,
+        overflow: "hidden",
       }}
     >
-      <span className="t-label" style={{ color: "var(--ground)" }}>
+      <span className="t-label" style={{ color: "var(--ground)", flexShrink: 0 }}>
         Latest
       </span>
       <span
-        className="t-mono"
-        style={{ color: "var(--ground)", opacity: 0.72 }}
+        className="t-mono status-pub"
+        style={{ color: "var(--ground)", opacity: 0.72, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
       >
         EMOTION AS SYSTEM · ARXIV TK · PREPRINT, FEB 2026
       </span>
 
-      <span style={{ marginLeft: "auto", display: "flex", gap: 16, alignItems: "center" }}>
+      <span style={{ marginLeft: "auto", display: "flex", gap: 16, alignItems: "center", flexShrink: 0 }}>
         <span
           className="t-mono"
-          style={{ color: "var(--ground)", opacity: 0.72, minWidth: 96, textAlign: "right" }}
+          style={{
+            color: "var(--ground)",
+            opacity: 0.72,
+            minWidth: 96,
+            textAlign: "right",
+            fontVariantNumeric: "tabular-nums",
+          }}
         >
           {clock ?? ""}
         </span>
         <span
-          className="t-mono"
+          className="t-mono status-city"
           style={{ color: "var(--ground)", opacity: 0.72 }}
         >
-          {coords ?? ""}
+          {city ?? ""}
         </span>
         <Link
           href="/research/emotion-as-system"
-          className="t-mono link-quiet"
+          className="t-mono link-quiet status-read"
           style={{
             color: "var(--ground)",
             fontWeight: 500,
@@ -119,6 +157,17 @@ export function StatusBar() {
           READ PAPER ↗
         </Link>
       </span>
+
+      <style>{`
+        @media (max-width: 639px) {
+          .status-pub { display: none; }
+          .status-city { display: none; }
+          .status-read { display: none; }
+        }
+        @media (max-width: 767px) {
+          .status-bar { padding: 0 16px !important; }
+        }
+      `}</style>
     </div>
   );
 }

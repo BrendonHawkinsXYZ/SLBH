@@ -168,7 +168,7 @@ export function HomeSurface() {
             paddingBottom: 80,
           }}
         >
-          <div style={{ width: "min(44%, 520px)", minWidth: 300 }}>
+          <div className="hero-col">
             <motion.p
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 0.55, y: 0 }}
@@ -297,7 +297,7 @@ export function HomeSurface() {
         </motion.div>
       </section>
 
-      {/* ─── Section B — Mono readout strip, tied to hero scroll state ─── */}
+      {/* ─── Section B — Mono readout strip ─── */}
       <motion.div
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
@@ -306,20 +306,13 @@ export function HomeSurface() {
           ease: EASE_OUT,
           delay: 2.4,
         }}
-        className="container-page"
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 24,
-          padding: "28px var(--pad-x-mobile)",
-        }}
+        className="container-page readout-strip"
       >
         <span className="t-mono" style={{ opacity: 0.55 }}>
           SLBH / v2.0 / HOME
         </span>
         <span
-          className="t-label"
+          className="t-label readout-middle"
           style={{ opacity: 0.55, letterSpacing: "0.18em" }}
         >
           AFFECT · SYSTEMS · DATA · TIME
@@ -328,7 +321,6 @@ export function HomeSurface() {
           className="t-mono"
           style={{
             opacity: 0.55,
-            minWidth: 220,
             textAlign: "right",
             fontVariantNumeric: "tabular-nums",
           }}
@@ -336,6 +328,31 @@ export function HomeSurface() {
           {readoutLine}
         </motion.span>
       </motion.div>
+
+      <style>{`
+        .hero-col {
+          width: 100%;
+          max-width: 520px;
+        }
+        @media (min-width: 640px) {
+          .hero-col { width: min(44%, 520px); }
+        }
+        .readout-strip {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          padding-top: 20px;
+          padding-bottom: 20px;
+        }
+        .readout-middle {
+          display: none;
+        }
+        @media (min-width: 768px) {
+          .readout-middle { display: block; }
+          .readout-strip { padding-top: 28px; padding-bottom: 28px; }
+        }
+      `}</style>
     </>
   );
 }

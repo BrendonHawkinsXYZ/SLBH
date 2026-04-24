@@ -47,13 +47,12 @@ const REVEAL_VARIANTS = {
 export function FeaturedDiagrams() {
   return (
     <section
+      className="fd-section"
       style={{
         background: "var(--ground)",
         color: "var(--signal)",
         borderTop: "1px solid var(--hairline-strong)",
         borderBottom: "1px solid var(--hairline-strong)",
-        paddingTop: 120,
-        paddingBottom: 120,
       }}
     >
       <div className="container-page">
@@ -179,10 +178,15 @@ export function FeaturedDiagrams() {
       </div>
 
       <style>{`
+        .fd-section { padding: 80px 0; }
+        @media (min-width: 768px) { .fd-section { padding: 120px 0; } }
         .fd-grid {
           display: grid;
           grid-template-columns: 1fr;
-          gap: 32px;
+          gap: 40px;
+        }
+        @media (min-width: 600px) {
+          .fd-grid { grid-template-columns: repeat(2, 1fr); gap: 32px; }
         }
         @media (min-width: 900px) {
           .fd-grid { grid-template-columns: repeat(3, 1fr); }
