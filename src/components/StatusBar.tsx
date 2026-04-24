@@ -122,7 +122,7 @@ export function StatusBar() {
         className="t-mono status-pub"
         style={{ color: "var(--ground)", opacity: 0.72, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
       >
-        EMOTION AS SYSTEM · ARXIV TK · PREPRINT, FEB 2026
+        EMOTION AS SYSTEM · PREPRINT
       </span>
 
       <span style={{ marginLeft: "auto", display: "flex", gap: 16, alignItems: "center", flexShrink: 0 }}>

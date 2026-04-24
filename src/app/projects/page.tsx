@@ -1,6 +1,5 @@
 import { getAllProjects } from "@/lib/projects";
 import { ProjectIndex } from "@/components/projects/ProjectIndex";
-import { TrunkLine } from "@/components/TrunkLine";
 
 export default function ProjectsPage() {
   const projects = getAllProjects();
@@ -12,52 +11,6 @@ export default function ProjectsPage() {
 
   return (
     <>
-      {/* §3.1 Hero */}
-      <section
-        style={{
-          minHeight: 400,
-          position: "relative",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-        }}
-      >
-        <div
-          className="container-page"
-          style={{ paddingTop: 80, paddingBottom: 96 }}
-        >
-          <p
-            className="t-mono"
-            style={{ opacity: 0.55, marginBottom: 20, marginTop: 0 }}
-          >
-            PROJECTS / {pad(total)} ACTIVE
-          </p>
-          <h1 className="t-h1" style={{ margin: "0 0 28px", maxWidth: 720 }}>
-            Projects are instruments in the field.
-          </h1>
-          <p
-            className="t-body-lg"
-            style={{ margin: 0, maxWidth: 480, opacity: 0.82 }}
-          >
-            Each project is a working instrument, a built artifact, or a
-            deployed experiment. Some become papers. Some become tools. All of
-            them feed back into the lab&apos;s model of affect as a structured
-            system.
-          </p>
-        </div>
-
-        <div
-          style={{
-            position: "absolute",
-            bottom: 0,
-            left: "50%",
-            transform: "translateX(-50%)",
-          }}
-        >
-          <TrunkLine length={110} nodePosition="top" />
-        </div>
-      </section>
-
       {/* §3.2 Mono readout strip */}
       <div
         className="hairline-t hairline-b proj-readout"
