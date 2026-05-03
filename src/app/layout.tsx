@@ -30,6 +30,10 @@ export const metadata: Metadata = {
   title: "Studio Lab BH",
   description:
     "Studio Lab BH is a systems research lab working across affect, systems, data, and time.",
+  icons: {
+    icon: "/SLBHFavi.png",
+    apple: "/SLBHFavi.png",
+  },
 };
 
 export default function RootLayout({
