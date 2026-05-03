@@ -87,6 +87,174 @@ const AFFILIATIONS = [
   },
 ];
 
+type CVEntry = { year?: string; title: string; detail?: string };
+type CVCategory = { label: string; entries: CVEntry[] };
+
+const CV: CVCategory[] = [
+  {
+    label: "SOLO EXHIBITIONS",
+    entries: [
+      { year: "2026", title: "ACG By Studio Lab BH", detail: "The Space, New York" },
+      { year: "2024", title: "Three Degrees", detail: "Industrious, Pittsburgh, PA" },
+      { year: "2019", title: "#ShowUp", detail: "Mattress Factory, Pittsburgh, PA" },
+      { year: "2018", title: "Untitled", detail: "Bunker Projects, Pittsburgh, PA" },
+    ],
+  },
+  {
+    label: "GROUP EXHIBITIONS",
+    entries: [
+      { year: "2025", title: "PIT Lab × Beta NYC Pop-Up", detail: "The Oculus, New York City" },
+      { year: "2020", title: "Seeking Truth", detail: "Brew House, Pittsburgh, PA" },
+      { year: "2020", title: "Channel", detail: "Pittsburgh Children’s Museum, Pittsburgh, PA" },
+      {
+        year: "2019",
+        title: "The Self, Realized: Queering the Art of Self-Portraiture",
+        detail: "Brewhouse, Pittsburgh, PA",
+      },
+      { year: "2018", title: "The House We Build", detail: "Imagebox Gallery, Pittsburgh, PA" },
+      { year: "2017", title: "Welcome Home", detail: "Future Tenant, Pittsburgh, PA" },
+    ],
+  },
+  {
+    label: "COMMISSIONS",
+    entries: [
+      { year: "2018", title: "Guest of Honor", detail: "Carnegie Museum of Art" },
+      { year: "2018", title: "#ShowUpMF", detail: "Mattress Factory" },
+    ],
+  },
+  {
+    label: "RESIDENCIES & FELLOWSHIPS",
+    entries: [
+      { year: "2020–21", title: "FINE Residency", detail: "Children’s Museum of Pittsburgh" },
+      { year: "2020", title: "Field Work Gallery" },
+      {
+        year: "2019",
+        title: "Creative and Social Impact Fellow",
+        detail: "Kelly Strayhorn Theater",
+      },
+      { year: "2019", title: "Distillery", detail: "Brew House Association" },
+      { year: "2019", title: "Visiting Artist", detail: "Legacy Arts Project" },
+      { year: "2018", title: "Bunker Projects" },
+    ],
+  },
+  {
+    label: "PUBLISHED WORK",
+    entries: [
+      { year: "2020", title: "Worst Title Ever", detail: "Cover Artist · Aaron Jones" },
+      { year: "2018", title: "Cali Cod", detail: "Photo Editor · The Tenth Magazine" },
+      { year: "2017", title: "Hidden Flame", detail: "Editorial Photographer · NeuNeu Magazine" },
+      { year: "2017", title: "Wonderland", detail: "Editorial Photographer · Fucking Young" },
+    ],
+  },
+  {
+    label: "PERFORMANCES",
+    entries: [
+      { year: "2019", title: "Stone Wall: 50th Anniversary", detail: "Andy Warhol Museum" },
+      {
+        year: "2018",
+        title: "The Warhol Shop Talk: Black Joy, Masculinity, & Barbershops",
+        detail: "Andy Warhol Museum",
+      },
+      { year: "2018", title: "My People Queer Art", detail: "KST Alloy" },
+    ],
+  },
+  {
+    label: "WORKSHOPS",
+    entries: [
+      {
+        year: "2026",
+        title:
+          "Making AI Make Sense Together: Designing a Critical AI Research Commons with NYC Open Data",
+        detail: "School of Data: Data Week",
+      },
+    ],
+  },
+  {
+    label: "PUBLIC SPEAKING",
+    entries: [
+      { year: "2025", title: "Queer Tech Stories Across Generations", detail: "PayPal HQ" },
+      { year: "2025", title: "Building Products in the Age of AI", detail: "Hearst" },
+      {
+        year: "2024",
+        title: "Speculative: Designing for the day after tomorrow",
+        detail: "Hearst",
+      },
+      { year: "2021", title: "Designing Technology", detail: "Bloom Institute of Technology" },
+      { year: "2019", title: "1440 Artist Panel", detail: "Mattress Factory" },
+      { year: "2018", title: "Visiting Photography Critic", detail: "Point Park University" },
+      {
+        year: "2018",
+        title: "The Illusion Of The Queer Black American",
+        detail: "Artist Image Resource",
+      },
+    ],
+  },
+  {
+    label: "COMMITTEES",
+    entries: [
+      { title: "Out in Tech", detail: "Pittsburgh Leadership" },
+      { title: "Hearst UX Guild", detail: "Founding Member" },
+    ],
+  },
+  {
+    label: "SELECT PROFESSIONAL EXPERIENCE",
+    entries: [
+      {
+        year: "Present",
+        title: "Hearst Television · Technical Product Manager",
+        detail: "Emerging Technology — AI, rapid prototyping, research",
+      },
+      {
+        title: "Candid · Product Manager",
+        detail: "API — Apple Pay API, GraphQL API, Demographics API",
+      },
+    ],
+  },
+  {
+    label: "EDUCATION",
+    entries: [
+      {
+        year: "2023",
+        title: "B.S. Information Assurance and Security",
+        detail: "American Intercontinental University",
+      },
+      {
+        year: "2021",
+        title: "Certificate, Web Development and Computer Science",
+        detail: "Bloom Institute of Technology",
+      },
+    ],
+  },
+  {
+    label: "MEDIA & PRESS",
+    entries: [
+      {
+        year: "2025",
+        title:
+          "Showing Up: Brendon Hawkins on Art, Technology, and Community Accountability",
+        detail: "Syncing Up Podcast · Out in Tech",
+      },
+      {
+        year: "2020",
+        title:
+          "MuseumLab opens line of communication with Channel group art exhibition",
+        detail: "Pittsburgh City Paper · Amanda Waltz",
+      },
+      {
+        year: "2019",
+        title:
+          "LGBTQ+ artists assert their identities for The Self, Realized: Queering the Art of Self-Portraiture",
+        detail: "Pittsburgh City Paper · Amanda Waltz",
+      },
+      {
+        year: "2018",
+        title: "Five stand-out stars from new all-black fashion mag Neu Neu",
+        detail: "Dazed Magazine · Kemi Alemoru",
+      },
+    ],
+  },
+];
+
 // Deterministic pseudo-random for the compass point field
 function seeded(i: number): number {
   const x = Math.sin(i * 9301 + 49297) * 233280;
@@ -323,6 +491,29 @@ export default function StudioPage() {
               </li>
             ))}
           </ul>
+        </div>
+
+        {/* Curriculum Vitae */}
+        <div className="container-page st-cv">
+          <h3 className="t-h3 st-cv-header">CURRICULUM VITAE</h3>
+          {CV.map((category) => (
+            <section key={category.label} className="st-cv-category">
+              <h4 className="t-label st-cv-category-label">{category.label}</h4>
+              <ul className="st-cv-list">
+                {category.entries.map((entry, i) => (
+                  <li key={`${category.label}-${i}`} className="st-cv-row">
+                    <span className="t-mono st-cv-year">{entry.year ?? ""}</span>
+                    <div className="st-cv-content">
+                      <span className="st-cv-title">{entry.title}</span>
+                      {entry.detail && (
+                        <span className="st-cv-detail">{entry.detail}</span>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
         </div>
 
         {/* Contact */}
@@ -701,6 +892,73 @@ export default function StudioPage() {
         .st-affil-org {
           font-size: 13px;
           opacity: 0.85;
+        }
+
+        /* ── §10.4 Curriculum Vitae ── */
+        .st-cv {
+          padding-top: 0;
+          padding-bottom: 96px;
+        }
+        .st-cv-header {
+          margin: 0 0 48px;
+          opacity: 0.72;
+        }
+        .st-cv-category {
+          margin-bottom: 56px;
+        }
+        .st-cv-category:last-child {
+          margin-bottom: 0;
+        }
+        .st-cv-category-label {
+          margin: 0 0 20px;
+          font-size: 11px;
+          letter-spacing: 0.18em;
+          opacity: 0.72;
+        }
+        .st-cv-list {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+        }
+        .st-cv-row {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 4px;
+          padding: 16px 0;
+          border-top: 0.5px solid var(--hairline);
+        }
+        @media (min-width: 720px) {
+          .st-cv-row {
+            grid-template-columns: 80px 1fr;
+            gap: 24px;
+            align-items: baseline;
+          }
+        }
+        .st-cv-list li:last-child {
+          border-bottom: 0.5px solid var(--hairline);
+        }
+        .st-cv-year {
+          font-size: 11px;
+          opacity: 0.72;
+        }
+        .st-cv-content {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+        .st-cv-title {
+          font-family: var(--font-inter), sans-serif;
+          font-weight: 400;
+          font-size: 14px;
+          line-height: 1.4;
+          color: var(--ground);
+        }
+        .st-cv-detail {
+          font-family: var(--font-inter), sans-serif;
+          font-weight: 300;
+          font-size: 13px;
+          line-height: 1.4;
+          opacity: 0.6;
         }
 
         /* ── §10.4 Contact ── */
