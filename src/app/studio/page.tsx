@@ -29,15 +29,15 @@ const DISCIPLINES = [
 const FOCUS_AREAS = [
   {
     label: "AFFECTIVE COMPUTATIONAL GEOMETRY",
-    body: "[TK 2 sentences — describe ACG focus.]",
+    body: "Affective Computational Geometry is the lab’s core research thesis: emotion has geometry, geometry can be computed, and computation can be perceived. The work develops models for understanding affect as a field with direction, intensity, structure, and transformation over time.",
   },
   {
     label: "COLLECTIVE FIELD DYNAMICS",
-    body: "[TK 2 sentences — describe collective field dynamics.]",
+    body: "Collective Field Dynamics studies how emotion moves across populations, platforms, and environments. It treats collective affect as a measurable system shaped by signals, feedback loops, memory, velocity, and drift.",
   },
   {
-    label: "PAIN AS INTERFACE",
-    body: "[TK 2 sentences — describe pain-as-interface.]",
+    label: "EMOTION AS FIELD",
+    body: "Emotion as Field treats emotion as a spatial and relational condition rather than a fixed internal state. The work studies how affect gathers, moves, intensifies, dissipates, and reorganizes across bodies, environments, platforms, and time.",
   },
 ];
 
@@ -45,47 +45,46 @@ const TENETS = [
   {
     n: "01",
     title: "LEAD WITH DESIGN THINKING",
-    body: "[TK — verbatim from userPreferences.]",
+    body: "Identifying emerging trends, noticing intuitive patterns, and exploring abstract concepts to define the foundation of research and projects.",
   },
   {
     n: "02",
     title: "DATA FOUNDATION",
-    body: "[TK — verbatim from userPreferences.]",
+    body: "Using data to validate and guide research, projects, and experiments, building on insights from design thinking.",
   },
   {
     n: "03",
     title: "COLOR AS LANGUAGE",
-    body: "[TK — verbatim from userPreferences.]",
+    body: "Exploring color’s fundamental role in perception and its significance across human, ecological, and biological systems.",
   },
   {
     n: "04",
     title: "CULTURE HAS VALUE",
-    body: "[TK — verbatim from userPreferences.]",
+    body: "Emphasizing culture’s foundational role in shaping human theories, social constructs, and engagements.",
   },
   {
     n: "05",
     title: "MEDIA AS COMMUNICATION",
-    body: "[TK — verbatim from userPreferences.]",
+    body: "Leveraging media to engage with culture, share theories, and promote projects, integrating it deeply into the research process.",
   },
   {
     n: "06",
     title: "ENGINEERING DNA",
-    body: "[TK — verbatim from userPreferences.]",
+    body: "Emphasizing a problem-solving mindset, where every project and research effort is guided by engineering principles to address and solve problems.",
   },
   {
     n: "07",
     title: "FLUID BOUNDARIES",
-    body: "[TK — verbatim from userPreferences.]",
+    body: "Adapting the practice to address emerging problems, ensuring flexibility and growth over time.",
   },
 ];
 
 const AFFILIATIONS = [
   { role: "FOUNDER", org: "Studio Lab BH" },
   {
-    role: "INTERIM FOUNDING BOARD CHAIR",
+    role: "FOUNDING BOARD CHAIR",
     org: "PIT Lab at CUNY",
   },
-  { role: "ADVISORY / BOARD", org: "TK" },
 ];
 
 // Deterministic pseudo-random for the compass point field
@@ -146,8 +145,10 @@ export default function StudioPage() {
             The lab, and the person running it.
           </h1>
           <p className="st-deck">
-            [TK 1–2 sentences introducing the dual structure: a research lab,
-            and the founder behind it.]
+            Studio Lab BH is a systems research lab modeling invisible human
+            systems, with affect as its first field of study. The studio is
+            also the research practice of Brendon Hawkins, whose work moves
+            across art, computation, product, and social theory.
           </p>
         </div>
         <div className="st-header-trunk">
@@ -252,7 +253,7 @@ export default function StudioPage() {
             SECTION B
           </span>
           <span id="section-b-heading" className="st-section-title">
-            BRENDON MATUSCH / FOUNDER
+            BRENDON HAWKINS / FOUNDER
           </span>
           <span className="st-section-avatar" aria-hidden>
             <img
@@ -270,24 +271,26 @@ export default function StudioPage() {
               <div className="st-intro-portrait-bg" aria-hidden />
               <img
                 src="/studio/brendon-portrait.png"
-                alt="Brendon Matusch"
+                alt="Brendon Hawkins"
                 className="st-intro-portrait-img"
               />
             </div>
           </div>
           <div className="st-intro-bio">
             <p className="t-body st-intro-para">
-              Brendon Matusch is the founder of Studio Lab BH, and Interim
+              Brendon Hawkins is the founder of Studio Lab BH and Interim
               Founding Board Chair at PIT Lab at CUNY. His work builds
-              computational frameworks for affect — how emotion behaves as a
-              structured system across populations, platforms, and time.
+              computational frameworks for affect: how emotion behaves as a
+              structured system across populations, platforms, environments,
+              and time.
             </p>
             <p className="t-body st-intro-para">
               His practice is interdisciplinary by design. He trained as an
               artist and works as a technologist, with a background spanning
-              art, research, and product. Prior work centered on time,
-              identity, and language as systems; current work formalizes
-              affect as the missing layer in how we model human experience.
+              art, research, product, and emerging technologies. Prior work
+              centered on time, identity, language, and culture as systems;
+              current work formalizes affect as a missing layer in how we
+              model human experience.
             </p>
             <p className="t-body st-intro-para">
               Based in New York. Formative roots in Pittsburgh. Studies ASL.
@@ -328,7 +331,12 @@ export default function StudioPage() {
           <ul className="st-contact-list">
             <li className="st-contact-row">
               <span className="t-label st-contact-label">EMAIL</span>
-              <span className="t-mono st-contact-value">[TK]</span>
+              <a
+                href="mailto:brendon@studiolabbh.xyz"
+                className="t-mono st-contact-value link-quiet"
+              >
+                brendon@studiolabbh.xyz
+              </a>
             </li>
             <li className="st-contact-row">
               <span className="t-label st-contact-label">INSTAGRAM</span>
@@ -338,7 +346,7 @@ export default function StudioPage() {
                 rel="noopener noreferrer"
                 className="t-mono st-contact-value link-quiet"
               >
-                @studiolabbh ↗
+                @studiolabbh ↗︎
               </a>
             </li>
           </ul>
@@ -348,15 +356,11 @@ export default function StudioPage() {
       <style>{`
         /* ── §10.1 Header ── */
         .st-header {
-          min-height: 60vh;
           position: relative;
-          display: flex;
-          flex-direction: column;
-          justify-content: flex-end;
         }
         .st-header-inner {
-          padding-top: 80px;
-          padding-bottom: 80px;
+          padding-top: 56px;
+          padding-bottom: 144px;
         }
         .st-kicker {
           opacity: 0.55;

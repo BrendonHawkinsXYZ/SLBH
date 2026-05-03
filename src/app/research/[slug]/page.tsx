@@ -110,7 +110,7 @@ export default async function PaperPage({
             className="rp-action rp-action--primary"
           >
             <span className="rp-action-label">VIEW PDF</span>
-            <span className="rp-action-arrow">↗</span>
+            <span className="rp-action-arrow">↗︎</span>
           </a>
         ) : (
           <span className="rp-action rp-action--disabled">
@@ -126,7 +126,7 @@ export default async function PaperPage({
             className="rp-action rp-action--secondary"
           >
             <span className="rp-action-label">DOI · {paper.doi}</span>
-            <span className="rp-action-arrow">↗</span>
+            <span className="rp-action-arrow">↗︎</span>
           </a>
         )}
 
@@ -140,7 +140,7 @@ export default async function PaperPage({
             <span className="rp-action-label">
               {paper.venue.toUpperCase()} LISTING
             </span>
-            <span className="rp-action-arrow">↗</span>
+            <span className="rp-action-arrow">↗︎</span>
           </a>
         )}
       </section>

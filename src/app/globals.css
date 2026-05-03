@@ -96,6 +96,10 @@ body {
   line-height: 1.55;
   background: var(--paper);
   color: var(--ground);
+  /* Force text-presentation for arrow glyphs (↗ etc.) so iOS doesn't
+     render them as colored emoji. Pairs with U+FE0E variation selector
+     appended inline for older browsers without this property. */
+  font-variant-emoji: text;
 }
 
 ::selection {

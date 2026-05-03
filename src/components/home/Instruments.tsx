@@ -96,7 +96,7 @@ export function Instruments() {
                 letterSpacing: "0.18em",
               }}
             >
-              Learn more ↗
+              Learn more ↗︎
             </Link>
           </motion.article>
         ))}

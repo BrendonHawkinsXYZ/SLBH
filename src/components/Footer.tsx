@@ -40,7 +40,7 @@ export function Footer() {
             letterSpacing: "0.18em",
           }}
         >
-          Instagram ↗
+          Instagram ↗︎
         </Link>
       </div>
     </footer>
