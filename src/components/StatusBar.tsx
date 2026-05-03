@@ -154,7 +154,7 @@ export function StatusBar() {
             textUnderlineOffset: 3,
           }}
         >
-          READ PAPER ↗
+          READ PAPER ↗︎
         </Link>
       </span>
 

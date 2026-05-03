@@ -61,7 +61,7 @@ export function Publications() {
               letterSpacing: "0.18em",
             }}
           >
-            See all ↗
+            See all ↗︎
           </Link>
         </motion.header>
 
