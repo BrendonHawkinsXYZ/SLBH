@@ -1,5 +1,6 @@
 import { getAllProjects } from "@/lib/projects";
 import { ProjectIndex } from "@/components/projects/ProjectIndex";
+import { BuildingInPublicNotice } from "@/components/projects/BuildingInPublicNotice";
 
 export default function ProjectsPage() {
   const projects = getAllProjects();
@@ -31,6 +32,9 @@ export default function ProjectsPage() {
           {pad(total)} TOTAL · {pad(ongoing)} ONGOING · {pad(complete)} COMPLETE
         </span>
       </div>
+
+      {/* Building-in-public notice (auto-opens once per session) */}
+      <BuildingInPublicNotice />
 
       {/* §3.3 Project index */}
       <ProjectIndex projects={projects} />
