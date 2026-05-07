@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getAllProjects } from "@/lib/projects";
+import { getAllProjects, findImage } from "@/lib/projects";
 import { TrunkLine } from "@/components/TrunkLine";
 import { FallbackImg } from "@/components/projects/acg/FallbackImg";
 import { FlowDiagram } from "@/components/projects/acg/FlowDiagram";
@@ -17,12 +17,23 @@ export default function ACGPage() {
     .map((s) => allProjects.find((p) => p.slug === s))
     .filter(Boolean) as (typeof allProjects)[0][];
 
+  const asset = (base: string) => findImage("acg", base);
+  const heroSrc = asset("hero");
+  const conceptSrc = asset("concept");
+  const storefrontSrc = asset("installation-storefront");
+  const array01Src = asset("installation-array-01");
+  const array02Src = asset("installation-array-02");
+  const promptSrc = asset("activation-prompt");
+  const roomSrc = asset("activation-room");
+  const alignmentSrc = asset("activation-alignment");
+  const footerSrc = asset("footer");
+
   return (
     <>
       {/* ── Section 1: Header ── */}
       <section className="acg-hero">
         <div className="container-page acg-hero-inner">
-          <p className="t-mono acg-kicker">PROJECT 04 / 2026 / ONGOING / NYC</p>
+          <p className="t-mono acg-kicker">PROJECT 04 / 2026 / ACTIVE / NYC</p>
           <h1 className="t-display acg-title">ACG by SLBH</h1>
           <p className="acg-summary">
             ACG by SLBH is an ongoing applied research series that turns
@@ -47,18 +58,16 @@ export default function ACGPage() {
           AFFECT · SYSTEMS · DATA · LIGHT · PRESENCE
         </span>
         <span className="t-mono" style={{ opacity: 0.55, textAlign: "right" }}>
-          STATUS: ONGOING · 2026 · APPLIED RESEARCH
+          STATUS: ACTIVE · 2026 · APPLIED RESEARCH
         </span>
       </div>
 
       {/* ── Section 3: Hero visual ── */}
       <section className="acg-visual">
         <div className="acg-visual-bg" aria-hidden />
-        <FallbackImg
-          src="/projects/acg/hero.webp"
-          alt=""
-          className="acg-visual-img"
-        />
+        {heroSrc && (
+          <FallbackImg src={heroSrc} alt="" className="acg-visual-img" />
+        )}
         <div className="acg-visual-fallback" aria-hidden>
           <span className="t-mono" style={{ opacity: 0.3 }}>
             TK: HERO VISUAL
@@ -94,11 +103,13 @@ export default function ACGPage() {
             <div className="acg-img-wrap">
               <div className="acg-img-frame">
                 <div className="acg-img-bg" />
-                <FallbackImg
-                  src="/projects/acg/concept.webp"
-                  alt="ACG storefront concept render"
-                  className="acg-img-fill"
-                />
+                {conceptSrc && (
+                  <FallbackImg
+                    src={conceptSrc}
+                    alt="ACG storefront concept render"
+                    className="acg-img-fill"
+                  />
+                )}
               </div>
               <p className="t-mono acg-img-caption">
                 STOREFRONT CONCEPT — RENDER
@@ -243,11 +254,13 @@ export default function ACGPage() {
           <figure className="acg-doc-cell acg-doc-cell--wide">
             <div className="acg-doc-frame">
               <div className="acg-doc-bg" />
-              <FallbackImg
-                src="/projects/acg/installation-storefront.webp"
-                alt="ACG storefront installation, exterior at night"
-                className="acg-img-fill"
-              />
+              {storefrontSrc && (
+                <FallbackImg
+                  src={storefrontSrc}
+                  alt="ACG storefront installation, exterior at night"
+                  className="acg-img-fill"
+                />
+              )}
             </div>
             <figcaption className="t-mono acg-doc-caption">
               INSTALLATION / STOREFRONT
@@ -256,11 +269,13 @@ export default function ACGPage() {
           <figure className="acg-doc-cell">
             <div className="acg-doc-frame">
               <div className="acg-doc-bg" />
-              <FallbackImg
-                src="/projects/acg/installation-array-01.webp"
-                alt="Light Array 01, collective field"
-                className="acg-img-fill"
-              />
+              {array01Src && (
+                <FallbackImg
+                  src={array01Src}
+                  alt="Light Array 01, collective field"
+                  className="acg-img-fill"
+                />
+              )}
             </div>
             <figcaption className="t-mono acg-doc-caption">
               LIGHT ARRAY 01 / COLLECTIVE
@@ -269,11 +284,13 @@ export default function ACGPage() {
           <figure className="acg-doc-cell">
             <div className="acg-doc-frame">
               <div className="acg-doc-bg" />
-              <FallbackImg
-                src="/projects/acg/installation-array-02.webp"
-                alt="Light Array 02, local field"
-                className="acg-img-fill"
-              />
+              {array02Src && (
+                <FallbackImg
+                  src={array02Src}
+                  alt="Light Array 02, local field"
+                  className="acg-img-fill"
+                />
+              )}
             </div>
             <figcaption className="t-mono acg-doc-caption">
               LIGHT ARRAY 02 / LOCAL
@@ -282,11 +299,13 @@ export default function ACGPage() {
           <figure className="acg-doc-cell">
             <div className="acg-doc-frame">
               <div className="acg-doc-bg" />
-              <FallbackImg
-                src="/projects/acg/activation-prompt.webp"
-                alt="Visitor prompt interface"
-                className="acg-img-fill"
-              />
+              {promptSrc && (
+                <FallbackImg
+                  src={promptSrc}
+                  alt="Visitor prompt interface"
+                  className="acg-img-fill"
+                />
+              )}
             </div>
             <figcaption className="t-mono acg-doc-caption">
               ACTIVATION / PROMPT
@@ -295,11 +314,13 @@ export default function ACGPage() {
           <figure className="acg-doc-cell">
             <div className="acg-doc-frame">
               <div className="acg-doc-bg" />
-              <FallbackImg
-                src="/projects/acg/activation-room.webp"
-                alt="Visitors inside the activation"
-                className="acg-img-fill"
-              />
+              {roomSrc && (
+                <FallbackImg
+                  src={roomSrc}
+                  alt="Visitors inside the activation"
+                  className="acg-img-fill"
+                />
+              )}
             </div>
             <figcaption className="t-mono acg-doc-caption">
               ACTIVATION / ROOM
@@ -308,11 +329,13 @@ export default function ACGPage() {
           <figure className="acg-doc-cell acg-doc-cell--wide">
             <div className="acg-doc-frame">
               <div className="acg-doc-bg" />
-              <FallbackImg
-                src="/projects/acg/activation-alignment.webp"
-                alt="Moment of alignment between collective and local fields"
-                className="acg-img-fill"
-              />
+              {alignmentSrc && (
+                <FallbackImg
+                  src={alignmentSrc}
+                  alt="Moment of alignment between collective and local fields"
+                  className="acg-img-fill"
+                />
+              )}
             </div>
             <figcaption className="t-mono acg-doc-caption">
               ALIGNMENT / TWO FIELDS, ONE COLOR
@@ -333,7 +356,7 @@ export default function ACGPage() {
               label: "FORMAT",
               value: "LIGHT INSTALLATION / PUBLIC PROMPT / SENSORY ACTIVATION",
             },
-            { label: "STATUS", value: "ONGOING SERIES" },
+            { label: "STATUS", value: "ACTIVE SERIES" },
             { label: "NEXT ACTIVATION", value: "TK" },
           ].map((row, i) => (
             <div
@@ -509,11 +532,13 @@ export default function ACGPage() {
 
       <div className="acg-footer-img" style={{ fontSize: 0, position: "relative" }}>
         <div className="acg-footer-placeholder" />
-        <FallbackImg
-          src="/projects/acg/footer.webp"
-          alt=""
-          className="acg-footer-photo"
-        />
+        {footerSrc && (
+          <FallbackImg
+            src={footerSrc}
+            alt=""
+            className="acg-footer-photo"
+          />
+        )}
       </div>
 
       <style>{`

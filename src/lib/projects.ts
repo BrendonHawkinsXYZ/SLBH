@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 
-export type ProjectStatus = "ongoing" | "complete" | "archived";
+export type ProjectStatus = "active" | "paused" | "complete";
 
 export type ProjectLink = {
   label: string;
@@ -27,7 +27,7 @@ const CONTENT_DIR = path.join(process.cwd(), "content/projects");
 const PUBLIC_DIR = path.join(process.cwd(), "public/projects");
 const EXTS = ["webp", "jpg", "jpeg", "png"];
 
-function findImage(slug: string, base: string): string {
+export function findImage(slug: string, base: string): string {
   for (const ext of EXTS) {
     if (fs.existsSync(path.join(PUBLIC_DIR, slug, `${base}.${ext}`))) {
       return `/projects/${slug}/${base}.${ext}`;
@@ -59,7 +59,7 @@ export function getAllProjects(): Project[] {
       discipline: ((data.discipline ?? []) as string[]).map((d) =>
         d.toUpperCase()
       ),
-      status: (data.status ?? "ongoing") as ProjectStatus,
+      status: (data.status ?? "active") as ProjectStatus,
       summary: data.summary ?? "",
       related: (data.related ?? []) as string[],
       links: (data.links ?? []) as ProjectLink[],

@@ -24,7 +24,7 @@ export default function AmericanEmotionsPage() {
       <section className="ae-hero">
         <div className="container-page ae-hero-inner">
           <p className="t-mono ae-kicker">
-            PROJECT 01 / 2024 — ONGOING / NYC
+            PROJECT 01 / 2024 — ACTIVE / NYC
           </p>
           <h1 className="t-display ae-title">American Emotions</h1>
           <p className="ae-summary">
@@ -49,7 +49,7 @@ export default function AmericanEmotionsPage() {
           AFFECT · SYSTEMS · DATA · TIME
         </span>
         <span className="t-mono" style={{ opacity: 0.55, textAlign: "right" }}>
-          STATUS: ONGOING · EST. 2024 · ITERATIONS: 03
+          STATUS: ACTIVE · EST. 2024 · ITERATIONS: 03
         </span>
       </div>
 
