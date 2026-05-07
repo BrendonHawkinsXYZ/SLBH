@@ -532,15 +532,11 @@ export default function ACGPage() {
       <style>{`
         /* ── Hero ── */
         .acg-hero {
-          min-height: 60vh;
           position: relative;
-          display: flex;
-          flex-direction: column;
-          justify-content: flex-end;
         }
         .acg-hero-inner {
-          padding-top: 80px;
-          padding-bottom: 80px;
+          padding-top: 56px;
+          padding-bottom: 144px;
         }
         .acg-kicker {
           opacity: 0.55;
