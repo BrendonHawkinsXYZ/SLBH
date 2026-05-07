@@ -26,7 +26,6 @@ export default function ACGPage() {
   const promptSrc = asset("activation-prompt");
   const roomSrc = asset("activation-room");
   const alignmentSrc = asset("activation-alignment");
-  const footerSrc = asset("footer");
 
   return (
     <>
@@ -530,29 +529,14 @@ export default function ACGPage() {
         </p>
       </section>
 
-      <div className="acg-footer-img" style={{ fontSize: 0, position: "relative" }}>
-        <div className="acg-footer-placeholder" />
-        {footerSrc && (
-          <FallbackImg
-            src={footerSrc}
-            alt=""
-            className="acg-footer-photo"
-          />
-        )}
-      </div>
-
       <style>{`
         /* ── Hero ── */
         .acg-hero {
-          min-height: 60vh;
           position: relative;
-          display: flex;
-          flex-direction: column;
-          justify-content: flex-end;
         }
         .acg-hero-inner {
-          padding-top: 80px;
-          padding-bottom: 80px;
+          padding-top: 56px;
+          padding-bottom: 144px;
         }
         .acg-kicker {
           opacity: 0.55;
@@ -888,10 +872,10 @@ export default function ACGPage() {
         }
         .acg-rel-meta { padding: 0 4px; }
 
-        /* ── Footer copy + image ── */
+        /* ── Footer copy ── */
         .acg-footer {
           padding-top: 0;
-          padding-bottom: 80px;
+          padding-bottom: 120px;
           max-width: var(--max-w);
         }
         .acg-footer-body {
@@ -899,21 +883,6 @@ export default function ACGPage() {
           line-height: 1.7;
           opacity: 0.72;
           margin: 0;
-        }
-        .acg-footer-placeholder {
-          background: var(--graphite);
-          height: 467px;
-          width: 100%;
-        }
-        .acg-footer-photo {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-          max-width: 2000px;
-          margin: 0 auto;
         }
       `}</style>
     </>
