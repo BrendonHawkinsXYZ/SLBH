@@ -10,9 +10,9 @@ const CARD_W = 320;
 const CARD_H = 400;
 
 const STATUS_LABEL: Record<string, string> = {
-  ongoing: "ONGOING",
+  active: "ACTIVE",
+  paused: "PAUSED",
   complete: "COMPLETE",
-  archived: "ARCHIVED",
 };
 
 export function ProjectIndex({ projects }: { projects: Project[] }) {

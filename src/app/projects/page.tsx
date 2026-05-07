@@ -5,7 +5,8 @@ import { BuildingInPublicNotice } from "@/components/projects/BuildingInPublicNo
 export default function ProjectsPage() {
   const projects = getAllProjects();
   const total = projects.length;
-  const ongoing = projects.filter((p) => p.status === "ongoing").length;
+  const active = projects.filter((p) => p.status === "active").length;
+  const paused = projects.filter((p) => p.status === "paused").length;
   const complete = projects.filter((p) => p.status === "complete").length;
 
   const pad = (n: number) => String(n).padStart(2, "0");
@@ -29,7 +30,7 @@ export default function ProjectsPage() {
           className="t-mono"
           style={{ opacity: 0.55, textAlign: "right" }}
         >
-          {pad(total)} TOTAL · {pad(ongoing)} ONGOING · {pad(complete)} COMPLETE
+          {pad(total)} TOTAL · {pad(active)} ACTIVE · {pad(paused)} PAUSED · {pad(complete)} COMPLETE
         </span>
       </div>
 
