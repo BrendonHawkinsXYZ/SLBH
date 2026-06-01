@@ -3,16 +3,12 @@ import { getAllProjects, findImage } from "@/lib/projects";
 import { TrunkLine } from "@/components/TrunkLine";
 import { FallbackImg } from "@/components/projects/convergent-grammar/FallbackImg";
 import { FlowDiagram } from "@/components/projects/convergent-grammar/FlowDiagram";
-import { GrammarOverlay } from "@/components/projects/convergent-grammar/GrammarOverlay";
 
 export const metadata = {
   title: "Convergent Grammar — SLBH",
   description:
     "A computational study of latent visual grammar across portraiture and adjacent image regimes.",
 };
-
-// 3×3 hero grid — one grammar variant per cell, source image loaded if present.
-const HERO_VARIANTS = [0, 1, 2, 3, 4, 5, 2, 0, 1];
 
 export default function ConvergentGrammarPage() {
   const allProjects = getAllProjects();
@@ -21,11 +17,9 @@ export default function ConvergentGrammarPage() {
     .map((s) => allProjects.find((p) => p.slug === s))
     .filter(Boolean) as (typeof allProjects)[0][];
 
+  // Resolves public/projects/convergent-grammar/<base>.{webp,jpg,jpeg,png}
   const asset = (base: string) => findImage("convergent-grammar", base);
-  const heroCells = HERO_VARIANTS.map((variant, i) => ({
-    variant,
-    src: asset(`grid-${i + 1}`),
-  }));
+  const heroSrc = asset("hero");
   const exampleSrc = asset("example");
 
   return (
@@ -61,20 +55,28 @@ export default function ConvergentGrammarPage() {
         </span>
       </div>
 
-      {/* ── Section 3: Hero visual — grammar grid ── */}
-      <section className="cg-visual" aria-label="Grid of compositional overlays">
-        <div className="cg-grid">
-          {heroCells.map(({ variant, src }, i) => (
-            <div key={i} className="cg-cell">
-              <div className="cg-cell-bg" aria-hidden />
-              {src && <FallbackImg src={src} alt="" className="cg-cell-img" />}
-              <GrammarOverlay variant={variant} className="cg-overlay" />
-            </div>
-          ))}
-        </div>
-        <p className="t-mono cg-visual-note">
-          TK / FINAL HERO COMPOSITION — SOURCE IMAGES W/ EXTRACTED GRAMMAR
-        </p>
+      {/* ── Section 3: Hero visual ── */}
+      <section
+        className="cg-visual"
+        aria-label="Hero composition — grid of source images with extracted spatial grammar"
+      >
+        <div className="cg-visual-bg" aria-hidden />
+        {heroSrc ? (
+          <FallbackImg
+            src={heroSrc}
+            alt="Grid of source images with extracted spatial grammar traced in hairline vectors"
+            className="cg-visual-img"
+          />
+        ) : (
+          <div className="cg-visual-fallback">
+            <span
+              className="t-mono"
+              style={{ color: "rgba(243, 242, 242, 0.4)", letterSpacing: "0.12em" }}
+            >
+              TK: HERO COMPOSITION — 3×3 GRID OF COMPOSITIONAL OVERLAYS
+            </span>
+          </div>
+        )}
       </section>
 
       {/* ── Section 4: Editorial ── */}
@@ -99,20 +101,21 @@ export default function ConvergentGrammarPage() {
             </p>
           </div>
           <div className="cg-block-visual">
-            <div className="cg-frame-wrap">
-              <div className="cg-frame">
-                <div className="cg-frame-bg" aria-hidden />
-                {exampleSrc && (
+            <div className="cg-img-wrap">
+              <div className="cg-img-frame">
+                <div className="cg-img-bg" aria-hidden />
+                {exampleSrc ? (
                   <FallbackImg
                     src={exampleSrc}
                     alt="Source portrait with extracted spatial grammar overlaid in hairline vectors"
-                    className="cg-frame-img"
+                    className="cg-img-fill"
                   />
+                ) : (
+                  <span className="t-mono cg-img-tk">TK: IMAGE</span>
                 )}
-                <GrammarOverlay variant={0} className="cg-frame-overlay" />
               </div>
-              <p className="t-mono cg-frame-caption">
-                PORTRAIT / EXTRACTED GRAMMAR — TK SOURCE
+              <p className="t-mono cg-img-caption">
+                PORTRAIT / EXTRACTED GRAMMAR EXAMPLE
               </p>
             </div>
           </div>
@@ -315,34 +318,22 @@ export default function ConvergentGrammarPage() {
           .cg-readout-mid { display: block; }
         }
 
-        /* ── Hero visual — grammar grid ── */
+        /* ── Hero visual ── */
         .cg-visual {
           min-height: 100vh;
           position: relative;
           overflow: hidden;
           background: var(--graphite);
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
-        .cg-grid {
-          position: absolute;
-          inset: 0;
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          grid-template-rows: repeat(3, 1fr);
-        }
-        .cg-cell {
-          position: relative;
-          overflow: hidden;
-          border-right: 0.5px solid rgba(243, 242, 242, 0.08);
-          border-bottom: 0.5px solid rgba(243, 242, 242, 0.08);
-        }
-        .cg-cell:nth-child(3n) { border-right: none; }
-        .cg-cell:nth-child(n + 7) { border-bottom: none; }
-        .cg-cell-bg {
+        .cg-visual-bg {
           position: absolute;
           inset: 0;
           background: var(--graphite);
         }
-        .cg-cell-img {
+        .cg-visual-img {
           position: absolute;
           inset: 0;
           width: 100%;
@@ -350,24 +341,11 @@ export default function ConvergentGrammarPage() {
           object-fit: cover;
           display: block;
         }
-        .cg-overlay {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          display: block;
-        }
-        .cg-visual-note {
-          position: absolute;
-          left: var(--pad-x-mobile);
-          bottom: 20px;
-          margin: 0;
-          font-size: 9px;
-          letter-spacing: 0.12em;
-          color: rgba(243, 242, 242, 0.4);
-        }
-        @media (min-width: 768px) {
-          .cg-visual-note { left: var(--pad-x); }
+        .cg-visual-fallback {
+          position: relative;
+          z-index: 1;
+          padding: 0 24px;
+          text-align: center;
         }
 
         /* ── Editorial ── */
@@ -416,21 +394,24 @@ export default function ConvergentGrammarPage() {
         }
         .cg-block-body:last-child { margin-bottom: 0; }
 
-        /* Composition frame (Block A) */
-        .cg-frame-wrap { width: 100%; }
-        .cg-frame {
+        /* Image frame (Block A) */
+        .cg-img-wrap { width: 100%; }
+        .cg-img-frame {
           position: relative;
           aspect-ratio: 4/3;
           width: 100%;
           border: 0.5px solid var(--hairline-strong);
           overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
-        .cg-frame-bg {
+        .cg-img-bg {
           position: absolute;
           inset: 0;
           background: var(--graphite);
         }
-        .cg-frame-img {
+        .cg-img-fill {
           position: absolute;
           inset: 0;
           width: 100%;
@@ -438,14 +419,14 @@ export default function ConvergentGrammarPage() {
           object-fit: cover;
           display: block;
         }
-        .cg-frame-overlay {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          display: block;
+        .cg-img-tk {
+          position: relative;
+          z-index: 1;
+          color: rgba(243, 242, 242, 0.4);
+          font-size: 9px;
+          letter-spacing: 0.12em;
         }
-        .cg-frame-caption {
+        .cg-img-caption {
           margin: 12px 0 0;
           font-size: 9px;
           opacity: 0.45;
