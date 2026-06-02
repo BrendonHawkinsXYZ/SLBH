@@ -19,6 +19,7 @@ export type Project = {
   summary: string;
   related: string[];
   links: ProjectLink[];
+  href?: string;        // overrides the default /projects/{slug} index link
   coverPath: string;     // resolved public URL or "" if not found
   thumbnailPath: string; // resolved public URL or "" if not found
 };
@@ -63,6 +64,7 @@ export function getAllProjects(): Project[] {
       summary: data.summary ?? "",
       related: (data.related ?? []) as string[],
       links: (data.links ?? []) as ProjectLink[],
+      href: data.href ? String(data.href) : undefined,
       coverPath: findImage(slug, "cover"),
       thumbnailPath: findImage(slug, "thumbnail"),
     };

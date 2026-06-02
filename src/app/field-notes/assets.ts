@@ -17,7 +17,7 @@ type RawAsset = { src: string; type: FieldAssetType };
 type Manifest = { base?: string; assets?: RawAsset[] };
 
 const IMAGE_RE = /\.(jpe?g|png|webp|gif|avif)$/i;
-const VIDEO_RE = /\.(mp4|webm|mov)$/i;
+const VIDEO_RE = /\.(mp4|m4v|webm|mov)$/i;
 
 export function classifyFile(name: string): FieldAssetType | null {
   if (IMAGE_RE.test(name)) return "image";

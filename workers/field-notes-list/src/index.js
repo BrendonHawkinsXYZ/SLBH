@@ -8,7 +8,7 @@
 // edge for about sixty seconds so repeat views do not re-list.
 
 const IMAGE = /\.(jpe?g|png|webp|gif|avif)$/i;
-const VIDEO = /\.(mp4|webm|mov)$/i;
+const VIDEO = /\.(mp4|m4v|webm|mov)$/i;
 
 export default {
   async fetch(request, env, ctx) {

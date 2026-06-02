@@ -38,6 +38,8 @@ export const cardFragmentShader = /* glsl */ `
   uniform sampler2D uTex;
   uniform float uReveal;
   uniform float uFeather;
+  uniform float uWidth;
+  uniform float uHeight;
   varying vec2 vUv;
 
   // Signed distance to a rounded rectangle, negative inside, used to feather
@@ -49,8 +51,14 @@ export const cardFragmentShader = /* glsl */ `
 
   void main() {
     vec4 tex = texture2D(uTex, vUv);
-    vec2 p = vUv - 0.5;
-    float dist = roundedRectSDF(p, vec2(0.5), 0.12);
+    // Run the mask in the card's world units, where uWidth and uHeight already
+    // carry the asset's real aspect ratio, so the corner radius and the edge
+    // feather stay uniform on every card whatever the source dimensions are,
+    // and the texture maps one to one with no stretching.
+    vec2 q = vec2((vUv.x - 0.5) * uWidth, (vUv.y - 0.5) * uHeight);
+    vec2 halfSize = vec2(uWidth, uHeight) * 0.5;
+    float radius = min(0.22, min(halfSize.x, halfSize.y) * 0.5);
+    float dist = roundedRectSDF(q, halfSize, radius);
     float mask = 1.0 - smoothstep(-uFeather, 0.0, dist);
     float alpha = tex.a * mask * uReveal;
     if (alpha < 0.001) discard;

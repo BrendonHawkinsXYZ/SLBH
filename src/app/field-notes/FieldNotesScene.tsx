@@ -18,7 +18,8 @@ const CARD_COUNT = 100;
 const FIELD_RADIUS = 19;
 const VERTICAL_SQUASH = 0.8;
 const LONG_EDGE = 3.2;
-const FEATHER = 0.07;
+// Edge feather measured in world units now, so it is uniform across aspect ratios.
+const FEATHER = 0.22;
 const IDLE_MS = 2500;
 const WORKER_URL = process.env.NEXT_PUBLIC_FIELD_NOTES_LIST_URL;
 

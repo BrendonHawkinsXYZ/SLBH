@@ -7,4 +7,4 @@ binding = "BUCKET"
 bucket_name = "slbh-field-notes"
 
 [vars]
-PUBLIC_BASE = "https://media.studiolabbh.xyz/field-notes/"
+PUBLIC_BASE = "https://pub-93524f69287d48d7a901a9d4d7a88581.r2.dev/"
