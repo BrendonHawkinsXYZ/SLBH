@@ -11,7 +11,6 @@ const CARD_H = 400;
 
 const STATUS_LABEL: Record<string, string> = {
   active: "ACTIVE",
-  ongoing: "ONGOING",
   paused: "PAUSED",
   complete: "COMPLETE",
 };
@@ -101,7 +100,7 @@ export function ProjectIndex({ projects }: { projects: Project[] }) {
             onMouseEnter={() => onRowEnter(p.slug)}
             onMouseLeave={onRowLeave}
           >
-            <Link href={`/projects/${p.slug}`} className="proj-row-link link-quiet">
+            <Link href={p.href ?? `/projects/${p.slug}`} className="proj-row-link link-quiet">
               <span className="proj-col-idx t-mono" style={{ opacity: 0.55 }}>
                 {p.index}
               </span>
@@ -125,7 +124,7 @@ export function ProjectIndex({ projects }: { projects: Project[] }) {
         {projects.map((p) => (
           <li key={p.slug} className="proj-mobile-item">
             <Link
-              href={`/projects/${p.slug}`}
+              href={p.href ?? `/projects/${p.slug}`}
               className="proj-mobile-link link-quiet"
             >
               <div className="proj-mobile-thumb">
