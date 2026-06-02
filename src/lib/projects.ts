@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 
-export type ProjectStatus = "active" | "ongoing" | "paused" | "complete";
+export type ProjectStatus = "active" | "paused" | "complete";
 
 export type ProjectLink = {
   label: string;

@@ -27,7 +27,7 @@ export default function ConvergentGrammarPage() {
       {/* ── Section 1: Header ── */}
       <section className="cg-hero">
         <div className="container-page cg-hero-inner">
-          <p className="t-mono cg-kicker">PROJECT 02 / 2026 / ONGOING / NYC</p>
+          <p className="t-mono cg-kicker">PROJECT 02 / 2026 / ACTIVE / NYC</p>
           <h1 className="t-display cg-title">Convergent Grammar</h1>
           <p className="cg-summary">
             A computational study of latent visual grammar across portraiture
@@ -51,7 +51,7 @@ export default function ConvergentGrammarPage() {
           AFFECT · SYSTEMS · DATA · TIME
         </span>
         <span className="t-mono" style={{ opacity: 0.55, textAlign: "right" }}>
-          STATUS: ONGOING · EST. 2026
+          STATUS: ACTIVE · EST. 2026
         </span>
       </div>
 

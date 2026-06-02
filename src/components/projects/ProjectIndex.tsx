@@ -11,7 +11,6 @@ const CARD_H = 400;
 
 const STATUS_LABEL: Record<string, string> = {
   active: "ACTIVE",
-  ongoing: "ONGOING",
   paused: "PAUSED",
   complete: "COMPLETE",
 };
