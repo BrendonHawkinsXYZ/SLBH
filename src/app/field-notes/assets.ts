@@ -59,25 +59,18 @@ export async function fetchAssetPool(
   }
 }
 
-// Samples the pool to exactly `count` cards, shuffling and slicing when the
-// pool is large enough so a fresh subset shows per session, and repeat
-// sampling when it is small so the field never looks sparse; an empty pool
-// returns an empty array.
-export function sampleToCount(pool: FieldAsset[], count: number): FieldAsset[] {
+// Samples the pool down to at most `max` cards, shuffling and slicing so a
+// fresh subset shows per session, and never repeating an asset, so the field
+// holds only what is in the bucket with no duplicates. A pool smaller than
+// `max` returns every asset once, and an empty pool returns an empty array.
+export function sampleUnique(pool: FieldAsset[], max: number): FieldAsset[] {
   if (pool.length === 0) return [];
-  if (pool.length >= count) {
-    const shuffled = pool.slice();
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled.slice(0, count);
+  const shuffled = pool.slice();
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
-  const out: FieldAsset[] = [];
-  for (let i = 0; i < count; i++) {
-    out.push(pool[Math.floor(Math.random() * pool.length)]);
-  }
-  return out;
+  return shuffled.slice(0, Math.min(max, shuffled.length));
 }
 
 // Builds a small set of quiet placeholder textures as data URLs, drawn in the
@@ -95,11 +88,22 @@ export function buildPlaceholderPool(): FieldAsset[] {
     [2, 3],
     [3, 2],
     [9, 16],
+    [16, 9],
   ];
-  const tones = ["#16161b", "#1b1b21", "#121217", "#1d1d24", "#15151a", "#191920"];
+  const tones = [
+    "#20202a",
+    "#1a1a23",
+    "#262630",
+    "#1d1d27",
+    "#15151c",
+    "#191921",
+    "#23232e",
+    "#14141a",
+  ];
   const out: FieldAsset[] = [];
-  for (let i = 0; i < aspects.length; i++) {
-    const [aw, ah] = aspects[i];
+  const count = 36;
+  for (let i = 0; i < count; i++) {
+    const [aw, ah] = aspects[i % aspects.length];
     const w = 360;
     const h = Math.max(1, Math.round((w * ah) / aw));
     const canvas = document.createElement("canvas");
@@ -112,15 +116,11 @@ export function buildPlaceholderPool(): FieldAsset[] {
     lin.addColorStop(1, "#0b0b0f");
     ctx.fillStyle = lin;
     ctx.fillRect(0, 0, w, h);
-    const rad = ctx.createRadialGradient(
-      w * 0.5,
-      h * 0.4,
-      0,
-      w * 0.5,
-      h * 0.4,
-      Math.max(w, h) * 0.72
-    );
-    rad.addColorStop(0, "rgba(242, 242, 242, 0.05)");
+    const ang = (((i * 37) % 360) * Math.PI) / 180;
+    const cx = w * 0.5 + Math.cos(ang) * w * 0.28;
+    const cy = h * 0.5 + Math.sin(ang) * h * 0.28;
+    const rad = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(w, h) * 0.7);
+    rad.addColorStop(0, "rgba(242, 242, 242, 0.055)");
     rad.addColorStop(1, "rgba(242, 242, 242, 0)");
     ctx.fillStyle = rad;
     ctx.fillRect(0, 0, w, h);

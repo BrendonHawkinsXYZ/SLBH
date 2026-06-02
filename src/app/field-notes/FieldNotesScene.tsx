@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { gsap } from "gsap";
@@ -11,15 +10,13 @@ import {
   buildPlaceholderPool,
   classifyFile,
   fetchAssetPool,
-  sampleToCount,
+  sampleUnique,
 } from "./assets";
 
-const CARD_COUNT = 100;
+const MAX_CARDS = 100;
 const FIELD_RADIUS = 19;
 const VERTICAL_SQUASH = 0.8;
 const LONG_EDGE = 3.2;
-// Edge feather measured in world units now, so it is uniform across aspect ratios.
-const FEATHER = 0.22;
 const IDLE_MS = 2500;
 const WORKER_URL = process.env.NEXT_PUBLIC_FIELD_NOTES_LIST_URL;
 
@@ -155,8 +152,7 @@ export default function FieldNotesScene() {
     controls.zoomSpeed = 0.8;
     controls.panSpeed = 0.6;
     controls.minDistance = 6;
-    // Loosened so the far entry dolly is not clamped; constrained once the
-    // camera has settled, in the reduced motion branch and the dolly onComplete.
+    // Loosened so the far entry dolly is not clamped; constrained once settled.
     controls.maxDistance = 200;
     controls.enabled = false;
 
@@ -180,6 +176,27 @@ export default function FieldNotesScene() {
       );
     }
 
+    function makeMaterial() {
+      return new THREE.ShaderMaterial({
+        uniforms: {
+          uTex: { value: blankTex },
+          uTime: { value: 0 },
+          uWidth: { value: LONG_EDGE },
+          uHeight: { value: LONG_EDGE },
+          uBobAmp: { value: reducedMotion ? 0 : 0.16 + Math.random() * 0.12 },
+          uBobSpeed: { value: 0.45 + Math.random() * 0.5 },
+          uBobPhase: { value: Math.random() * Math.PI * 2 },
+          uReveal: { value: 0 },
+        },
+        vertexShader: cardVertexShader,
+        fragmentShader: cardFragmentShader,
+        transparent: true,
+        depthWrite: false,
+        depthTest: true,
+        side: THREE.DoubleSide,
+      });
+    }
+
     function applyTexture(card: Card, texture: THREE.Texture, aspect: number, video: HTMLVideoElement | null) {
       if (card.tex && card.tex !== texture) card.tex.dispose();
       if (card.video && card.video !== video) {
@@ -190,6 +207,8 @@ export default function FieldNotesScene() {
       card.tex = texture;
       card.video = video;
       card.mat.uniforms.uTex.value = texture;
+      // Long edge is fixed, the short edge follows the asset aspect, so the
+      // quad matches the image proportions and nothing is stretched.
       card.mat.uniforms.uWidth.value = aspect >= 1 ? LONG_EDGE : LONG_EDGE * aspect;
       card.mat.uniforms.uHeight.value = aspect >= 1 ? LONG_EDGE / aspect : LONG_EDGE;
     }
@@ -219,47 +238,40 @@ export default function FieldNotesScene() {
       gsap.to(card.mat.uniforms.uReveal, { value: 1, duration: 0.9, delay, ease: "power2.out" });
     }
 
-    function buildField() {
-      for (let i = 0; i < CARD_COUNT; i++) {
-        const mat = new THREE.ShaderMaterial({
-          uniforms: {
-            uTex: { value: blankTex },
-            uTime: { value: 0 },
-            uWidth: { value: LONG_EDGE },
-            uHeight: { value: LONG_EDGE },
-            uBobAmp: { value: reducedMotion ? 0 : 0.16 + Math.random() * 0.12 },
-            uBobSpeed: { value: 0.45 + Math.random() * 0.5 },
-            uBobPhase: { value: Math.random() * Math.PI * 2 },
-            uReveal: { value: 0 },
-            uFeather: { value: FEATHER },
-          },
-          vertexShader: cardVertexShader,
-          fragmentShader: cardFragmentShader,
-          transparent: true,
-          depthWrite: false,
-          depthTest: true,
-          side: THREE.DoubleSide,
-        });
+    function disposeCards() {
+      for (const c of cards) {
+        gsap.killTweensOf(c.mesh.position);
+        gsap.killTweensOf(c.mat.uniforms.uReveal);
+        field.remove(c.mesh);
+        c.mat.dispose();
+        c.tex?.dispose();
+        if (c.video) {
+          c.video.pause();
+          c.video.removeAttribute("src");
+          c.video.load();
+        }
+      }
+      cards.length = 0;
+    }
+
+    // Build exactly one card per sampled asset, capped at MAX_CARDS, so the
+    // field holds only what is in the bucket with no duplicates.
+    function buildAndPopulate(pool: FieldAsset[]) {
+      disposeCards();
+      const sample = sampleUnique(pool, MAX_CARDS);
+      setCount(sample.length);
+      const base = reducedMotion ? 0 : 0.4;
+      for (let i = 0; i < sample.length; i++) {
+        const mat = makeMaterial();
         const mesh = new THREE.Mesh(geometry, mat);
         randomFieldPosition(tmp);
         mesh.position.copy(tmp);
         mesh.frustumCulled = false;
         field.add(mesh);
-        cards.push({ mesh, mat, tex: null, video: null, token: 0 });
+        const card: Card = { mesh, mat, tex: null, video: null, token: 0 };
+        cards.push(card);
+        populateCard(card, sample[i], false, base + i * 0.014);
       }
-    }
-
-    function populateAll(pool: FieldAsset[], fadeOutFirst: boolean) {
-      const sample = sampleToCount(pool, CARD_COUNT);
-      if (sample.length === 0) return;
-      const base = reducedMotion ? 0 : 0.5;
-      sample.forEach((asset, i) => {
-        populateCard(card_at(i), asset, fadeOutFirst, base + (fadeOutFirst ? Math.random() * 0.3 : i * 0.012));
-      });
-    }
-
-    function card_at(i: number) {
-      return cards[i % cards.length];
     }
 
     function reshuffle() {
@@ -270,7 +282,8 @@ export default function FieldNotesScene() {
         randomFieldPosition(tmp);
         gsap.to(c.mesh.position, { x: tmp.x, y: tmp.y, z: tmp.z, duration: 1.4, ease: "power2.inOut" });
       }
-      populateAll(poolRef.current, true);
+      const sample = sampleUnique(poolRef.current, cards.length);
+      sample.forEach((asset, i) => populateCard(cards[i], asset, true, Math.random() * 0.3));
     }
     apiRef.current = { reshuffle };
 
@@ -291,7 +304,7 @@ export default function FieldNotesScene() {
       poolRef.current = assets;
       setSource("LOCAL SESSION");
       setLocalActive(true);
-      populateAll(assets, true);
+      buildAndPopulate(assets);
     }
 
     // Animation loop
@@ -318,7 +331,6 @@ export default function FieldNotesScene() {
       }
     }
 
-    // Interaction listeners that pause the idle drift
     const onControlStart = () => {
       pointerActive = true;
       controls.autoRotate = false;
@@ -361,13 +373,9 @@ export default function FieldNotesScene() {
     };
     window.addEventListener("resize", onResize);
 
-    // Build the field and start the entry dolly straight away, so the
-    // animation never waits on the network, then load the pool and reveal the
-    // cards as their textures arrive.
-    buildField();
-    setCount(CARD_COUNT);
+    // Start the entry dolly straight away, so the animation never waits on the
+    // network, then load the pool and build the field as it arrives.
     tick();
-
     if (reducedMotion) {
       controls.maxDistance = 72;
       controls.enabled = true;
@@ -392,7 +400,7 @@ export default function FieldNotesScene() {
       const usingRemote = remote.length > 0;
       poolRef.current = usingRemote ? remote : buildPlaceholderPool();
       setSource(usingRemote ? "R2 BUCKET" : "PLACEHOLDER FALLBACK");
-      populateAll(poolRef.current, false);
+      buildAndPopulate(poolRef.current);
     })();
 
     return () => {
@@ -407,17 +415,7 @@ export default function FieldNotesScene() {
       container.removeEventListener("dragleave", onDragLeave);
       container.removeEventListener("drop", onDrop);
       window.removeEventListener("resize", onResize);
-      for (const c of cards) {
-        gsap.killTweensOf(c.mesh.position);
-        gsap.killTweensOf(c.mat.uniforms.uReveal);
-        c.mat.dispose();
-        c.tex?.dispose();
-        if (c.video) {
-          c.video.pause();
-          c.video.removeAttribute("src");
-          c.video.load();
-        }
-      }
+      disposeCards();
       geometry.dispose();
       blankTex.dispose();
       controls.dispose();
@@ -465,13 +463,6 @@ export default function FieldNotesScene() {
         </div>
       )}
 
-      <div className="fn-foot">
-        <Link href="/" className="fn-wordmark link-quiet">
-          STUDIO LAB BH
-        </Link>
-        <span className="fn-tag t-mono">SLBH</span>
-      </div>
-
       {localActive && (
         <div className="fn-note t-mono">LOCAL SESSION · PREVIEW ONLY · NOT SAVED TO R2</div>
       )}
@@ -490,12 +481,16 @@ export default function FieldNotesScene() {
 
       <style>{`
         .fn-root {
-          position: fixed;
-          inset: 0;
-          z-index: 1000;
+          position: relative;
+          width: 100%;
+          height: calc(100svh - 104px);
+          min-height: 460px;
           background: #0B0B0F;
           overflow: hidden;
           color: #F2F2F2;
+        }
+        @media (min-width: 768px) {
+          .fn-root { height: calc(100svh - 112px); }
         }
         .fn-canvas { position: absolute; inset: 0; }
         .fn-canvas canvas { touch-action: none; }
@@ -518,22 +513,22 @@ export default function FieldNotesScene() {
 
         .fn-bracket {
           position: absolute;
-          width: 26px;
-          height: 26px;
+          width: 24px;
+          height: 24px;
           pointer-events: none;
-          border-color: rgba(242, 242, 242, 0.32);
+          border-color: rgba(242, 242, 242, 0.3);
           border-style: solid;
           border-width: 0;
         }
-        .fn-bracket--tl { top: 22px; left: 22px; border-top-width: 1px; border-left-width: 1px; }
-        .fn-bracket--tr { top: 22px; right: 22px; border-top-width: 1px; border-right-width: 1px; }
-        .fn-bracket--bl { bottom: 22px; left: 22px; border-bottom-width: 1px; border-left-width: 1px; }
-        .fn-bracket--br { bottom: 22px; right: 22px; border-bottom-width: 1px; border-right-width: 1px; }
+        .fn-bracket--tl { top: 20px; left: 20px; border-top-width: 1px; border-left-width: 1px; }
+        .fn-bracket--tr { top: 20px; right: 20px; border-top-width: 1px; border-right-width: 1px; }
+        .fn-bracket--bl { bottom: 20px; left: 20px; border-bottom-width: 1px; border-left-width: 1px; }
+        .fn-bracket--br { bottom: 20px; right: 20px; border-bottom-width: 1px; border-right-width: 1px; }
 
         .fn-mark {
           position: absolute;
-          top: 34px;
-          left: 46px;
+          top: 26px;
+          left: 40px;
           font-size: 10px;
           letter-spacing: 0.18em;
           opacity: 0.62;
@@ -541,8 +536,8 @@ export default function FieldNotesScene() {
 
         .fn-controls {
           position: absolute;
-          top: 30px;
-          right: 46px;
+          bottom: 24px;
+          right: 40px;
           display: flex;
           gap: 10px;
         }
@@ -554,14 +549,14 @@ export default function FieldNotesScene() {
           letter-spacing: 0.14em;
           padding: 7px 12px;
           cursor: pointer;
-          transition: border-color 300ms ease, background 300ms ease, opacity 300ms ease;
+          transition: border-color 300ms ease, background 300ms ease;
         }
         .fn-btn:hover { border-color: rgba(75, 92, 255, 0.7); background: rgba(75, 92, 255, 0.08); }
 
         .fn-monitor {
           position: absolute;
-          top: 70px;
-          right: 46px;
+          bottom: 64px;
+          right: 40px;
           display: flex;
           flex-direction: column;
           gap: 5px;
@@ -573,33 +568,10 @@ export default function FieldNotesScene() {
           opacity: 0.82;
         }
 
-        .fn-foot {
-          position: absolute;
-          bottom: 30px;
-          left: 46px;
-          display: flex;
-          align-items: baseline;
-          gap: 14px;
-        }
-        .fn-wordmark {
-          font-family: var(--font-orbitron), sans-serif;
-          font-weight: 500;
-          font-size: 12px;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
-          color: #F2F2F2;
-          text-decoration: none;
-        }
-        .fn-tag {
-          font-size: 9.5px;
-          letter-spacing: 0.18em;
-          opacity: 0.5;
-        }
-
         .fn-note {
           position: absolute;
-          bottom: 32px;
-          right: 46px;
+          bottom: 26px;
+          left: 40px;
           font-size: 9.5px;
           letter-spacing: 0.12em;
           opacity: 0.6;
@@ -630,11 +602,10 @@ export default function FieldNotesScene() {
         }
 
         @media (max-width: 640px) {
-          .fn-mark { left: 24px; top: 30px; }
-          .fn-controls { right: 24px; top: 26px; }
+          .fn-mark { left: 24px; }
+          .fn-controls { right: 24px; }
           .fn-monitor { right: 24px; }
-          .fn-foot { left: 24px; bottom: 24px; }
-          .fn-note { right: 24px; bottom: 26px; }
+          .fn-note { left: 24px; }
         }
       `}</style>
     </div>
