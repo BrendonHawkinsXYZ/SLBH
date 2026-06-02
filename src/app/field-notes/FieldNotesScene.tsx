@@ -13,7 +13,12 @@ import {
   sampleUnique,
 } from "./assets";
 
-const MAX_CARDS = 100;
+const DESKTOP_CARDS = 100;
+const MOBILE_CARDS = 48;
+const DESKTOP_MAX_EDGE = 1280;
+const MOBILE_MAX_EDGE = 768;
+const DESKTOP_VIDEO_BUDGET = 6;
+const MOBILE_VIDEO_BUDGET = 1;
 const FIELD_RADIUS = 19;
 const VERTICAL_SQUASH = 0.8;
 const LONG_EDGE = 3.2;
@@ -27,56 +32,111 @@ type Card = {
   mat: THREE.ShaderMaterial;
   tex: THREE.Texture | null;
   video: HTMLVideoElement | null;
+  isLiveVideo: boolean;
   token: number;
 };
 
-type Loaded = { texture: THREE.Texture; aspect: number; video: HTMLVideoElement | null };
+type Loaded = {
+  texture: THREE.Texture;
+  aspect: number;
+  video: HTMLVideoElement | null;
+  isLiveVideo: boolean;
+};
 
-function loadImageTexture(url: string): Promise<Loaded> {
+// Draw a source image or a decoded video frame onto an offscreen canvas with a
+// capped long edge, so the texture uploaded to the GPU stays small; oversized
+// textures are the cause of the WebGL context loss that crashes phones.
+function drawDownscaled(
+  source: CanvasImageSource,
+  sw: number,
+  sh: number,
+  maxEdge: number
+): HTMLCanvasElement {
+  const scale = Math.min(1, maxEdge / Math.max(1, Math.max(sw, sh)));
+  const w = Math.max(1, Math.round(sw * scale));
+  const h = Math.max(1, Math.round(sh * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  if (ctx) ctx.drawImage(source, 0, 0, w, h);
+  return canvas;
+}
+
+function canvasTexture(canvas: HTMLCanvasElement): THREE.Texture {
+  const texture = new THREE.Texture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.generateMipmaps = true;
+  texture.needsUpdate = true;
+  return texture;
+}
+
+function loadImageTexture(url: string, maxEdge: number): Promise<Loaded> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = () => {
-      const texture = new THREE.Texture(img);
-      texture.colorSpace = THREE.SRGBColorSpace;
-      texture.minFilter = THREE.LinearMipmapLinearFilter;
-      texture.magFilter = THREE.LinearFilter;
-      texture.generateMipmaps = true;
-      texture.needsUpdate = true;
-      const aspect = img.naturalWidth / Math.max(1, img.naturalHeight);
-      resolve({ texture, aspect, video: null });
+      const sw = img.naturalWidth;
+      const sh = img.naturalHeight;
+      const canvas = drawDownscaled(img, sw, sh, maxEdge);
+      resolve({
+        texture: canvasTexture(canvas),
+        aspect: sw / Math.max(1, sh),
+        video: null,
+        isLiveVideo: false,
+      });
     };
     img.onerror = () => reject(new Error("image load error"));
     img.src = url;
   });
 }
 
-function loadVideoTexture(url: string): Promise<Loaded> {
+function teardownVideo(video: HTMLVideoElement | null) {
+  if (!video) return;
+  video.pause();
+  video.removeAttribute("src");
+  video.load();
+}
+
+// Within the live budget a video becomes a live VideoTexture; beyond the budget
+// a single frame is captured to a downscaled canvas and the video element is
+// released, so a field full of clips cannot exhaust GPU memory.
+function loadVideoTexture(url: string, maxEdge: number, wantLive: boolean): Promise<Loaded> {
   return new Promise((resolve, reject) => {
     const video = document.createElement("video");
     video.crossOrigin = "anonymous";
-    video.loop = true;
     video.muted = true;
     video.playsInline = true;
-    video.autoplay = true;
     video.preload = "auto";
-    video.src = url;
-    video.addEventListener(
-      "loadedmetadata",
-      () => {
+    if (wantLive) video.loop = true;
+    const onReady = () => {
+      const vw = video.videoWidth;
+      const vh = video.videoHeight;
+      const aspect = vw / Math.max(1, vh);
+      if (wantLive) {
         const texture = new THREE.VideoTexture(video);
         texture.colorSpace = THREE.SRGBColorSpace;
         texture.minFilter = THREE.LinearFilter;
         texture.magFilter = THREE.LinearFilter;
-        const aspect = video.videoWidth / Math.max(1, video.videoHeight);
         video.play().catch(() => {});
-        resolve({ texture, aspect, video });
-      },
-      { once: true }
-    );
+        resolve({ texture, aspect, video, isLiveVideo: true });
+      } else {
+        const canvas = drawDownscaled(video, vw, vh, maxEdge);
+        const texture = canvasTexture(canvas);
+        teardownVideo(video);
+        resolve({ texture, aspect, video: null, isLiveVideo: false });
+      }
+    };
+    video.addEventListener("loadeddata", onReady, { once: true });
     video.addEventListener("error", () => reject(new Error("video load error")), {
       once: true,
     });
+    video.src = url;
+    // Muted playback is allowed without a gesture and forces a frame to decode,
+    // so the still capture above has something to draw on mobile.
+    video.play().catch(() => {});
   });
 }
 
@@ -108,16 +168,26 @@ export default function FieldNotesScene() {
     if (!container || !mount) return;
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const isMobile = window.matchMedia("(max-width: 820px), (pointer: coarse)").matches;
+    const maxCards = isMobile ? MOBILE_CARDS : DESKTOP_CARDS;
+    const maxEdge = isMobile ? MOBILE_MAX_EDGE : DESKTOP_MAX_EDGE;
+    const videoBudget = isMobile ? MOBILE_VIDEO_BUDGET : DESKTOP_VIDEO_BUDGET;
 
     let renderer: THREE.WebGLRenderer;
     try {
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
+      renderer = new THREE.WebGLRenderer({
+        antialias: !isMobile,
+        alpha: false,
+        powerPreference: "high-performance",
+      });
     } catch {
       setError("WEBGL UNAVAILABLE");
       return;
     }
 
     let disposed = false;
+    let contextLost = false;
+    let liveVideoCount = 0;
     const objectUrls: string[] = [];
     const poolRef: { current: FieldAsset[] } = { current: [] };
     const cards: Card[] = [];
@@ -125,13 +195,14 @@ export default function FieldNotesScene() {
 
     const width = container.clientWidth;
     const height = container.clientHeight;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2));
     renderer.setSize(width, height, false);
     renderer.setClearColor(0x0b0b0f, 1);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.domElement.style.width = "100%";
     renderer.domElement.style.height = "100%";
     renderer.domElement.style.display = "block";
+    renderer.domElement.style.touchAction = "none";
     mount.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
@@ -152,7 +223,6 @@ export default function FieldNotesScene() {
     controls.zoomSpeed = 0.8;
     controls.panSpeed = 0.6;
     controls.minDistance = 6;
-    // Loosened so the far entry dolly is not clamped; constrained once settled.
     controls.maxDistance = 200;
     controls.enabled = false;
 
@@ -197,20 +267,20 @@ export default function FieldNotesScene() {
       });
     }
 
-    function applyTexture(card: Card, texture: THREE.Texture, aspect: number, video: HTMLVideoElement | null) {
-      if (card.tex && card.tex !== texture) card.tex.dispose();
-      if (card.video && card.video !== video) {
-        card.video.pause();
-        card.video.removeAttribute("src");
-        card.video.load();
+    function applyTexture(card: Card, loaded: Loaded) {
+      if (card.tex && card.tex !== loaded.texture) card.tex.dispose();
+      if (card.video && card.video !== loaded.video) teardownVideo(card.video);
+      if (card.isLiveVideo && card.video !== loaded.video) {
+        liveVideoCount = Math.max(0, liveVideoCount - 1);
       }
-      card.tex = texture;
-      card.video = video;
-      card.mat.uniforms.uTex.value = texture;
-      // Long edge is fixed, the short edge follows the asset aspect, so the
-      // quad matches the image proportions and nothing is stretched.
-      card.mat.uniforms.uWidth.value = aspect >= 1 ? LONG_EDGE : LONG_EDGE * aspect;
-      card.mat.uniforms.uHeight.value = aspect >= 1 ? LONG_EDGE / aspect : LONG_EDGE;
+      card.tex = loaded.texture;
+      card.video = loaded.video;
+      card.isLiveVideo = loaded.isLiveVideo;
+      card.mat.uniforms.uTex.value = loaded.texture;
+      // Long edge fixed, short edge follows the asset aspect, so the quad keeps
+      // the image proportions and nothing is stretched.
+      card.mat.uniforms.uWidth.value = loaded.aspect >= 1 ? LONG_EDGE : LONG_EDGE * loaded.aspect;
+      card.mat.uniforms.uHeight.value = loaded.aspect >= 1 ? LONG_EDGE / loaded.aspect : LONG_EDGE;
     }
 
     async function populateCard(card: Card, asset: FieldAsset, fadeOutFirst: boolean, delay: number) {
@@ -221,20 +291,32 @@ export default function FieldNotesScene() {
         });
         if (token !== card.token || disposed) return;
       }
+      // Reserve a live video slot synchronously, before any await, so concurrent
+      // loads cannot overshoot the budget.
+      let reserved = false;
+      if (asset.type === "video" && liveVideoCount < videoBudget) {
+        liveVideoCount++;
+        reserved = true;
+      }
       let loaded: Loaded | null = null;
       try {
-        loaded = asset.type === "video" ? await loadVideoTexture(asset.url) : await loadImageTexture(asset.url);
+        loaded =
+          asset.type === "video"
+            ? await loadVideoTexture(asset.url, maxEdge, reserved)
+            : await loadImageTexture(asset.url, maxEdge);
       } catch {
         loaded = null;
       }
       if (!loaded || token !== card.token || disposed) {
+        if (reserved) liveVideoCount = Math.max(0, liveVideoCount - 1);
         if (loaded) {
           loaded.texture.dispose();
-          loaded.video?.pause();
+          teardownVideo(loaded.video);
         }
         return;
       }
-      applyTexture(card, loaded.texture, loaded.aspect, loaded.video);
+      if (reserved && !loaded.isLiveVideo) liveVideoCount = Math.max(0, liveVideoCount - 1);
+      applyTexture(card, loaded);
       gsap.to(card.mat.uniforms.uReveal, { value: 1, duration: 0.9, delay, ease: "power2.out" });
     }
 
@@ -245,20 +327,17 @@ export default function FieldNotesScene() {
         field.remove(c.mesh);
         c.mat.dispose();
         c.tex?.dispose();
-        if (c.video) {
-          c.video.pause();
-          c.video.removeAttribute("src");
-          c.video.load();
-        }
+        teardownVideo(c.video);
       }
       cards.length = 0;
+      liveVideoCount = 0;
     }
 
-    // Build exactly one card per sampled asset, capped at MAX_CARDS, so the
-    // field holds only what is in the bucket with no duplicates.
+    // Build one card per sampled asset, capped at maxCards and sampled uniquely,
+    // so the field holds only what is in the bucket with no duplicates.
     function buildAndPopulate(pool: FieldAsset[]) {
       disposeCards();
-      const sample = sampleUnique(pool, MAX_CARDS);
+      const sample = sampleUnique(pool, maxCards);
       setCount(sample.length);
       const base = reducedMotion ? 0 : 0.4;
       for (let i = 0; i < sample.length; i++) {
@@ -268,7 +347,7 @@ export default function FieldNotesScene() {
         mesh.position.copy(tmp);
         mesh.frustumCulled = false;
         field.add(mesh);
-        const card: Card = { mesh, mat, tex: null, video: null, token: 0 };
+        const card: Card = { mesh, mat, tex: null, video: null, isLiveVideo: false, token: 0 };
         cards.push(card);
         populateCard(card, sample[i], false, base + i * 0.014);
       }
@@ -282,6 +361,9 @@ export default function FieldNotesScene() {
         randomFieldPosition(tmp);
         gsap.to(c.mesh.position, { x: tmp.x, y: tmp.y, z: tmp.z, duration: 1.4, ease: "power2.inOut" });
       }
+      // Reset the live video accounting; old elements are torn down on apply.
+      liveVideoCount = 0;
+      for (const c of cards) c.isLiveVideo = false;
       const sample = sampleUnique(poolRef.current, cards.length);
       sample.forEach((asset, i) => populateCard(cards[i], asset, true, Math.random() * 0.3));
     }
@@ -314,8 +396,14 @@ export default function FieldNotesScene() {
     let fpsAt = performance.now();
     function tick() {
       raf = requestAnimationFrame(tick);
+      if (contextLost) return;
       const t = clock.getElapsedTime();
-      for (const c of cards) c.mat.uniforms.uTime.value = t;
+      for (const c of cards) {
+        c.mat.uniforms.uTime.value = t;
+        if (c.isLiveVideo && c.tex && c.video && c.video.readyState >= 2) {
+          c.tex.needsUpdate = true;
+        }
+      }
       if (!reducedMotion && !pointerActive && performance.now() - lastInteraction > IDLE_MS) {
         controls.autoRotate = true;
       }
@@ -347,6 +435,21 @@ export default function FieldNotesScene() {
     controls.addEventListener("end", onControlEnd);
     renderer.domElement.addEventListener("wheel", onWheel, { passive: true });
 
+    // Recover from a lost context instead of letting the tab crash and reload.
+    const onContextLost = (e: Event) => {
+      e.preventDefault();
+      contextLost = true;
+      cancelAnimationFrame(raf);
+    };
+    const onContextRestored = () => {
+      contextLost = false;
+      buildAndPopulate(poolRef.current);
+      cancelAnimationFrame(raf);
+      tick();
+    };
+    renderer.domElement.addEventListener("webglcontextlost", onContextLost, false);
+    renderer.domElement.addEventListener("webglcontextrestored", onContextRestored, false);
+
     // Local drag and drop, session only
     const onDragOver = (e: DragEvent) => {
       e.preventDefault();
@@ -373,8 +476,8 @@ export default function FieldNotesScene() {
     };
     window.addEventListener("resize", onResize);
 
-    // Start the entry dolly straight away, so the animation never waits on the
-    // network, then load the pool and build the field as it arrives.
+    // Start the entry dolly straight away, then load the pool and build the
+    // field as it arrives.
     tick();
     if (reducedMotion) {
       controls.maxDistance = 72;
@@ -411,6 +514,8 @@ export default function FieldNotesScene() {
       controls.removeEventListener("start", onControlStart);
       controls.removeEventListener("end", onControlEnd);
       renderer.domElement.removeEventListener("wheel", onWheel);
+      renderer.domElement.removeEventListener("webglcontextlost", onContextLost);
+      renderer.domElement.removeEventListener("webglcontextrestored", onContextRestored);
       container.removeEventListener("dragover", onDragOver);
       container.removeEventListener("dragleave", onDragLeave);
       container.removeEventListener("drop", onDrop);
