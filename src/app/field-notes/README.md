@@ -21,16 +21,18 @@ The Worker and its setup live in `workers/field-notes-list/`.
 
 ## Wiring the page to the Worker
 
-Set one public env var to the deployed Worker URL:
+The route reads the listing Worker URL from a public env var, set in the
+committed `.env` so every build picks it up:
 
 ```bash
-# .env.local for development, and the production environment for the live site
-NEXT_PUBLIC_FIELD_NOTES_LIST_URL="https://field-notes-list.<subdomain>.workers.dev"
+NEXT_PUBLIC_FIELD_NOTES_LIST_URL="https://field-notes-list.brendon-9a7.workers.dev/"
 ```
 
-When the var is absent, or the fetch fails, the route falls back to a small set
-of procedurally drawn placeholder textures, so the page is never empty and
-nothing heavy is committed to the repository.
+Override it in `.env.local` for local experiments, or in the deploy
+environment, since those take precedence. When the var is absent, or the
+fetch fails, the route falls back to a small set of procedurally drawn
+placeholder textures, so the page is never empty and nothing heavy is
+committed to the repository.
 
 ## Files
 
