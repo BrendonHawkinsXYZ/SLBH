@@ -94,7 +94,7 @@ const CV: CVCategory[] = [
   {
     label: "SOLO EXHIBITIONS",
     entries: [
-      { year: "2026", title: "ACG By Studio Lab BH", detail: "The Space, New York" },
+      { year: "2026", title: "ACG By Studio Lab BH", detail: "The Space, New York, NY" },
       { year: "2024", title: "Three Degrees", detail: "Industrious, Pittsburgh, PA" },
       { year: "2019", title: "#ShowUp", detail: "Mattress Factory, Pittsburgh, PA" },
       { year: "2018", title: "Untitled", detail: "Bunker Projects, Pittsburgh, PA" },
@@ -103,7 +103,7 @@ const CV: CVCategory[] = [
   {
     label: "GROUP EXHIBITIONS",
     entries: [
-      { year: "2025", title: "PIT Lab × Beta NYC Pop-Up", detail: "The Oculus, New York City" },
+      { year: "2025", title: "PIT Lab × Beta NYC Pop-Up", detail: "The Oculus, New York, NY" },
       { year: "2020", title: "Seeking Truth", detail: "Brew House, Pittsburgh, PA" },
       { year: "2020", title: "Channel", detail: "Pittsburgh Children’s Museum, Pittsburgh, PA" },
       {
