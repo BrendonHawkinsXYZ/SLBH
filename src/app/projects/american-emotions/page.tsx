@@ -19,6 +19,7 @@ export default function AmericanEmotionsPage() {
     .filter(Boolean) as (typeof allProjects)[0][];
 
   const heroSrc = findImage("american-emotions", "hero");
+  const render2024Src = findImage("american-emotions", "render-2024");
 
   return (
     <>
@@ -105,7 +106,7 @@ export default function AmericanEmotionsPage() {
               <div className="ae-archival-frame">
                 <div className="ae-archival-bg" />
                 <FallbackImg
-                  src="/projects/american-emotions/render-2024.jpg"
+                  src={render2024Src}
                   alt="2024 election run render, archival"
                   className="ae-archival-img"
                 />
