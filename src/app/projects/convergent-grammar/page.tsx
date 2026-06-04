@@ -170,7 +170,7 @@ export default function ConvergentGrammarPage() {
             image production.
           </p>
           <p className="t-body cg-block-body cg-block-body--wide">
-            There is no paper yet. The project is in its research phase. Outputs
+            The project is in its research phase. Outputs
             will be released as diagrams and, eventually, as a paper on the
             vertical longitudinal study.
           </p>
