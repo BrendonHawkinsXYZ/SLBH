@@ -147,8 +147,16 @@ export default function FieldNotesScene() {
   const [dropping, setDropping] = useState(false);
   const [localActive, setLocalActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [initialized, setInitialized] = useState(false);
+  const [elapsed, setElapsed] = useState(0);
 
   const onReshuffle = useCallback(() => apiRef.current?.reshuffle(), []);
+
+  useEffect(() => {
+    if (initialized) return;
+    const id = setInterval(() => setElapsed((s) => s + 1), 1000);
+    return () => clearInterval(id);
+  }, [initialized]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -372,6 +380,7 @@ export default function FieldNotesScene() {
       }
       if (!assets.length) return;
       poolRef.current = assets;
+      setInitialized(true);
       setLocalActive(true);
       buildAndPopulate(assets);
     }
@@ -488,6 +497,7 @@ export default function FieldNotesScene() {
       const remote = await fetchAssetPool(WORKER_URL, controller.signal);
       if (disposed) return;
       poolRef.current = remote.length > 0 ? remote : buildPlaceholderPool();
+      setInitialized(true);
       buildAndPopulate(poolRef.current);
     })();
 
@@ -517,9 +527,27 @@ export default function FieldNotesScene() {
     };
   }, []);
 
+  const mins = Math.floor(elapsed / 60);
+  const secs = elapsed % 60;
+  const elapsedStr = `${mins}:${String(secs).padStart(2, "0")}`;
+
   return (
     <div ref={containerRef} className="fn-root">
       <div ref={mountRef} className="fn-canvas" />
+
+      <div
+        className="fn-init"
+        aria-hidden={initialized}
+        style={{ opacity: initialized ? 0 : 1, pointerEvents: initialized ? "none" : "all" }}
+      >
+        <span className="t-mono fn-init-label">09 / FIELD NOTES</span>
+        <div className="fn-init-row">
+          <span className="t-mono fn-init-status">INITIALIZING</span>
+          <span className="fn-init-cursor" aria-hidden />
+        </div>
+        <span className="t-mono fn-init-elapsed">{elapsedStr}</span>
+      </div>
+
       <div className="fn-grain" aria-hidden />
       <div className="fn-vignette" aria-hidden />
 
@@ -573,6 +601,51 @@ export default function FieldNotesScene() {
         }
         .fn-canvas { position: absolute; inset: 0; }
         .fn-canvas canvas { touch-action: none; }
+
+        .fn-init {
+          position: absolute;
+          inset: 0;
+          z-index: 20;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 18px;
+          background: #0B0B0F;
+          transition: opacity 700ms ease;
+        }
+        .fn-init-label {
+          font-size: 10px;
+          letter-spacing: 0.18em;
+          opacity: 0.45;
+        }
+        .fn-init-row {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .fn-init-status {
+          font-size: 11px;
+          letter-spacing: 0.16em;
+          opacity: 0.75;
+        }
+        .fn-init-cursor {
+          display: inline-block;
+          width: 7px;
+          height: 11px;
+          background: rgba(242, 242, 242, 0.6);
+          animation: fn-blink 1s step-end infinite;
+        }
+        @keyframes fn-blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
+        }
+        .fn-init-elapsed {
+          font-size: 22px;
+          letter-spacing: 0.12em;
+          opacity: 0.28;
+          font-variant-numeric: tabular-nums;
+        }
 
         .fn-grain {
           position: absolute;
