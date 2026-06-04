@@ -26,7 +26,7 @@ const FieldNotesScene = dynamic(() => import("./FieldNotesScene"), {
         className="t-mono"
         style={{ fontSize: 10, letterSpacing: "0.2em", opacity: 0.5 }}
       >
-        09 / FIELD NOTES
+        05 / FIELD NOTES
       </span>
     </div>
   ),
