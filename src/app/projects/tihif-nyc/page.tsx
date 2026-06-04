@@ -10,16 +10,6 @@ export const metadata = {
     "A site-specific installation that streamed one person's daily emotion into three windows as colored light.",
 };
 
-// Section 5 documentation grid — 2×3, one image slot per cell.
-const ARTIFACTS = [
-  { base: "artifact-1", caption: "STREET VIEW / NIGHT" },
-  { base: "artifact-2", caption: "FACADE / THREE WINDOWS" },
-  { base: "artifact-3", caption: "WINDOW / LED DETAIL" },
-  { base: "artifact-4", caption: "JOURNAL / SOURCE ENTRY" },
-  { base: "artifact-5", caption: "COLOR / DAILY STATE" },
-  { base: "artifact-6", caption: "INTERIOR / STUDIO" },
-];
-
 export default function TihifNycPage() {
   const allProjects = getAllProjects();
   const relatedSlugs = ["acg", "american-emotions"];
@@ -30,7 +20,6 @@ export default function TihifNycPage() {
   // Resolves public/projects/tihif-nyc/<base>.{webp,jpg,jpeg,png}
   const asset = (base: string) => findImage("tihif-nyc", base);
   const heroSrc = asset("hero");
-  const premiseSrc = asset("premise");
 
   return (
     <>
@@ -94,42 +83,21 @@ export default function TihifNycPage() {
       {/* ── Section 4: Editorial ── */}
       <section className="container-page tihif-editorial">
         {/* Block A — PREMISE */}
-        <div className="tihif-block tihif-block--text-left">
-          <div className="tihif-block-text">
-            <p className="t-mono tihif-block-kicker">01 / PREMISE</p>
-            <h2 className="t-h2 tihif-block-headline">
-              What if a private feeling spilled into public light?
-            </h2>
-            <p className="t-body tihif-block-body">
-              The lab thinks about affective ecosystems, the way private emotion
-              moves through shared space. This Is How I&rsquo;m Feeling: NYC
-              asked the question directly. What happens if you put one
-              person&rsquo;s emotion onto the street, in plain view, every night?
-            </p>
-            <p className="t-body tihif-block-body">
-              The answer was a studio in New York, three windows, and a nightly
-              broadcast of one feeling rendered as colored light.
-            </p>
-          </div>
-          <div className="tihif-block-visual">
-            <div className="tihif-img-wrap">
-              <div className="tihif-img-frame">
-                <div className="tihif-img-bg" aria-hidden />
-                {premiseSrc ? (
-                  <FallbackImg
-                    src={premiseSrc}
-                    alt="Street-level photograph of the three lit windows at night"
-                    className="tihif-img-fill"
-                  />
-                ) : (
-                  <span className="t-mono tihif-img-tk">TK: STREET VIEW</span>
-                )}
-              </div>
-              <p className="t-mono tihif-img-caption">
-                LIT WINDOWS / STREET LEVEL, NIGHT
-              </p>
-            </div>
-          </div>
+        <div className="tihif-block tihif-block--full">
+          <p className="t-mono tihif-block-kicker">01 / PREMISE</p>
+          <h2 className="t-h2 tihif-block-headline">
+            What if a private feeling spilled into public light?
+          </h2>
+          <p className="t-body tihif-block-body">
+            The lab thinks about affective ecosystems, the way private emotion
+            moves through shared space. This Is How I&rsquo;m Feeling: NYC
+            asked the question directly. What happens if you put one
+            person&rsquo;s emotion onto the street, in plain view, every night?
+          </p>
+          <p className="t-body tihif-block-body">
+            The answer was a studio in New York, three windows, and a nightly
+            broadcast of one feeling rendered as colored light.
+          </p>
         </div>
 
         {/* Block B — PROCESS */}
@@ -183,35 +151,6 @@ export default function TihifNycPage() {
             demonstration of that claim. The subsequent work, ACG by SLBH,
             scales it.
           </p>
-        </div>
-      </section>
-
-      {/* ── Section 5: Artifacts ── */}
-      <section className="container-page tihif-artifacts">
-        <p className="t-mono tihif-artifacts-label">ARTIFACTS / DOCUMENTATION</p>
-        <div className="tihif-art-grid">
-          {ARTIFACTS.map(({ base, caption }) => {
-            const src = asset(base);
-            return (
-              <figure key={base} className="tihif-art-cell">
-                <div className="tihif-art-frame">
-                  <div className="tihif-art-bg" aria-hidden />
-                  {src ? (
-                    <FallbackImg
-                      src={src}
-                      alt={caption.toLowerCase()}
-                      className="tihif-art-fill"
-                    />
-                  ) : (
-                    <span className="t-mono tihif-art-tk">TK</span>
-                  )}
-                </div>
-                <figcaption className="t-mono tihif-art-caption">
-                  {caption}
-                </figcaption>
-              </figure>
-            );
-          })}
         </div>
       </section>
 
@@ -437,107 +376,11 @@ export default function TihifNycPage() {
         }
         .tihif-block-body:last-child { margin-bottom: 0; }
 
-        /* Image frame (Block A) */
-        .tihif-img-wrap { width: 100%; }
-        .tihif-img-frame {
-          position: relative;
-          aspect-ratio: 4/3;
-          width: 100%;
-          border: 0.5px solid var(--hairline-strong);
-          overflow: hidden;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .tihif-img-bg {
-          position: absolute;
-          inset: 0;
-          background: var(--graphite);
-        }
-        .tihif-img-fill {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-        }
-        .tihif-img-tk {
-          position: relative;
-          z-index: 1;
-          color: rgba(243, 242, 242, 0.4);
-          font-size: 9px;
-          letter-spacing: 0.12em;
-        }
-        .tihif-img-caption {
-          margin: 12px 0 0;
-          font-size: 9px;
-          opacity: 0.45;
-          letter-spacing: 0.1em;
-        }
-
         /* Flow diagram */
         .tihif-flow-wrap {
           display: flex;
           align-items: center;
           padding: 32px 0;
-        }
-
-        /* ── Artifacts ── */
-        .tihif-artifacts {
-          padding-top: 0;
-          padding-bottom: 96px;
-        }
-        .tihif-artifacts-label {
-          opacity: 0.45;
-          margin: 0 0 24px;
-          font-size: 10px;
-          letter-spacing: 0.12em;
-        }
-        .tihif-art-grid {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 24px;
-        }
-        @media (min-width: 700px) {
-          .tihif-art-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
-        }
-        .tihif-art-cell { margin: 0; }
-        .tihif-art-frame {
-          position: relative;
-          aspect-ratio: 1/1;
-          width: 100%;
-          border: 0.5px solid var(--hairline-strong);
-          overflow: hidden;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .tihif-art-bg {
-          position: absolute;
-          inset: 0;
-          background: var(--graphite);
-        }
-        .tihif-art-fill {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-        }
-        .tihif-art-tk {
-          position: relative;
-          z-index: 1;
-          color: rgba(243, 242, 242, 0.4);
-          font-size: 9px;
-          letter-spacing: 0.12em;
-        }
-        .tihif-art-caption {
-          margin: 12px 0 0;
-          font-size: 9px;
-          opacity: 0.45;
-          letter-spacing: 0.1em;
         }
 
         /* ── Links ── */

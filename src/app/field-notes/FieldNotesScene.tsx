@@ -25,8 +25,6 @@ const LONG_EDGE = 3.2;
 const IDLE_MS = 2500;
 const WORKER_URL = process.env.NEXT_PUBLIC_FIELD_NOTES_LIST_URL;
 
-type SourceLabel = "LOADING" | "R2 BUCKET" | "PLACEHOLDER FALLBACK" | "LOCAL SESSION";
-
 type Card = {
   mesh: THREE.Mesh;
   mat: THREE.ShaderMaterial;
@@ -144,23 +142,13 @@ export default function FieldNotesScene() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mountRef = useRef<HTMLDivElement | null>(null);
   const apiRef = useRef<{ reshuffle: () => void } | null>(null);
-  const monitorOnRef = useRef(false);
-
-  const [source, setSource] = useState<SourceLabel>("LOADING");
   const [count, setCount] = useState(0);
   const [fps, setFps] = useState(0);
-  const [monitor, setMonitor] = useState(false);
   const [dropping, setDropping] = useState(false);
   const [localActive, setLocalActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const onReshuffle = useCallback(() => apiRef.current?.reshuffle(), []);
-  const onToggleMonitor = useCallback(() => {
-    setMonitor((v) => {
-      monitorOnRef.current = !v;
-      return !v;
-    });
-  }, []);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -384,7 +372,6 @@ export default function FieldNotesScene() {
       }
       if (!assets.length) return;
       poolRef.current = assets;
-      setSource("LOCAL SESSION");
       setLocalActive(true);
       buildAndPopulate(assets);
     }
@@ -415,7 +402,7 @@ export default function FieldNotesScene() {
         const value = Math.round((frames * 1000) / (now - fpsAt));
         frames = 0;
         fpsAt = now;
-        if (monitorOnRef.current) setFps(value);
+        setFps(value);
       }
     }
 
@@ -500,9 +487,7 @@ export default function FieldNotesScene() {
     (async () => {
       const remote = await fetchAssetPool(WORKER_URL, controller.signal);
       if (disposed) return;
-      const usingRemote = remote.length > 0;
-      poolRef.current = usingRemote ? remote : buildPlaceholderPool();
-      setSource(usingRemote ? "R2 BUCKET" : "PLACEHOLDER FALLBACK");
+      poolRef.current = remote.length > 0 ? remote : buildPlaceholderPool();
       buildAndPopulate(poolRef.current);
     })();
 
@@ -549,24 +534,13 @@ export default function FieldNotesScene() {
         <button type="button" className="fn-btn t-mono" onClick={onReshuffle}>
           RESHUFFLE
         </button>
-        <button
-          type="button"
-          className="fn-btn t-mono"
-          onClick={onToggleMonitor}
-          aria-pressed={monitor}
-        >
-          MONITOR {monitor ? "ON" : "OFF"}
-        </button>
       </div>
 
-      {monitor && (
-        <div className="fn-monitor t-mono" aria-live="polite">
-          <span>FIELD MONITOR</span>
-          <span>SOURCE: {source}</span>
-          <span>CARDS: {String(count).padStart(3, "0")}</span>
-          <span>FPS: {String(fps).padStart(3, "0")}</span>
-        </div>
-      )}
+      <div className="fn-monitor t-mono" aria-live="polite">
+        <span>FIELD MONITOR</span>
+        <span>CARDS: {String(count).padStart(3, "0")}</span>
+        <span>FPS: {String(fps).padStart(3, "0")}</span>
+      </div>
 
       {localActive && (
         <div className="fn-note t-mono">LOCAL SESSION · PREVIEW ONLY · NOT SAVED TO R2</div>

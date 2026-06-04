@@ -21,6 +21,9 @@ export default function ConvergentGrammarPage() {
   const asset = (base: string) => findImage("convergent-grammar", base);
   const heroSrc = asset("hero");
   const exampleSrc = asset("example");
+  const landscapeSrc = asset("landscape");
+  const customSrc = asset("custom");
+  const interiorSrc = asset("interior");
 
   return (
     <>
@@ -174,6 +177,31 @@ export default function ConvergentGrammarPage() {
             will be released as diagrams and, eventually, as a paper on the
             vertical longitudinal study.
           </p>
+        </div>
+      </section>
+
+      {/* ── Section 4.5: Study image gallery ── */}
+      <section className="container-page cg-gallery">
+        <p className="t-mono cg-gallery-label">STUDY IMAGES</p>
+        <div className="cg-gallery-grid">
+          {[
+            { src: landscapeSrc, caption: "LANDSCAPES", alt: "Landscape compositional study" },
+            { src: customSrc, caption: "CUSTOM IMAGES", alt: "Custom image compositional study" },
+            { src: interiorSrc, caption: "INTERIOR PAINTINGS", alt: "Interior painting compositional study" },
+          ].map(({ src, caption, alt }) => (
+            <figure key={caption} className="cg-gallery-item">
+              <div className="cg-gallery-frame">
+                {src ? (
+                  <FallbackImg src={src} alt={alt} className="cg-gallery-img" />
+                ) : (
+                  <div className="cg-gallery-empty">
+                    <span className="t-mono cg-gallery-tk">TK</span>
+                  </div>
+                )}
+              </div>
+              <figcaption className="t-mono cg-gallery-caption">{caption}</figcaption>
+            </figure>
+          ))}
         </div>
       </section>
 
@@ -394,7 +422,7 @@ export default function ConvergentGrammarPage() {
         .cg-img-wrap { width: 100%; }
         .cg-img-frame {
           position: relative;
-          aspect-ratio: 4/3;
+          aspect-ratio: 4/5;
           width: 100%;
           border: 0.5px solid var(--hairline-strong);
           overflow: hidden;
@@ -490,6 +518,55 @@ export default function ConvergentGrammarPage() {
           margin-bottom: 16px;
         }
         .cg-rel-meta { padding: 0 4px; }
+
+        /* ── Study image gallery ── */
+        .cg-gallery {
+          padding-top: 0;
+          padding-bottom: 96px;
+        }
+        .cg-gallery-label {
+          opacity: 0.45;
+          margin: 0 0 24px;
+          font-size: 10px;
+          letter-spacing: 0.12em;
+        }
+        .cg-gallery-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 32px;
+        }
+        @media (min-width: 900px) {
+          .cg-gallery-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        .cg-gallery-item { margin: 0; }
+        .cg-gallery-frame {
+          width: 100%;
+          border: 0.5px solid var(--hairline-strong);
+          overflow: hidden;
+          background: var(--graphite);
+        }
+        .cg-gallery-img {
+          width: 100%;
+          height: auto;
+          display: block;
+        }
+        .cg-gallery-empty {
+          min-height: 120px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .cg-gallery-tk {
+          color: rgba(243, 242, 242, 0.4);
+          font-size: 9px;
+          letter-spacing: 0.12em;
+        }
+        .cg-gallery-caption {
+          margin: 12px 0 0;
+          font-size: 9px;
+          opacity: 0.45;
+          letter-spacing: 0.1em;
+        }
 
         /* ── Footer copy ── */
         .cg-footer {
