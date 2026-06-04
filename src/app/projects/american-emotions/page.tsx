@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getAllProjects } from "@/lib/projects";
+import { getAllProjects, findImage } from "@/lib/projects";
 import { TrunkLine } from "@/components/TrunkLine";
 import { PipelineDiagram } from "@/components/projects/american-emotions/PipelineDiagram";
 import { IterationTimeline } from "@/components/projects/american-emotions/IterationTimeline";
@@ -17,6 +17,8 @@ export default function AmericanEmotionsPage() {
   const related = relatedSlugs
     .map((s) => allProjects.find((p) => p.slug === s))
     .filter(Boolean) as (typeof allProjects)[0][];
+
+  const heroSrc = findImage("american-emotions", "hero");
 
   return (
     <>
@@ -54,22 +56,21 @@ export default function AmericanEmotionsPage() {
       </div>
 
       {/* ── Section 3: Hero visual ── */}
-      <section className="ae-visual">
-        <video
-          className="ae-video"
-          autoPlay
-          muted
-          loop
-          playsInline
-          aria-hidden
-        >
-          <source src="/projects/american-emotions/hero.mp4" type="video/mp4" />
-        </video>
-        <div className="ae-visual-fallback" aria-hidden>
-          <span className="t-mono" style={{ opacity: 0.3 }}>
-            TK: HERO VISUAL
-          </span>
-        </div>
+      <section className="ae-visual" aria-label="American Emotions hero visual">
+        <div className="ae-visual-bg" aria-hidden />
+        {heroSrc ? (
+          <FallbackImg
+            src={heroSrc}
+            alt="American Emotions — rendered collective affect as color"
+            className="ae-visual-img"
+          />
+        ) : (
+          <div className="ae-visual-fallback" aria-hidden>
+            <span className="t-mono" style={{ opacity: 0.3 }}>
+              TK: HERO VISUAL
+            </span>
+          </div>
+        )}
       </section>
 
       {/* ── Section 4: Editorial ── */}
@@ -191,7 +192,7 @@ export default function AmericanEmotionsPage() {
       {/* ── Section 5: Links ── */}
       <section className="container-page ae-links">
         {[
-          { label: "LIVE INSTRUMENT", href: null, note: "TK: URL ONCE PUBLIC" },
+          { label: "LIVE INSTRUMENT", href: "https://www.instagram.com/americanemotions", note: "instagram / @americanemotions" },
           { label: "RELATED PAPER", href: "/research/emotion-as-system", note: "/research/emotion-as-system" },
           { label: "SEE ALSO", href: "/projects/acg", note: "/projects/acg" },
         ].map(({ label, href, note }, i) => (
@@ -207,7 +208,7 @@ export default function AmericanEmotionsPage() {
               {label}
             </span>
             {href ? (
-              <Link href={href} className="t-mono link-quiet ae-link-url">
+              <Link href={href} className="t-mono link-quiet ae-link-url" target="_blank" rel="noopener noreferrer">
                 {note} →
               </Link>
             ) : (
@@ -261,16 +262,6 @@ export default function AmericanEmotionsPage() {
           </div>
         </section>
       )}
-
-      {/* ── Section 7: Footer image ── */}
-      <div className="ae-footer-img" style={{ fontSize: 0, position: "relative" }}>
-        <div className="ae-footer-placeholder" />
-        <FallbackImg
-          src="/projects/american-emotions/footer.jpg"
-          alt=""
-          className="ae-footer-photo"
-        />
-      </div>
 
       <style>{`
         /* ── Hero ── */
@@ -334,7 +325,12 @@ export default function AmericanEmotionsPage() {
           align-items: center;
           justify-content: center;
         }
-        .ae-video {
+        .ae-visual-bg {
+          position: absolute;
+          inset: 0;
+          background: var(--graphite);
+        }
+        .ae-visual-img {
           position: absolute;
           inset: 0;
           width: 100%;
@@ -399,7 +395,7 @@ export default function AmericanEmotionsPage() {
         /* Archival image */
         .ae-archival-frame {
           position: relative;
-          aspect-ratio: 4/3;
+          aspect-ratio: 1/1;
           width: 100%;
           border: 0.5px solid var(--hairline-strong);
           overflow: hidden;
@@ -486,22 +482,6 @@ export default function AmericanEmotionsPage() {
         }
         .ae-rel-meta { padding: 0 4px; }
 
-        /* ── Footer image ── */
-        .ae-footer-placeholder {
-          background: var(--graphite);
-          height: 467px;
-          width: 100%;
-        }
-        .ae-footer-photo {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-          max-width: 2000px;
-          margin: 0 auto;
-        }
       `}</style>
     </>
   );
