@@ -348,15 +348,15 @@ export default function ACGPage() {
         <p className="t-mono acg-visit-label">ACTIVATION</p>
         <div className="acg-visit-rows">
           {[
-            { label: "LOCATION", value: "TK / STOREFRONT ADDRESS" },
-            { label: "DATES", value: "TK" },
-            { label: "HOURS", value: "TK" },
+            { label: "LOCATION", value: "The Space, UWS NYC" },
+            { label: "DATES", value: "April 28-30, 2026" },
+            { label: "HOURS", value: "24 Hours/Day" },
             {
               label: "FORMAT",
               value: "LIGHT INSTALLATION / PUBLIC PROMPT / SENSORY ACTIVATION",
             },
             { label: "STATUS", value: "ACTIVE SERIES" },
-            { label: "NEXT ACTIVATION", value: "TK" },
+            { label: "NEXT ACTIVATION", value: "TBD" },
           ].map((row, i) => (
             <div
               key={row.label}
