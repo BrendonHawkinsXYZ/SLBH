@@ -193,7 +193,7 @@ export default function AmericanEmotionsPage() {
       {/* ── Section 5: Links ── */}
       <section className="container-page ae-links">
         {[
-          { label: "LIVE INSTRUMENT", href: "https://www.instagram.com/americanemotions", note: "instagram / @americanemotions" },
+          { label: "LIVE INSTRUMENT", href: "https://americanemotions.studiolabbh.xyz", note: "American Emotions" },
           { label: "RELATED PAPER", href: "/research/emotion-as-system", note: "/research/emotion-as-system" },
           { label: "SEE ALSO", href: "/projects/acg", note: "/projects/acg" },
         ].map(({ label, href, note }, i) => (
