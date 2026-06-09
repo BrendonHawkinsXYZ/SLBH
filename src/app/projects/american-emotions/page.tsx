@@ -193,8 +193,9 @@ export default function AmericanEmotionsPage() {
       {/* ── Section 5: Links ── */}
       <section className="container-page ae-links">
         {[
-          { label: "LIVE INSTRUMENT", href: "https://americanemotions.studiolabbh.xyz", note: "American Emotions" },
+          { label: "LIVE INSTRUMENT", href: "https://americanemotions.studiolabbh.xyz", note: "American Emotions App" },
           { label: "RELATED PAPER", href: "/research/emotion-as-system", note: "/research/emotion-as-system" },
+          { label: "2024 ELECTION ARCHIVE", href: "https://www.instagram.com/americanemotions", note: "Instagram" },
           { label: "SEE ALSO", href: "/projects/acg", note: "/projects/acg" },
         ].map(({ label, href, note }, i) => (
           <div key={label} className="ae-link-row" style={{ borderTop: i === 0 ? "0.5px solid var(--hairline)" : undefined }}>
