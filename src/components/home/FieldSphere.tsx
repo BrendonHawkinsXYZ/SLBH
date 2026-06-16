@@ -28,15 +28,15 @@ const BAYER8 = [
   [42, 26, 38, 22, 41, 25, 37, 21],
 ];
 
-const CELL = 4; // dither cell, CSS px — small keeps the dither tight
-const DOT = 2.4; // drawn dot, CSS px (< CELL leaves the stipple gaps)
+const CELL = 2; // dither cell, CSS px — small keeps the dither tight
+const DOT = 1.3; // drawn dot, CSS px (< CELL leaves the stipple gaps)
 const INFLUENCE = 72; // pointer disruption radius, CSS px
 const PUSH = 2.6; // repulsion impulse strength
 const SPRING = 0.05; // pull back toward home position
 const DAMP = 0.85; // velocity damping
 const REST_EPS = 0.02; // below this the field is considered settled
 const IDLE_MS = 140; // reform this long after the pointer stops moving
-const EDGE_NOISE = 1.5; // per-dot positional jitter, CSS px — roughens each piece
+const EDGE_NOISE = 0.7; // per-dot positional jitter, CSS px — roughens each piece
 const THRESH_NOISE = 0.08; // grain on the dither on/off boundary
 
 type Stop = { h: number; s: number; l: number; pct: number };
