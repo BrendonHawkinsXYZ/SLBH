@@ -27,9 +27,7 @@ export function HomeSurface() {
         animate={{ opacity: 1 }}
         transition={{ duration: DURATIONS.slow, ease: EASE_OUT, delay: 0.8 }}
       >
-        <div className="field-holder">
-          <FieldSphere />
-        </div>
+        <FieldSphere />
       </motion.div>
 
       {/* ─── Editorial column ─── */}
@@ -129,11 +127,6 @@ export function HomeSurface() {
           align-items: center;
           justify-content: center;
           pointer-events: none;
-        }
-        .field-holder {
-          position: relative;
-          width: min(520px, 92vw);
-          height: min(520px, 92vw);
         }
         .hero-col {
           width: 100%;
