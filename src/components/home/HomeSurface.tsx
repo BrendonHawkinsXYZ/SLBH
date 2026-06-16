@@ -29,14 +29,6 @@ export function HomeSurface() {
       >
         <div className="field-holder">
           <FieldSphere />
-          <motion.div
-            className="field-origin"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.82 }}
-            transition={{ duration: DURATIONS.slow, ease: EASE_OUT, delay: 1.0 }}
-          >
-            <FieldMark size="xl" />
-          </motion.div>
         </div>
       </motion.div>
 
@@ -142,13 +134,6 @@ export function HomeSurface() {
           position: relative;
           width: min(520px, 92vw);
           height: min(520px, 92vw);
-        }
-        .field-origin {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          color: var(--ground);
         }
         .hero-col {
           width: 100%;
