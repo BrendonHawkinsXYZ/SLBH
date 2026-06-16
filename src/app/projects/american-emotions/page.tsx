@@ -201,7 +201,7 @@ export default function AmericanEmotionsPage() {
           <div key={label} className="ae-link-row" style={{ borderTop: i === 0 ? "0.5px solid var(--hairline)" : undefined }}>
             <span
               style={{
-                fontFamily: "var(--font-orbitron), sans-serif",
+                fontFamily: "var(--font-inter), sans-serif",
                 fontWeight: 500,
                 fontSize: 13,
                 letterSpacing: "0.04em",
@@ -245,7 +245,7 @@ export default function AmericanEmotionsPage() {
                 <div className="ae-rel-meta">
                   <span
                     style={{
-                      fontFamily: "var(--font-orbitron), sans-serif",
+                      fontFamily: "var(--font-inter), sans-serif",
                       fontWeight: 500,
                       fontSize: 13,
                       letterSpacing: "0.02em",

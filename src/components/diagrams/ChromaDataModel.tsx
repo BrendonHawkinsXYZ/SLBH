@@ -20,7 +20,7 @@ export function ChromaDataModel() {
         x={centerX}
         y={54}
         fill="var(--signal)"
-        fontFamily="var(--font-orbitron), sans-serif"
+        fontFamily="var(--font-inter), sans-serif"
         fontWeight={500}
         fontSize={16}
         letterSpacing="0.12em"
@@ -33,7 +33,7 @@ export function ChromaDataModel() {
         x={centerX}
         y={130}
         fill="var(--signal)"
-        fontFamily="var(--font-orbitron), sans-serif"
+        fontFamily="var(--font-inter), sans-serif"
         fontWeight={500}
         fontSize={13}
         letterSpacing="0.12em"
@@ -70,7 +70,7 @@ export function ChromaDataModel() {
           x={centerX}
           y={278 + line.dy}
           fill="var(--signal)"
-          fontFamily="var(--font-orbitron), sans-serif"
+          fontFamily="var(--font-inter), sans-serif"
           fontWeight={400}
           fontSize={11}
           letterSpacing="0.1em"
@@ -93,7 +93,7 @@ export function ChromaDataModel() {
         x={centerX}
         y={425}
         fill="var(--signal)"
-        fontFamily="var(--font-orbitron), sans-serif"
+        fontFamily="var(--font-inter), sans-serif"
         fontWeight={500}
         fontSize={13}
         letterSpacing="0.12em"

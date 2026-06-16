@@ -116,7 +116,7 @@ export function Publications() {
           @media (min-width: 768px) { .pub-section { padding-top: 80px; padding-bottom: 80px; } }
           .pub-date { opacity: 0.72; font-size: 11px; }
           .pub-title {
-            font-family: var(--font-orbitron), sans-serif;
+            font-family: var(--font-inter), sans-serif;
             font-weight: 500;
             font-size: clamp(14px, 2vw, 20px);
             letter-spacing: 0;

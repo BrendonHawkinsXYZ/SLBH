@@ -7,7 +7,7 @@ import { Footer } from "@/components/Footer";
 
 const orbitron = Orbitron({
   subsets: ["latin"],
-  weight: ["400", "500"],
+  weight: ["500"],
   variable: "--font-orbitron",
   display: "swap",
 });

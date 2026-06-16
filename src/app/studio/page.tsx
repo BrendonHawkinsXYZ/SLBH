@@ -614,7 +614,7 @@ export default function StudioPage() {
           .st-section-bar { padding: 48px var(--pad-x); }
         }
         .st-section-title {
-          font-family: var(--font-orbitron), sans-serif;
+          font-family: var(--font-inter), sans-serif;
           font-weight: 500;
           font-size: clamp(16px, 2vw, 24px);
           letter-spacing: 0.18em;
@@ -722,7 +722,7 @@ export default function StudioPage() {
           aspect-ratio: 1 / 1;
         }
         .st-compass-label {
-          font-family: var(--font-orbitron), sans-serif;
+          font-family: var(--font-inter), sans-serif;
           font-weight: 500;
           font-size: 11px;
           letter-spacing: 0.14em;
@@ -831,14 +831,14 @@ export default function StudioPage() {
         }
         .st-tenet { display: flex; flex-direction: column; gap: 12px; max-width: 360px; }
         .st-tenet-number {
-          font-family: var(--font-orbitron), sans-serif;
+          font-family: var(--font-inter), sans-serif;
           font-weight: 500;
           font-size: 48px;
           line-height: 1;
           opacity: 0.35;
         }
         .st-tenet-title {
-          font-family: var(--font-orbitron), sans-serif;
+          font-family: var(--font-inter), sans-serif;
           font-weight: 500;
           font-size: 14px;
           letter-spacing: 0.04em;

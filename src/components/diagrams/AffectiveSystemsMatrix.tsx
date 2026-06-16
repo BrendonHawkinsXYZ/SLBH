@@ -69,7 +69,7 @@ export function AffectiveSystemsMatrix() {
         x={VB_W / 2}
         y={36}
         fill="var(--signal)"
-        fontFamily="var(--font-orbitron), sans-serif"
+        fontFamily="var(--font-inter), sans-serif"
         fontWeight={500}
         fontSize={14}
         letterSpacing="0.12em"
@@ -189,7 +189,7 @@ export function AffectiveSystemsMatrix() {
           x={colCX(i)}
           y={hdrCY + 3.5}
           fill="var(--signal)"
-          fontFamily="var(--font-orbitron), sans-serif"
+          fontFamily="var(--font-inter), sans-serif"
           fontWeight={500}
           fontSize={9}
           letterSpacing="0.12em"
@@ -208,7 +208,7 @@ export function AffectiveSystemsMatrix() {
               x={rowLabelCX}
               y={cy + 3.5}
               fill="var(--signal)"
-              fontFamily="var(--font-orbitron), sans-serif"
+              fontFamily="var(--font-inter), sans-serif"
               fontWeight={400}
               fontSize={8}
               letterSpacing="0.1em"
@@ -225,7 +225,7 @@ export function AffectiveSystemsMatrix() {
                     x={cx}
                     y={w2 ? cy - 3 : cy + 3.5}
                     fill="var(--signal)"
-                    fontFamily="var(--font-orbitron), sans-serif"
+                    fontFamily="var(--font-inter), sans-serif"
                     fontWeight={300}
                     fontSize={7}
                     letterSpacing="0.08em"
@@ -238,7 +238,7 @@ export function AffectiveSystemsMatrix() {
                       x={cx}
                       y={cy + 9}
                       fill="var(--signal)"
-                      fontFamily="var(--font-orbitron), sans-serif"
+                      fontFamily="var(--font-inter), sans-serif"
                       fontWeight={300}
                       fontSize={7}
                       letterSpacing="0.08em"
