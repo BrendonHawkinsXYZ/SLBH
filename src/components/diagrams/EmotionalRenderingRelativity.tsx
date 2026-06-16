@@ -44,7 +44,7 @@ export function EmotionalRenderingRelativity() {
         x={VB_W / 2}
         y={54}
         fill="var(--signal)"
-        fontFamily="var(--font-orbitron), sans-serif"
+        fontFamily="var(--font-inter), sans-serif"
         fontWeight={500}
         fontSize={15}
         letterSpacing="0.12em"
@@ -81,7 +81,7 @@ export function EmotionalRenderingRelativity() {
               x={x + tileW / 2}
               y={y + tileW + labelGap}
               fill="var(--signal)"
-              fontFamily="var(--font-orbitron), sans-serif"
+              fontFamily="var(--font-inter), sans-serif"
               fontWeight={500}
               fontSize={8}
               letterSpacing="0.14em"

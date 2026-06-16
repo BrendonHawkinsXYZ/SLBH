@@ -137,7 +137,7 @@ export default function ResearchPage() {
         }
         .rpi-date { opacity: 0.72; font-size: 11px; }
         .rpi-title {
-          font-family: var(--font-orbitron), sans-serif;
+          font-family: var(--font-inter), sans-serif;
           font-weight: 500;
           font-size: clamp(14px, 2vw, 20px);
           line-height: 1.25;

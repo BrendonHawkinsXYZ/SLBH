@@ -288,7 +288,7 @@ export default async function PaperPage({
         }
         .rp-action--disabled:hover { opacity: 0.35; }
         .rp-action-label {
-          font-family: var(--font-orbitron), sans-serif;
+          font-family: var(--font-inter), sans-serif;
           font-weight: 500;
           font-size: clamp(16px, 2.4vw, 22px);
           letter-spacing: 0.04em;
@@ -297,7 +297,7 @@ export default async function PaperPage({
           font-size: clamp(20px, 3vw, 28px);
         }
         .rp-action-arrow {
-          font-family: var(--font-orbitron), sans-serif;
+          font-family: var(--font-inter), sans-serif;
           font-size: clamp(20px, 3vw, 28px);
         }
 
@@ -348,7 +348,7 @@ export default async function PaperPage({
         }
         .rp-related-date { opacity: 0.72; font-size: 11px; }
         .rp-related-title {
-          font-family: var(--font-orbitron), sans-serif;
+          font-family: var(--font-inter), sans-serif;
           font-weight: 500;
           font-size: clamp(14px, 2vw, 18px);
           line-height: 1.25;

@@ -53,7 +53,7 @@ export function IterationTimeline() {
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             <span
               style={{
-                fontFamily: "var(--font-orbitron), sans-serif",
+                fontFamily: "var(--font-inter), sans-serif",
                 fontWeight: 500,
                 fontSize: 13,
                 letterSpacing: "0.04em",
@@ -74,7 +74,7 @@ export function IterationTimeline() {
 
           <span
             style={{
-              fontFamily: "var(--font-orbitron), sans-serif",
+              fontFamily: "var(--font-inter), sans-serif",
               fontSize: 9,
               letterSpacing: "0.14em",
               border: "1px solid var(--hairline-strong)",

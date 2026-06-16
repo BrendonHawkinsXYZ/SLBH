@@ -190,7 +190,7 @@ export function ProjectIndex({ projects }: { projects: Project[] }) {
         .proj-col-idx  { width: 60px;  flex-shrink: 0; font-size: 11px; }
         .proj-col-name {
           flex: 1;
-          font-family: var(--font-orbitron), sans-serif;
+          font-family: var(--font-inter), sans-serif;
           font-weight: 500;
           font-size: 22px;
           letter-spacing: -0.01em;

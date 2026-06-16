@@ -218,7 +218,7 @@ export default function ConvergentGrammarPage() {
           >
             <span
               style={{
-                fontFamily: "var(--font-orbitron), sans-serif",
+                fontFamily: "var(--font-inter), sans-serif",
                 fontWeight: 500,
                 fontSize: 13,
                 letterSpacing: "0.04em",
@@ -261,7 +261,7 @@ export default function ConvergentGrammarPage() {
                 <div className="cg-rel-meta">
                   <span
                     style={{
-                      fontFamily: "var(--font-orbitron), sans-serif",
+                      fontFamily: "var(--font-inter), sans-serif",
                       fontWeight: 500,
                       fontSize: 13,
                       letterSpacing: "0.02em",

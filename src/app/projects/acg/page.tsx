@@ -457,7 +457,7 @@ export default function ACGPage() {
           >
             <span
               style={{
-                fontFamily: "var(--font-orbitron), sans-serif",
+                fontFamily: "var(--font-inter), sans-serif",
                 fontWeight: 500,
                 fontSize: 13,
                 letterSpacing: "0.04em",
@@ -500,7 +500,7 @@ export default function ACGPage() {
                 <div className="acg-rel-meta">
                   <span
                     style={{
-                      fontFamily: "var(--font-orbitron), sans-serif",
+                      fontFamily: "var(--font-inter), sans-serif",
                       fontWeight: 500,
                       fontSize: 13,
                       letterSpacing: "0.02em",
