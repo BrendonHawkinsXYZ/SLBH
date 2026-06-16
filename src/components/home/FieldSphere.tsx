@@ -38,8 +38,8 @@ function makePalette(): Palette {
   const base = Math.random() * 360;
   const stops = Array.from({ length: 6 }, (_, i) => {
     const h = (((base + i * 50 + (Math.random() - 0.5) * 22) % 360) + 360) % 360;
-    const s = 38 + Math.random() * 28;
-    const l = 63 + Math.random() * 17;
+    const s = 52 + Math.random() * 30;
+    const l = 48 + Math.random() * 16;
     return { h, s, l, pct: i * (96 / 5) };
   });
   return { stops, cx: 18 + Math.random() * 56, cy: 10 + Math.random() * 56 };
