@@ -1,29 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import { motion } from "motion/react";
 import { FieldMark } from "@/components/FieldMark";
+import { FieldSphere } from "@/components/home/FieldSphere";
 import { revealVariants, revealTransition, EASE_OUT, DURATIONS } from "@/lib/motion";
 
-const BASE_RADIUS = 520;
-
-function randomGradient(): string {
-  const base = Math.random() * 360;
-  const stops = Array.from({ length: 6 }, (_, i) => {
-    const h = (base + i * 50 + (Math.random() - 0.5) * 22) % 360;
-    const s = 38 + Math.random() * 28;
-    const l = 63 + Math.random() * 17;
-    const pct = Math.round(i * (96 / 5));
-    return `hsl(${Math.round((h + 360) % 360)},${Math.round(s)}%,${Math.round(l)}%) ${pct}%`;
-  });
-  const cx = 18 + Math.random() * 56;
-  const cy = 10 + Math.random() * 56;
-  return `radial-gradient(circle at ${Math.round(cx)}% ${Math.round(cy)}%, ${stops.join(", ")})`;
-}
-
 export function HomeSurface() {
-  const [gradient] = useState(randomGradient);
   return (
     <section
       style={{
@@ -35,51 +18,26 @@ export function HomeSurface() {
         alignItems: "center",
       }}
     >
-      {/* ─── Field ─── */}
+      {/* ─── Field (dithered sphere + origin mark) ───
+          Centered on mobile; shifted into the empty right column on desktop. */}
       <motion.div
         aria-hidden
+        className="field-wrap"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: DURATIONS.slow, ease: EASE_OUT, delay: 0.8 }}
-        style={{
-          position: "absolute",
-          inset: 0,
-          zIndex: 0,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          pointerEvents: "none",
-        }}
       >
-        <div
-          className="field-pulse"
-          style={{
-            width: "min(520px, 92vw)",
-            height: "min(520px, 92vw)",
-            borderRadius: "50%",
-            background: gradient,
-            willChange: "transform",
-          }}
-        />
-      </motion.div>
-
-      {/* ─── Origin mark ─── */}
-      <motion.div
-        aria-hidden
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.9 }}
-        transition={{ duration: DURATIONS.slow, ease: EASE_OUT, delay: 1.0 }}
-        style={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          zIndex: 1,
-          mixBlendMode: "screen",
-          color: "var(--signal)",
-        }}
-      >
-        <FieldMark size="xl" />
+        <div className="field-holder">
+          <FieldSphere />
+          <motion.div
+            className="field-origin"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.82 }}
+            transition={{ duration: DURATIONS.slow, ease: EASE_OUT, delay: 1.0 }}
+          >
+            <FieldMark size="xl" />
+          </motion.div>
+        </div>
       </motion.div>
 
       {/* ─── Editorial column ─── */}
@@ -171,12 +129,37 @@ export function HomeSurface() {
       </div>
 
       <style>{`
+        .field-wrap {
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          pointer-events: none;
+        }
+        .field-holder {
+          position: relative;
+          width: min(520px, 92vw);
+          height: min(520px, 92vw);
+        }
+        .field-origin {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          color: var(--ground);
+        }
         .hero-col {
           width: 100%;
           max-width: 560px;
         }
         @media (min-width: 640px) {
           .hero-col { width: min(48%, 560px); }
+          .field-wrap {
+            justify-content: flex-end;
+            padding-right: clamp(16px, 7vw, 96px);
+          }
         }
       `}</style>
     </section>
