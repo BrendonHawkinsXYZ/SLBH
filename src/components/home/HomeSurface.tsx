@@ -124,9 +124,13 @@ export function HomeSurface() {
           inset: 0;
           z-index: 0;
           display: flex;
-          align-items: center;
+          align-items: flex-start; /* mobile: lift the field toward the top */
           justify-content: center;
           pointer-events: none;
+        }
+        .field-wrap canvas {
+          opacity: 0.4; /* mobile: dim so the text reads */
+          margin-top: -10vh; /* mobile: lift the disc up behind the headline */
         }
         .hero-col {
           width: 100%;
@@ -135,9 +139,11 @@ export function HomeSurface() {
         @media (min-width: 640px) {
           .hero-col { width: min(48%, 560px); }
           .field-wrap {
+            align-items: center; /* desktop: restore vertical centering */
             justify-content: flex-end;
             padding-right: clamp(16px, 7vw, 96px);
           }
+          .field-wrap canvas { opacity: 1; margin-top: 0; } /* desktop: full vivid */
         }
       `}</style>
     </section>
