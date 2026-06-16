@@ -5,39 +5,31 @@ import { useEffect, useRef } from "react";
 /**
  * FieldSphere — the hero "Field".
  *
- * A radial colour field (random hue on every load) rendered as a tight,
- * ordered (Bayer 8×8) dither of small coloured dots. Moving the pointer over
- * it repels the dots near the cursor; they spring back home and reform the
- * circle when the pointer moves away.
+ * A circular pixel mosaic: a dense grid of small coloured squares sampled from
+ * a radial gradient (random hue on every load). Reads as a solid disc at a
+ * glance and resolves into individual pixels up close. Moving the pointer over
+ * it repels nearby pixels; they spring back home and reform the circle.
  *
  * Canvas 2D, no dependencies. The render loop only runs while the field is
  * disturbed and stops once everything has settled. Honours the brand
- * `field-pulse` (applied via className) and `prefers-reduced-motion`
- * (static dither, no interaction).
+ * `field-pulse` (via className) and `prefers-reduced-motion` (static, no
+ * interaction).
  */
 
-/** Ordered 8×8 Bayer matrix — thresholds normalise to (0, 1). */
-const BAYER8 = [
-  [0, 48, 12, 60, 3, 51, 15, 63],
-  [32, 16, 44, 28, 35, 19, 47, 31],
-  [8, 56, 4, 52, 11, 59, 7, 55],
-  [40, 24, 36, 20, 43, 27, 39, 23],
-  [2, 50, 14, 62, 1, 49, 13, 61],
-  [34, 18, 46, 30, 33, 17, 45, 29],
-  [10, 58, 6, 54, 9, 57, 5, 53],
-  [42, 26, 38, 22, 41, 25, 37, 21],
-];
+const BASE_CELL = 2.2; // smallest pixel cell, CSS px
+const MAX_DOTS = 38000; // perf ceiling — the cell grows on big canvases to hold this
+const DOT_RATIO = 0.82; // pixel size as a fraction of the cell (the rest is the gap)
+const MARGIN = 36; // inset from the canvas box so the disc + disruption never clip
+const EDGE0 = 0.975; // soft-edge feather starts here (fraction of the radius)
+const EDGE_NOISE = 0.5; // per-pixel jitter, CSS px — keeps the rim from being a sterile lattice
 
-const CELL = 2; // dither cell, CSS px — small keeps the dither tight
-const DOT = 1.3; // drawn dot, CSS px (< CELL leaves the stipple gaps)
-const INFLUENCE = 72; // pointer disruption radius, CSS px
+// Pointer "gravity" — unchanged feel.
+const INFLUENCE = 72; // disruption radius, CSS px
 const PUSH = 2.6; // repulsion impulse strength
-const SPRING = 0.05; // pull back toward home position
+const SPRING = 0.05; // pull back toward home
 const DAMP = 0.85; // velocity damping
 const REST_EPS = 0.02; // below this the field is considered settled
 const IDLE_MS = 140; // reform this long after the pointer stops moving
-const EDGE_NOISE = 0.7; // per-dot positional jitter, CSS px — roughens each piece
-const THRESH_NOISE = 0.08; // grain on the dither on/off boundary
 
 type Stop = { h: number; s: number; l: number; pct: number };
 type Palette = { stops: Stop[]; cx: number; cy: number };
@@ -67,7 +59,7 @@ export function FieldSphere() {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const palette = makePalette();
 
-    // Per-dot state (reordered + grouped by colour for cheap draws).
+    // Per-pixel state (reordered + grouped by colour for cheap draws).
     let hx = new Float32Array(0); // home x / y
     let hy = new Float32Array(0);
     let ox = new Float32Array(0); // live offset from home
@@ -78,6 +70,7 @@ export function FieldSphere() {
     let groupStart: number[] = [];
     let count = 0;
     let size = 0; // CSS px (square)
+    let dotSize = BASE_CELL * DOT_RATIO;
 
     const pointer = { x: -9999, y: -9999, active: false, lastMove: 0 };
     let raf = 0;
@@ -90,6 +83,11 @@ export function FieldSphere() {
       canvas.width = Math.round(size * dpr);
       canvas.height = Math.round(size * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      // Adaptive cell: shrink to BASE_CELL on small canvases, grow just enough
+      // on large ones to stay under the pixel budget.
+      const cell = Math.max(BASE_CELL, Math.sqrt(((Math.PI / 4) * size * size) / MAX_DOTS));
+      dotSize = cell * DOT_RATIO;
 
       // Paint the radial gradient offscreen so we can sample per-cell colour.
       const off = document.createElement("canvas");
@@ -111,45 +109,38 @@ export function FieldSphere() {
       octx.fillStyle = grad;
       octx.fillRect(0, 0, off.width, off.height);
       const data = octx.getImageData(0, 0, off.width, off.height).data;
-      const sample = off.width / size;
+      const samp = off.width / size;
 
       const center = size / 2;
-      const radius = size / 2;
-      const cols = Math.ceil(size / CELL);
+      const radius = size / 2 - MARGIN;
+      const cols = Math.ceil(size / cell);
 
       const tmpX: number[] = [];
       const tmpY: number[] = [];
       const tmpCol: string[] = [];
       for (let j = 0; j < cols; j++) {
         for (let i = 0; i < cols; i++) {
-          const x = i * CELL + CELL / 2;
-          const y = j * CELL + CELL / 2;
+          const x = i * cell + cell / 2;
+          const y = j * cell + cell / 2;
           const d = Math.hypot(x - center, y - center) / radius;
-          if (d > 1.06) continue;
+          if (d > 1) continue; // every cell inside the disc is filled — no dropout
 
-          const sx = Math.min(off.width - 1, Math.floor(x * sample));
-          const sy = Math.min(off.height - 1, Math.floor(y * sample));
+          const sx = Math.min(off.width - 1, Math.floor(x * samp));
+          const sy = Math.min(off.height - 1, Math.floor(y * samp));
           const p = (sy * off.width + sx) * 4;
           const r = data[p];
           const g = data[p + 1];
           const b = data[p + 2];
 
-          // Density: solid core, dithered rim, sparser where the field is
-          // lighter — this is what ties the dither to the colour.
-          const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-          const radial = Math.min(1, Math.max(0, (1.06 - d) / 0.26));
-          const coverage = radial * (1 - 0.5 * lum);
-          // Ordered threshold + a little noise so edges grain rather than
-          // breaking on a clean ordered boundary.
-          const threshold =
-            (BAYER8[j & 7][i & 7] + 0.5) / 64 + (Math.random() - 0.5) * THRESH_NOISE;
-          if (coverage <= threshold) continue;
+          // Soft anti-aliased rim (a quantised alpha feather, not a dither).
+          let a = d <= EDGE0 ? 1 : (1 - d) / (1 - EDGE0);
+          a = Math.round(a * 5) / 5;
+          if (a <= 0) continue;
 
-          // Jitter each piece off its grid cell so its edges read as noisy.
+          // A touch of jitter so the rim doesn't read as a perfect lattice.
           tmpX.push(x + (Math.random() - 0.5) * 2 * EDGE_NOISE);
           tmpY.push(y + (Math.random() - 0.5) * 2 * EDGE_NOISE);
-          // Quantise colour (steps of 8) so dots batch into few draw groups.
-          tmpCol.push(`rgb(${r & 0xf8},${g & 0xf8},${b & 0xf8})`);
+          tmpCol.push(`rgba(${r & 0xf8},${g & 0xf8},${b & 0xf8},${a})`);
         }
       }
 
@@ -186,12 +177,12 @@ export function FieldSphere() {
 
     function draw() {
       ctx.clearRect(0, 0, size, size);
-      const half = DOT / 2;
+      const half = dotSize / 2;
       for (let g = 0; g < groupColor.length; g++) {
         ctx.fillStyle = groupColor[g];
         const end = groupStart[g + 1];
         for (let k = groupStart[g]; k < end; k++) {
-          ctx.fillRect(hx[k] + ox[k] - half, hy[k] + oy[k] - half, DOT, DOT);
+          ctx.fillRect(hx[k] + ox[k] - half, hy[k] + oy[k] - half, dotSize, dotSize);
         }
       }
     }
@@ -298,8 +289,8 @@ export function FieldSphere() {
       aria-hidden
       className="field-pulse"
       style={{
-        width: "min(520px, 92vw)",
-        height: "min(520px, 92vw)",
+        width: "min(600px, 94vw)",
+        height: "min(600px, 94vw)",
         display: "block",
       }}
     />
