@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 
 function formatClock(date: Date) {
@@ -90,6 +91,7 @@ function getCityFromTimezone(): string {
 }
 
 export function StatusBar() {
+  const pathname = usePathname();
   const [clock, setClock] = useState<string | null>(null);
   const [city, setCity] = useState<string | null>(null);
 
@@ -101,6 +103,9 @@ export function StatusBar() {
     }, 1000);
     return () => window.clearInterval(id);
   }, []);
+
+  // The home hero owns the top of the screen — the strip lives on every other route.
+  if (pathname === "/") return null;
 
   return (
     <div
@@ -122,7 +127,7 @@ export function StatusBar() {
         className="t-mono status-pub"
         style={{ color: "var(--ground)", opacity: 0.72, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
       >
-        EMOTION AS SYSTEM · PREPRINT
+        GLOBAL EMOTIONS · LIVE INSTRUMENT
       </span>
 
       <span style={{ marginLeft: "auto", display: "flex", gap: 16, alignItems: "center", flexShrink: 0 }}>
@@ -145,7 +150,9 @@ export function StatusBar() {
           {city ?? ""}
         </span>
         <Link
-          href="/research/emotion-as-system"
+          href="https://globalemotions.studiolabbh.xyz/"
+          target="_blank"
+          rel="noopener noreferrer"
           className="t-mono link-quiet status-read"
           style={{
             color: "var(--ground)",
@@ -154,7 +161,7 @@ export function StatusBar() {
             textUnderlineOffset: 3,
           }}
         >
-          READ PAPER ↗︎
+          VIEW LIVE ↗︎
         </Link>
       </span>
 
