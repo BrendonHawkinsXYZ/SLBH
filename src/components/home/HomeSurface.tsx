@@ -52,6 +52,8 @@ export function HomeSurface() {
             WHAT DOES EMOTION LOOK LIKE?
           </motion.h1>
 
+          <div className="hero-spacer" aria-hidden />
+
           <div className="hero-lower">
             <motion.p
               initial={{ opacity: 0, y: 6 }}
@@ -174,6 +176,10 @@ export function HomeSurface() {
           align-items: flex-start;
         }
 
+        .hero-spacer {
+          display: none;
+        }
+
         .hero-body {
           margin: 28px 0 0;
           max-width: 460px;
@@ -197,7 +203,7 @@ export function HomeSurface() {
           display: inline-block;
           padding: 16px 32px;
           border: 1px solid var(--ground);
-          border-radius: 40px;
+          border-radius: 0;
           text-decoration: none;
           font-size: 10.5px;
           letter-spacing: 0.18em;
@@ -220,11 +226,11 @@ export function HomeSurface() {
           .hero-cta { margin-top: 50px; }
         }
 
-        /* Mobile: headline pinned top, body + side-by-side buttons pinned bottom. */
+        /* Mobile: the centred column wraps the centred shape — the headline
+           sits just above it and the body + side-by-side buttons just below.
+           A spacer reserves the shape's footprint between the two groups. */
         @media (max-width: 767px) {
-          .hero-section { align-items: stretch; }
-          .hero-pad { display: flex; flex-direction: column; }
-          .hero-col { flex: 1; justify-content: space-between; }
+          .hero-spacer { display: block; height: 72vw; }
           .hero-body { margin-top: 0; }
           .hero-cta {
             width: 100%;
