@@ -46,7 +46,7 @@ export function HomeSurface() {
             variants={revealVariants}
             transition={{ duration: DURATIONS.base, ease: EASE_OUT, delay: 1.0 }}
           >
-            WHAT DOES FEELING LOOK LIKE?
+            WHAT DOES EMOTION LOOK LIKE?
           </motion.h1>
 
           <motion.p
