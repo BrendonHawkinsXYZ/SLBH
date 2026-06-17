@@ -203,7 +203,7 @@ export function HomeSurface() {
           display: inline-block;
           padding: 16px 32px;
           border: 1px solid var(--ground);
-          border-radius: 40px;
+          border-radius: 0;
           text-decoration: none;
           font-size: 10.5px;
           letter-spacing: 0.18em;
