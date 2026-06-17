@@ -46,7 +46,7 @@ export function HomeSurface() {
             variants={revealVariants}
             transition={{ duration: DURATIONS.base, ease: EASE_OUT, delay: 1.0 }}
           >
-            Every feeling is a coordinate.
+            EVERY FEELING IS A COORDINATE.
           </motion.h1>
 
           <motion.p
@@ -56,8 +56,7 @@ export function HomeSurface() {
             className="t-body-lg hero-body"
           >
             Studio Lab BH is a systems research lab building computational
-            models, instruments, and environments for affect — the invisible
-            architecture of human experience.
+            models for affect.
           </motion.p>
 
           <motion.div
