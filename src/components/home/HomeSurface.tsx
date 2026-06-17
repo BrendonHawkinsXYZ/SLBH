@@ -35,7 +35,7 @@ export function HomeSurface() {
 
       {/* ─── Editorial column — a left-aligned mass that owns the screen ─── */}
       <div
-        className="container-page"
+        className="hero-pad"
         style={{ position: "relative", zIndex: 2, width: "100%" }}
       >
         <div className="hero-col">
@@ -46,7 +46,7 @@ export function HomeSurface() {
             variants={revealVariants}
             transition={{ duration: DURATIONS.base, ease: EASE_OUT, delay: 1.0 }}
           >
-            Every feeling is a coordinate.
+            WHAT DOES EMOTION LOOK LIKE?
           </motion.h1>
 
           <motion.p
@@ -56,8 +56,7 @@ export function HomeSurface() {
             className="t-body-lg hero-body"
           >
             Studio Lab BH is a systems research lab building computational
-            models, instruments, and environments for affect — the invisible
-            architecture of human experience.
+            models and instruments for affect.
           </motion.p>
 
           <motion.div
@@ -122,6 +121,13 @@ export function HomeSurface() {
           }
         }
 
+        .hero-pad {
+          padding-inline: var(--pad-x-mobile);
+        }
+        @media (min-width: 768px) {
+          .hero-pad { padding-inline: var(--pad-x); }
+        }
+
         .field-wrap {
           position: absolute;
           inset: 0;
@@ -154,9 +160,9 @@ export function HomeSurface() {
             background: linear-gradient(
               180deg,
               rgba(243, 242, 242, 0) 0%,
-              rgba(243, 242, 242, 0.72) 20%,
-              rgba(243, 242, 242, 0.90) 50%,
-              rgba(243, 242, 242, 0.72) 80%,
+              rgba(243, 242, 242, 0.28) 18%,
+              rgba(243, 242, 242, 0.52) 50%,
+              rgba(243, 242, 242, 0.28) 82%,
               rgba(243, 242, 242, 0) 100%
             );
           }
@@ -173,12 +179,11 @@ export function HomeSurface() {
         .hero-headline {
           margin: 0;
           max-width: 12ch;
-          font-family: var(--font-inter), sans-serif;
+          font-family: var(--font-orbitron), sans-serif;
           font-weight: 700;
-          font-size: clamp(46px, 10.5vw, 116px);
-          line-height: 0.95;
-          letter-spacing: -0.02em;
-          text-wrap: balance;
+          font-size: clamp(36px, 9vw, 104px);
+          line-height: 1;
+          letter-spacing: 0;
           text-shadow: 0 2px 36px rgba(243, 242, 242, 0.5);
         }
 
