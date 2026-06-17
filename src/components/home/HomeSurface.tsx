@@ -46,7 +46,7 @@ export function HomeSurface() {
             variants={revealVariants}
             transition={{ duration: DURATIONS.base, ease: EASE_OUT, delay: 1.0 }}
           >
-            EVERY EMOTION HAS A SHAPE.
+            WHAT DOES FEELING LOOK LIKE?
           </motion.h1>
 
           <motion.p
@@ -56,7 +56,7 @@ export function HomeSurface() {
             className="t-body-lg hero-body"
           >
             Studio Lab BH is a systems research lab building computational
-            models for affect.
+            models and instruments for affect.
           </motion.p>
 
           <motion.div
