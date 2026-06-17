@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { motion } from "motion/react";
 import { FieldSphere } from "@/components/home/FieldSphere";
-import { revealVariants, revealTransition, EASE_OUT, DURATIONS } from "@/lib/motion";
+import { revealVariants, EASE_OUT, DURATIONS } from "@/lib/motion";
 
 export function HomeSurface() {
   return (
@@ -30,10 +30,13 @@ export function HomeSurface() {
         <FieldSphere />
       </motion.div>
 
-      {/* ─── Legibility scrim: a soft paper wash so the statement + sub-text read over the field ─── */}
+      {/* ─── Legibility scrim: follows where the type sits (centre on desktop's left,
+          top + bottom on mobile) so the shape stays vivid where the text isn't. ─── */}
       <div aria-hidden className="hero-scrim" />
 
-      {/* ─── Editorial column — a left-aligned mass that owns the screen ─── */}
+      {/* ─── Editorial column. On desktop it's a left-aligned mass centred in the
+          viewport; on mobile the headline pins to the top and the body + buttons
+          drop to the bottom, leaving the shape clear in the middle. ─── */}
       <div
         className="hero-pad"
         style={{ position: "relative", zIndex: 2, width: "100%" }}
@@ -49,61 +52,39 @@ export function HomeSurface() {
             WHAT DOES EMOTION LOOK LIKE?
           </motion.h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: DURATIONS.base, ease: EASE_OUT, delay: 1.5 }}
-            className="t-body-lg hero-body"
-          >
-            Studio Lab BH is a systems research lab building computational
-            models and instruments for affect.
-          </motion.p>
+          <div className="hero-lower">
+            <motion.p
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: DURATIONS.base, ease: EASE_OUT, delay: 1.5 }}
+              className="t-body-lg hero-body"
+            >
+              Studio Lab BH is a systems research lab building computational
+              models and instruments for affect.
+            </motion.p>
 
-          <motion.div
-            className="hero-cta"
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: DURATIONS.base, ease: EASE_OUT, delay: 1.8 }}
-          >
-            <Link
-              href="/research/emotion-as-system"
-              className="t-nav link-quiet"
-              style={{
-                background: "var(--ground)",
-                color: "var(--signal)",
-                border: "1px solid var(--ground)",
-                padding: "16px 32px",
-                borderRadius: 40,
-                textDecoration: "none",
-                display: "inline-block",
-                letterSpacing: "0.18em",
-                fontSize: 10.5,
-              }}
+            <motion.div
+              className="hero-cta"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: DURATIONS.base, ease: EASE_OUT, delay: 1.8 }}
             >
-              Read the paper
-            </Link>
-            <Link
-              href="https://globalemotions.studiolabbh.xyz/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="t-nav link-quiet"
-              style={{
-                background: "rgba(243, 242, 242, 0.55)",
-                backdropFilter: "blur(6px)",
-                WebkitBackdropFilter: "blur(6px)",
-                color: "var(--ground)",
-                border: "1px solid var(--ground)",
-                padding: "16px 32px",
-                borderRadius: 40,
-                textDecoration: "none",
-                display: "inline-block",
-                letterSpacing: "0.18em",
-                fontSize: 10.5,
-              }}
-            >
-              See the work
-            </Link>
-          </motion.div>
+              <Link
+                href="/research/emotion-as-system"
+                className="t-nav link-quiet hero-pill hero-pill-solid"
+              >
+                Read the paper
+              </Link>
+              <Link
+                href="https://globalemotions.studiolabbh.xyz/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="t-nav link-quiet hero-pill hero-pill-ghost"
+              >
+                See the work
+              </Link>
+            </motion.div>
+          </div>
         </div>
       </div>
 
@@ -138,8 +119,7 @@ export function HomeSurface() {
           pointer-events: none;
         }
 
-        /* Desktop: lift the left column where the (left-aligned) type lives,
-           so the centred shape still reads vividly on the right. */
+        /* Desktop: left-anchored wash for the left-aligned type; shape vivid on the right. */
         .hero-scrim {
           position: absolute;
           inset: 0;
@@ -153,17 +133,17 @@ export function HomeSurface() {
             rgba(243, 242, 242, 0) 70%
           );
         }
-        /* Mobile: the type is full-width, so wash a vertical band through the
-           centre (where the text sits) and let the shape show top + bottom. */
+        /* Mobile: type lives top + bottom, so wash those and keep the centre (shape) clear. */
         @media (max-width: 767px) {
           .hero-scrim {
             background: linear-gradient(
               180deg,
-              rgba(243, 242, 242, 0) 0%,
-              rgba(243, 242, 242, 0.28) 18%,
-              rgba(243, 242, 242, 0.52) 50%,
-              rgba(243, 242, 242, 0.28) 82%,
-              rgba(243, 242, 242, 0) 100%
+              rgba(243, 242, 242, 0.55) 0%,
+              rgba(243, 242, 242, 0.30) 24%,
+              rgba(243, 242, 242, 0) 44%,
+              rgba(243, 242, 242, 0) 56%,
+              rgba(243, 242, 242, 0.34) 76%,
+              rgba(243, 242, 242, 0.66) 100%
             );
           }
         }
@@ -187,6 +167,13 @@ export function HomeSurface() {
           text-shadow: 0 2px 36px rgba(243, 242, 242, 0.5);
         }
 
+        .hero-lower {
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
         .hero-body {
           margin: 28px 0 0;
           max-width: 460px;
@@ -206,9 +193,52 @@ export function HomeSurface() {
           gap: 14px;
         }
 
+        .hero-pill {
+          display: inline-block;
+          padding: 16px 32px;
+          border: 1px solid var(--ground);
+          border-radius: 40px;
+          text-decoration: none;
+          font-size: 10.5px;
+          letter-spacing: 0.18em;
+          text-align: center;
+          white-space: nowrap;
+        }
+        .hero-pill-solid {
+          background: var(--ground);
+          color: var(--signal);
+        }
+        .hero-pill-ghost {
+          background: rgba(243, 242, 242, 0.55);
+          backdrop-filter: blur(6px);
+          -webkit-backdrop-filter: blur(6px);
+          color: var(--ground);
+        }
+
         @media (min-width: 768px) {
           .hero-body { margin-top: 34px; }
           .hero-cta { margin-top: 50px; }
+        }
+
+        /* Mobile: headline pinned top, body + side-by-side buttons pinned bottom. */
+        @media (max-width: 767px) {
+          .hero-section { align-items: stretch; }
+          .hero-pad { display: flex; flex-direction: column; }
+          .hero-col { flex: 1; justify-content: space-between; }
+          .hero-body { margin-top: 0; }
+          .hero-cta {
+            width: 100%;
+            flex-wrap: nowrap;
+            gap: 10px;
+            margin-top: 22px;
+          }
+          .hero-pill {
+            flex: 1 1 0;
+            min-width: 0;
+            padding: 14px 10px;
+            font-size: 10px;
+            letter-spacing: 0.1em;
+          }
         }
       `}</style>
     </section>
