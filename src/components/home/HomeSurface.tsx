@@ -46,7 +46,7 @@ export function HomeSurface() {
             variants={revealVariants}
             transition={{ duration: DURATIONS.base, ease: EASE_OUT, delay: 1.0 }}
           >
-            EVERY FEELING IS A COORDINATE.
+            EVERY EMOTION HAS A SHAPE.
           </motion.h1>
 
           <motion.p
