@@ -1,13 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  SHAPE_CATALOG,
+  SHAPE_FAMILIES,
+  PRESETS,
+  MODIFIER_SPECS,
+  DEFAULT_MODIFIERS,
+  defaultValues,
+  familyById,
+  resolveShape,
   makePalette,
   renderShapeField,
   type Background,
+  type Modifiers,
   type Palette,
-  type ShapeDef,
+  type ParamSpec,
+  type ParamValues,
+  type Preset,
 } from "@/lib/shapeField";
 
 const BACKGROUNDS: { id: Background; label: string }[] = [
@@ -18,54 +27,139 @@ const BACKGROUNDS: { id: Background; label: string }[] = [
 
 const EXPORT_SIZES = [500, 1000];
 
+// Preset quick-starts, grouped for the chip row.
+const PRESET_GROUPS = ["Basic", "Polygon", "Rounded", "Organic", "Star"].map((group) => ({
+  group,
+  presets: PRESETS.filter((preset) => preset.group === group),
+}));
+
+function formatValue(spec: ParamSpec, v: number): string {
+  if (spec.id === "rotation") return `${Math.round(v)}°`;
+  if (spec.integer) return String(Math.round(v));
+  return v.toFixed(2);
+}
+
+function Dial({
+  spec,
+  value,
+  onChange,
+}: {
+  spec: ParamSpec;
+  value: number;
+  onChange: (v: number) => void;
+}) {
+  return (
+    <label className="shp-dial">
+      <span className="shp-dial-head">
+        <span className="shp-dial-label">{spec.label}</span>
+        <span className="t-mono shp-dial-val">{formatValue(spec, value)}</span>
+      </span>
+      <input
+        type="range"
+        min={spec.min}
+        max={spec.max}
+        step={spec.step}
+        value={value}
+        onChange={(e) => onChange(parseFloat(e.target.value))}
+      />
+    </label>
+  );
+}
+
 export function ShapesStudio() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  const [shapeId, setShapeId] = useState<string>(SHAPE_CATALOG[0].id);
+  const [familyId, setFamilyId] = useState<string>("round");
+  const [values, setValues] = useState<ParamValues>(() => defaultValues("round"));
+  const [modifiers, setModifiers] = useState<Modifiers>(DEFAULT_MODIFIERS);
   // Lazy init so the first paint already has a fresh colour (client-side random;
   // never rendered into the DOM, so no hydration mismatch).
   const [palette, setPalette] = useState<Palette>(() => makePalette());
   const [background, setBackground] = useState<Background>("white");
 
-  const shape: ShapeDef = SHAPE_CATALOG.find((s) => s.id === shapeId) ?? SHAPE_CATALOG[0];
+  const family = familyById(familyId);
+  const shape = useMemo(
+    () => resolveShape(familyId, values, modifiers),
+    [familyId, values, modifiers],
+  );
 
-  // ── Live preview: redraw on any change, and on resize, at device resolution. ──
+  // ── Live preview: redraw on any change, and on resize, at device resolution.
+  //    rAF-coalesced so dragging a slider never queues more than one frame. ──
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    let raf = 0;
     const render = () => {
+      raf = 0;
       const cssSize = canvas.clientWidth;
       if (cssSize <= 0) return;
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = Math.round(cssSize * dpr);
       canvas.height = Math.round(cssSize * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      renderShapeField(ctx, cssSize, palette, shape, background);
+      renderShapeField(ctx, cssSize, palette, shape, background, modifiers.pixelScale);
+    };
+    const schedule = () => {
+      if (!raf) raf = requestAnimationFrame(render);
     };
 
-    render();
-    const ro = new ResizeObserver(render);
+    schedule();
+    const ro = new ResizeObserver(schedule);
     ro.observe(canvas);
-    return () => ro.disconnect();
-  }, [palette, shape, background]);
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
+  }, [shape, palette, background, modifiers.pixelScale]);
+
+  const setParam = useCallback((id: string, v: number) => {
+    setValues((prev) => ({ ...prev, [id]: v }));
+  }, []);
+
+  const setModifier = useCallback((id: string, v: number) => {
+    setModifiers((prev) => ({ ...prev, [id]: v }));
+  }, []);
+
+  const selectFamily = useCallback((id: string) => {
+    setFamilyId(id);
+    setValues(defaultValues(id)); // keep modifiers so a hollow/stretch carries over
+  }, []);
+
+  const applyPreset = useCallback((preset: Preset) => {
+    setFamilyId(preset.familyId);
+    setValues({ ...defaultValues(preset.familyId), ...(preset.values ?? {}) });
+    setModifiers({ ...DEFAULT_MODIFIERS, ...(preset.modifiers ?? {}) });
+  }, []);
 
   const randomizeColors = useCallback(() => setPalette(makePalette()), []);
 
-  const randomShape = useCallback(() => {
-    setShapeId((current) => {
-      let next = current;
-      while (next === current && SHAPE_CATALOG.length > 1) {
-        next = SHAPE_CATALOG[Math.floor(Math.random() * SHAPE_CATALOG.length)].id;
-      }
-      return next;
-    });
+  // Roll a whole new shape: random family, random dials, mild random modifiers —
+  // the discovery button for novel, often non-geometric, forms.
+  const randomizeShape = useCallback(() => {
+    const fam = SHAPE_FAMILIES[Math.floor(Math.random() * SHAPE_FAMILIES.length)];
+    const vals: ParamValues = {};
+    for (const spec of fam.params) {
+      const steps = Math.round((spec.max - spec.min) / spec.step);
+      vals[spec.id] = +(spec.min + Math.round(Math.random() * steps) * spec.step).toFixed(4);
+    }
+    setFamilyId(fam.id);
+    setValues(vals);
+    setModifiers((prev) => ({
+      ...DEFAULT_MODIFIERS,
+      rotation: Math.floor(Math.random() * 360),
+      stretchX: +(0.6 + Math.random() * 0.4).toFixed(2),
+      stretchY: +(0.6 + Math.random() * 0.4).toFixed(2),
+      hole: Math.random() < 0.3 ? +(Math.random() * 0.6).toFixed(2) : 0,
+      wobble: Math.random() < 0.5 ? +(Math.random() * 0.32).toFixed(2) : 0,
+      wobbleFreq: 3 + Math.floor(Math.random() * 10),
+      pixelScale: prev.pixelScale, // leave the grain where the user set it
+    }));
   }, []);
 
-  // ── Export: render fresh at exact pixel size, then download a PNG. Same
-  //    palette + shape + ground as the preview, so what you see is what you get. ──
+  // ── Export: render fresh at exact pixel size, then download a PNG. ──
   const exportPng = useCallback(
     (px: number) => {
       const c = document.createElement("canvas");
@@ -73,31 +167,31 @@ export function ShapesStudio() {
       c.height = px;
       const ctx = c.getContext("2d");
       if (!ctx) return;
-      renderShapeField(ctx, px, palette, shape, background);
+      renderShapeField(ctx, px, palette, shape, background, modifiers.pixelScale);
       c.toBlob((blob) => {
         if (!blob) return;
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `slbh-field-${shape.id}-${background}-${px}.png`;
+        a.download = `slbh-field-${familyId}-${background}-${px}.png`;
         document.body.appendChild(a);
         a.click();
         a.remove();
         URL.revokeObjectURL(url);
       }, "image/png");
     },
-    [palette, shape, background],
+    [palette, shape, background, modifiers.pixelScale, familyId],
   );
 
   return (
     <section className="shp">
       <div className="container-page shp-head">
         <p className="t-mono shp-kicker">SHAPES / GENERATOR</p>
-        <h1 className="t-h1 shp-title">Field shape generator</h1>
+        <h1 className="t-h1 shp-title">Field shape instrument</h1>
         <p className="shp-deck">
-          The same mosaic the home Field is built from, poured into any form.
-          Pick a shape, reroll the colour, choose a ground, and export a clean
-          PNG.
+          The same mosaic the home Field is built from, as an instrument. Pick a
+          base family, turn the dials, warp it with wobble, choose a ground, and
+          export a clean PNG.
         </p>
       </div>
 
@@ -109,7 +203,9 @@ export function ShapesStudio() {
           </div>
           <div className="shp-meta">
             <span className="t-mono shp-meta-text">
-              {shape.label.toUpperCase()} · {background.toUpperCase()}
+              {family.label.toUpperCase()}
+              {modifiers.hole > 0 ? " · HOLLOW" : ""}
+              {modifiers.wobble > 0 ? " · WOBBLE" : ""} · {background.toUpperCase()}
             </span>
             <span className="shp-meta-swatches" aria-hidden>
               {palette.stops.map((stop, i) => (
@@ -121,29 +217,99 @@ export function ShapesStudio() {
 
         {/* ── Controls ── */}
         <div className="shp-controls">
+          {/* Quick-start presets */}
           <fieldset className="shp-field">
             <div className="shp-legend-row">
-              <legend className="t-label shp-legend">Shape</legend>
-              <button type="button" className="t-mono shp-mini" onClick={randomShape}>
-                ↺ Random
+              <legend className="t-label shp-legend">Quick start</legend>
+              <button type="button" className="t-mono shp-mini" onClick={randomizeShape}>
+                🎲 Randomize
               </button>
             </div>
+            <div className="shp-groups">
+              {PRESET_GROUPS.map(({ group, presets }) => (
+                <div key={group} className="shp-group">
+                  <span className="t-mono shp-group-label">{group}</span>
+                  <div className="shp-shapes">
+                    {presets.map((preset) => (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        className="shp-chip"
+                        onClick={() => applyPreset(preset)}
+                      >
+                        {preset.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </fieldset>
+
+          {/* Family */}
+          <fieldset className="shp-field">
+            <legend className="t-label shp-legend">Family</legend>
             <div className="shp-shapes">
-              {SHAPE_CATALOG.map((s) => (
+              {SHAPE_FAMILIES.map((fam) => (
                 <button
-                  key={s.id}
+                  key={fam.id}
                   type="button"
                   className="shp-chip"
-                  data-active={s.id === shapeId}
-                  aria-pressed={s.id === shapeId}
-                  onClick={() => setShapeId(s.id)}
+                  data-active={fam.id === familyId}
+                  aria-pressed={fam.id === familyId}
+                  onClick={() => selectFamily(fam.id)}
                 >
-                  {s.label}
+                  {fam.label}
                 </button>
               ))}
             </div>
           </fieldset>
 
+          {/* Shape dials (per family) */}
+          <fieldset className="shp-field">
+            <legend className="t-label shp-legend">Shape</legend>
+            {family.params.length > 0 ? (
+              <div className="shp-dials">
+                {family.params.map((spec) => (
+                  <Dial key={spec.id} spec={spec} value={values[spec.id]} onChange={(v) => setParam(spec.id, v)} />
+                ))}
+              </div>
+            ) : (
+              <p className="shp-empty">No shape dials — bend it with Transform &amp; Effects below.</p>
+            )}
+          </fieldset>
+
+          {/* Transform */}
+          <fieldset className="shp-field">
+            <legend className="t-label shp-legend">Transform</legend>
+            <div className="shp-dials">
+              {MODIFIER_SPECS.transform.map((spec) => (
+                <Dial
+                  key={spec.id}
+                  spec={spec}
+                  value={modifiers[spec.id as keyof Modifiers]}
+                  onChange={(v) => setModifier(spec.id, v)}
+                />
+              ))}
+            </div>
+          </fieldset>
+
+          {/* Effects */}
+          <fieldset className="shp-field">
+            <legend className="t-label shp-legend">Effects</legend>
+            <div className="shp-dials">
+              {MODIFIER_SPECS.effects.map((spec) => (
+                <Dial
+                  key={spec.id}
+                  spec={spec}
+                  value={modifiers[spec.id as keyof Modifiers]}
+                  onChange={(v) => setModifier(spec.id, v)}
+                />
+              ))}
+            </div>
+          </fieldset>
+
+          {/* Colour */}
           <fieldset className="shp-field">
             <legend className="t-label shp-legend">Colour</legend>
             <button type="button" className="shp-btn shp-btn-primary" onClick={randomizeColors}>
@@ -151,6 +317,7 @@ export function ShapesStudio() {
             </button>
           </fieldset>
 
+          {/* Background */}
           <fieldset className="shp-field">
             <legend className="t-label shp-legend">Background</legend>
             <div className="shp-seg">
@@ -169,6 +336,7 @@ export function ShapesStudio() {
             </div>
           </fieldset>
 
+          {/* Export */}
           <fieldset className="shp-field">
             <legend className="t-label shp-legend">Export PNG</legend>
             <div className="shp-export">
@@ -196,15 +364,13 @@ export function ShapesStudio() {
           margin: 0 0 18px;
           letter-spacing: 0.18em;
         }
-        .shp-title {
-          margin: 0 0 18px;
-        }
+        .shp-title { margin: 0 0 18px; }
         .shp-deck {
           font-family: var(--font-inter), sans-serif;
           font-weight: 300;
           font-size: 16px;
           line-height: 1.55;
-          max-width: 520px;
+          max-width: 540px;
           opacity: 0.72;
           margin: 0;
         }
@@ -217,7 +383,7 @@ export function ShapesStudio() {
         }
         @media (min-width: 900px) {
           .shp-grid {
-            grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+            grid-template-columns: minmax(0, 1fr) minmax(340px, 440px);
             gap: 64px;
           }
         }
@@ -263,27 +429,18 @@ export function ShapesStudio() {
         .shp-meta-text { opacity: 0.6; }
         .shp-meta-swatches {
           display: inline-flex;
-          gap: 0;
           border: 0.5px solid var(--hairline-strong);
+          flex-shrink: 0;
         }
-        .shp-swatch {
-          width: 18px;
-          height: 14px;
-          display: block;
-        }
+        .shp-swatch { width: 18px; height: 14px; display: block; }
 
         /* ── Controls ── */
         .shp-controls {
           display: flex;
           flex-direction: column;
-          gap: 32px;
+          gap: 30px;
         }
-        .shp-field {
-          border: none;
-          padding: 0;
-          margin: 0;
-          min-width: 0;
-        }
+        .shp-field { border: none; padding: 0; margin: 0; min-width: 0; }
         .shp-legend-row {
           display: flex;
           align-items: baseline;
@@ -291,28 +448,29 @@ export function ShapesStudio() {
           gap: 12px;
           margin-bottom: 14px;
         }
-        .shp-legend {
-          padding: 0;
-          opacity: 0.72;
-        }
+        .shp-legend { padding: 0; opacity: 0.72; }
         .shp-field > .shp-legend { margin-bottom: 14px; }
         .shp-mini {
           background: none;
           border: none;
           cursor: pointer;
           color: var(--ground);
-          opacity: 0.55;
+          opacity: 0.6;
           padding: 0;
           letter-spacing: 0.08em;
           transition: opacity var(--d-fast) var(--ease-out);
         }
         .shp-mini:hover { opacity: 1; }
 
-        .shp-shapes {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
+        .shp-groups { display: flex; flex-direction: column; gap: 16px; }
+        .shp-group-label {
+          display: block;
+          opacity: 0.4;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          margin-bottom: 9px;
         }
+        .shp-shapes { display: flex; flex-wrap: wrap; gap: 8px; }
         .shp-chip {
           font-family: var(--font-plex-mono), ui-monospace, monospace;
           font-size: 11px;
@@ -332,6 +490,39 @@ export function ShapesStudio() {
           color: var(--signal);
         }
 
+        /* ── Dials ── */
+        .shp-dials { display: flex; flex-direction: column; gap: 16px; }
+        .shp-dial { display: flex; flex-direction: column; gap: 7px; }
+        .shp-dial-head {
+          display: flex;
+          align-items: baseline;
+          justify-content: space-between;
+          gap: 12px;
+        }
+        .shp-dial-label {
+          font-family: var(--font-inter), sans-serif;
+          font-weight: 400;
+          font-size: 13px;
+          opacity: 0.85;
+        }
+        .shp-dial-val { opacity: 0.55; }
+        .shp-dial input[type="range"] {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 100%;
+          height: 2px;
+          background: var(--hairline-strong);
+          accent-color: var(--ground);
+          cursor: pointer;
+        }
+        .shp-empty {
+          margin: 0;
+          font-size: 13px;
+          font-weight: 300;
+          opacity: 0.5;
+        }
+
+        /* ── Segmented + buttons ── */
         .shp-seg {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
@@ -353,10 +544,7 @@ export function ShapesStudio() {
         }
         .shp-seg-btn:last-child { border-right: none; }
         .shp-seg-btn:hover { background: var(--hairline); }
-        .shp-seg-btn[data-active="true"] {
-          background: var(--ground);
-          color: var(--signal);
-        }
+        .shp-seg-btn[data-active="true"] { background: var(--ground); color: var(--signal); }
 
         .shp-btn {
           font-family: var(--font-inter), sans-serif;
@@ -372,18 +560,10 @@ export function ShapesStudio() {
           transition: background var(--d-fast) var(--ease-out), color var(--d-fast) var(--ease-out);
         }
         .shp-btn:hover { background: var(--ground); color: var(--signal); }
-        .shp-btn-primary {
-          width: 100%;
-          background: var(--ground);
-          color: var(--signal);
-        }
+        .shp-btn-primary { width: 100%; background: var(--ground); color: var(--signal); }
         .shp-btn-primary:hover { opacity: 0.85; }
 
-        .shp-export {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 10px;
-        }
+        .shp-export { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
       `}</style>
     </section>
   );
