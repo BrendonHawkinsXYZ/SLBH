@@ -17,18 +17,26 @@ import {
 } from "@/lib/shapeField";
 import { SequenceField, type Slot as FieldSlot } from "@/lib/sequenceField";
 
-// ── Poster template (4:5) ──
-const TPL = {
-  W: 2000,
-  H: 2500,
-  cx: 1000,
-  cy: 1185,
-  shapeSize: 1300,
-  topY: 300,
-  topFont: 60,
-  wordY: 2360,
-  wordFont: 54,
+// ── Poster templates ──
+type Format = "4:5" | "9:16";
+type Template = {
+  label: string;
+  W: number;
+  H: number;
+  cx: number;
+  cy: number;
+  shapeSize: number;
+  topY: number;
+  topFont: number;
+  wordY: number;
+  wordFont: number;
+  wordTrack: number;
 };
+const TEMPLATES: Record<Format, Template> = {
+  "4:5": { label: "4:5 · Post", W: 2000, H: 2500, cx: 1000, cy: 1185, shapeSize: 1300, topY: 300, topFont: 60, wordY: 2360, wordFont: 54, wordTrack: 12 },
+  "9:16": { label: "9:16 · Reel", W: 1080, H: 1920, cx: 540, cy: 980, shapeSize: 800, topY: 235, topFont: 46, wordY: 1810, wordFont: 40, wordTrack: 8 },
+};
+const FORMATS: Format[] = ["4:5", "9:16"];
 const DURATION_MS = 15000;
 const MIN_SLOTS = 2;
 const MAX_SLOTS = 5;
@@ -68,6 +76,12 @@ function formatValue(spec: ParamSpec, v: number): string {
   return v.toFixed(2);
 }
 
+function setTracking(ctx: CanvasRenderingContext2D, px: number) {
+  if ("letterSpacing" in ctx) {
+    (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = `${px}px`;
+  }
+}
+
 function Dial({ spec, value, onChange }: { spec: ParamSpec; value: number; onChange: (v: number) => void }) {
   return (
     <label className="cm-dial">
@@ -101,6 +115,7 @@ export function ChromaStudio() {
     slotFromPreset("blob"),
   ]);
   const [active, setActive] = useState(0);
+  const [format, setFormat] = useState<Format>("4:5");
   const [pixelScale, setPixelScale] = useState(1);
   const [background, setBackground] = useState<"white" | "black">("white");
   const [topText, setTopText] = useState("What does emotion look like?");
@@ -110,6 +125,7 @@ export function ChromaStudio() {
   const [fonts, setFonts] = useState({ inter: "Inter, sans-serif", orbitron: "Orbitron, sans-serif" });
 
   const activeSlot = slots[Math.min(active, slots.length - 1)];
+  const tpl = TEMPLATES[format];
 
   // Resolve canvas font family names from the next/font CSS variables, once loaded.
   useEffect(() => {
@@ -120,8 +136,8 @@ export function ChromaStudio() {
     const apply = () => !cancelled && setFonts({ inter, orbitron });
     if (document.fonts) {
       Promise.all([
-        document.fonts.load(`500 ${TPL.topFont}px ${inter}`),
-        document.fonts.load(`700 ${TPL.wordFont}px ${orbitron}`),
+        document.fonts.load(`500 60px ${inter}`),
+        document.fonts.load(`700 54px ${orbitron}`),
       ])
         .then(apply)
         .catch(apply);
@@ -136,9 +152,9 @@ export function ChromaStudio() {
   // Paint one poster frame into a context already placed in template coordinates.
   const paint = useCallback(
     (ctx: CanvasRenderingContext2D, field: SequenceField | null, progress: number) => {
-      ctx.clearRect(0, 0, TPL.W, TPL.H);
+      ctx.clearRect(0, 0, tpl.W, tpl.H);
       ctx.fillStyle = background === "white" ? "#ffffff" : "#0A0A0A";
-      ctx.fillRect(0, 0, TPL.W, TPL.H);
+      ctx.fillRect(0, 0, tpl.W, tpl.H);
 
       const ink = background === "white" ? "#0A0A0A" : "#F5F5F3";
       ctx.fillStyle = ink;
@@ -146,20 +162,27 @@ export function ChromaStudio() {
       ctx.textBaseline = "middle";
 
       if (topText.trim()) {
-        ctx.font = `500 ${TPL.topFont}px ${fonts.inter}`;
-        if ("letterSpacing" in ctx) (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "0px";
-        ctx.fillText(topText, TPL.W / 2, TPL.topY);
+        setTracking(ctx, 0);
+        let size = tpl.topFont;
+        ctx.font = `500 ${size}px ${fonts.inter}`;
+        const maxW = tpl.W * 0.86;
+        const w = ctx.measureText(topText).width;
+        if (w > maxW) {
+          size = Math.floor((size * maxW) / w);
+          ctx.font = `500 ${size}px ${fonts.inter}`;
+        }
+        ctx.fillText(topText, tpl.W / 2, tpl.topY);
       }
 
-      field?.render(ctx, TPL.cx, TPL.cy, progress);
+      field?.render(ctx, tpl.cx, tpl.cy, progress);
 
       ctx.fillStyle = ink;
-      ctx.font = `700 ${TPL.wordFont}px ${fonts.orbitron}`;
-      if ("letterSpacing" in ctx) (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "12px";
-      ctx.fillText("CHROMA", TPL.W / 2 + 6, TPL.wordY);
-      if ("letterSpacing" in ctx) (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "0px";
+      ctx.font = `700 ${tpl.wordFont}px ${fonts.orbitron}`;
+      setTracking(ctx, tpl.wordTrack);
+      ctx.fillText("CHROMA", tpl.W / 2 + tpl.wordTrack / 2, tpl.wordY);
+      setTracking(ctx, 0);
     },
-    [background, topText, fonts],
+    [background, topText, fonts, tpl],
   );
 
   // Draw the preview canvas (template scaled to fit), at a given progress.
@@ -179,20 +202,20 @@ export function ChromaStudio() {
         canvas.width = w;
         canvas.height = h;
       }
-      const scale = w / TPL.W;
+      const scale = w / tpl.W;
       ctx.setTransform(scale, 0, 0, scale, 0, 0);
       paint(ctx, fieldRef.current, progress);
     },
-    [paint],
+    [paint, tpl],
   );
 
   // Build the field: just the active slot while paused (snappy editing), the full
   // sequence while playing.
   useEffect(() => {
     const built = playing ? slots.map(toFieldSlot) : [toFieldSlot(activeSlot)];
-    fieldRef.current = new SequenceField(TPL.shapeSize, built, pixelScale);
+    fieldRef.current = new SequenceField(tpl.shapeSize, built, pixelScale);
     if (!playing) drawPreview(0);
-  }, [playing, slots, activeSlot, pixelScale, drawPreview]);
+  }, [playing, slots, activeSlot, pixelScale, tpl, drawPreview]);
 
   // Playback loop.
   useEffect(() => {
@@ -292,10 +315,10 @@ export function ChromaStudio() {
     setPlaying(false);
     try {
       if (document.fonts) await document.fonts.ready;
-      const field = new SequenceField(TPL.shapeSize, slots.map(toFieldSlot), pixelScale);
+      const field = new SequenceField(tpl.shapeSize, slots.map(toFieldSlot), pixelScale);
       const cvs = document.createElement("canvas");
-      cvs.width = TPL.W;
-      cvs.height = TPL.H;
+      cvs.width = tpl.W;
+      cvs.height = tpl.H;
       const ctx = cvs.getContext("2d");
       if (!ctx) throw new Error("no 2d context");
 
@@ -338,7 +361,7 @@ export function ChromaStudio() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `chroma-${slots.length}shapes-15s.${ext}`;
+      a.download = `chroma-${slots.length}shapes-${format.replace(":", "x")}-15s.${ext}`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -348,7 +371,7 @@ export function ChromaStudio() {
       setExportPct(0);
       drawPreview(0);
     }
-  }, [exporting, slots, pixelScale, paint, drawPreview]);
+  }, [exporting, slots, pixelScale, tpl, format, paint, drawPreview]);
 
   const family = familyById(activeSlot.familyId);
   const secondsEach = (15 / slots.length).toFixed(1);
@@ -368,7 +391,11 @@ export function ChromaStudio() {
       <div className="container-page cm-grid">
         {/* ── Preview ── */}
         <div className="cm-stage">
-          <div className={`cm-frame cm-bg-${background}`}>
+          <div
+            className={`cm-frame cm-bg-${background}`}
+            data-fmt={format === "9:16" ? "r" : "p"}
+            style={{ aspectRatio: format === "9:16" ? "9 / 16" : "4 / 5" }}
+          >
             <canvas ref={previewRef} className="cm-canvas" aria-label="CHROMA poster preview" />
           </div>
           <div className="cm-transport">
@@ -380,7 +407,7 @@ export function ChromaStudio() {
             </button>
           </div>
           <p className="t-mono cm-note">
-            {slots.length} SHAPES · {secondsEach}s EACH · 2000×2500 · MP4/WEBM
+            {slots.length} SHAPES · {secondsEach}s EACH · {tpl.W}×{tpl.H} · MP4/WEBM
           </p>
         </div>
 
@@ -478,9 +505,24 @@ export function ChromaStudio() {
           {/* Global */}
           <fieldset className="cm-field">
             <legend className="t-label cm-legend">Output</legend>
-            <div className="cm-dials">
+            <span className="cm-dial-label cm-out-label">Format</span>
+            <div className="cm-seg cm-seg-2">
+              {FORMATS.map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  className="cm-seg-btn"
+                  data-active={f === format}
+                  onClick={() => setFormat(f)}
+                >
+                  {TEMPLATES[f].label}
+                </button>
+              ))}
+            </div>
+            <div className="cm-dials cm-out-gap">
               <Dial spec={PIXEL_SPEC} value={pixelScale} onChange={setPixelScale} />
             </div>
+            <span className="cm-dial-label cm-out-label">Ground</span>
             <div className="cm-seg cm-seg-2">
               {(["white", "black"] as const).map((bg) => (
                 <button
@@ -519,9 +561,12 @@ export function ChromaStudio() {
 
         .cm-stage { position: sticky; top: 88px; display: flex; flex-direction: column; gap: 16px; }
         .cm-frame {
-          position: relative; width: 100%; aspect-ratio: 4 / 5;
+          position: relative; margin-inline: auto;
           border: 0.5px solid var(--hairline-strong); overflow: hidden;
         }
+        .cm-frame[data-fmt="p"] { width: 100%; }
+        /* The reel is tall and narrow — size it by height so it fits the viewport. */
+        .cm-frame[data-fmt="r"] { height: min(72vh, 150vw); width: auto; max-width: 100%; }
         .cm-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
         .cm-bg-white { background: #ffffff; }
         .cm-bg-black { background: #000000; }
@@ -590,7 +635,9 @@ export function ChromaStudio() {
           border: 0.5px solid var(--hairline-strong); background: transparent; color: var(--ground);
         }
 
-        .cm-seg { display: grid; border: 0.5px solid var(--hairline-strong); margin-top: 16px; }
+        .cm-out-label { display: block; margin-bottom: 8px; }
+        .cm-out-gap { margin-top: 18px; margin-bottom: 18px; }
+        .cm-seg { display: grid; border: 0.5px solid var(--hairline-strong); }
         .cm-seg-2 { grid-template-columns: 1fr 1fr; }
         .cm-seg-btn {
           font-family: var(--font-inter), sans-serif; font-weight: 500; font-size: 11px;
