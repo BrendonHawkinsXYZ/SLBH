@@ -20,17 +20,18 @@
 
 import { AFFECT_PALETTE } from "@/lib/affectPalette";
 
-const BASE_CELL = 2.2; // smallest pixel cell, logical px
-const MAX_DOTS = 46000; // dot budget — keeps density matched to the home Field
-const DOT_RATIO = 0.82; // pixel size as a fraction of the cell (the rest is the gap)
-const MARGIN_FRAC = 0.05; // inset from the canvas box, as a fraction of size
-const EDGE0 = 0.975; // soft-edge feather starts here (fraction of the shape radius)
-const INNER_FEATHER = 0.03; // soft inner rim for hollow shapes, in disc-radius units
+// Mosaic constants, shared with the video sequencer so both renderers match.
+export const BASE_CELL = 2.2; // smallest pixel cell, logical px
+export const MAX_DOTS = 46000; // dot budget — keeps density matched to the home Field
+export const DOT_RATIO = 0.82; // pixel size as a fraction of the cell (the rest is the gap)
+export const MARGIN_FRAC = 0.05; // inset from the canvas box, as a fraction of size
+export const EDGE0 = 0.975; // soft-edge feather starts here (fraction of the shape radius)
+export const INNER_FEATHER = 0.03; // soft inner rim for hollow shapes, in disc-radius units
 // Per-dot jitter as a fraction of the cell, so the mosaic keeps the same tight
 // lattice at every render size. The home Field uses a fixed 0.5px nudge, which
 // is ≈0.13·cell at desktop sizes — enough to avoid a sterile grid, small enough
 // that dots stay on the lattice and read as a near-solid mass (not a stipple).
-const EDGE_NOISE_RATIO = 0.13;
+export const EDGE_NOISE_RATIO = 0.13;
 
 export type Background = "white" | "black" | "transparent";
 
