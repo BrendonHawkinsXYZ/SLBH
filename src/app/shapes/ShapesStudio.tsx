@@ -222,7 +222,7 @@ export function ShapesStudio() {
             <div className="shp-legend-row">
               <legend className="t-label shp-legend">Quick start</legend>
               <button type="button" className="t-mono shp-mini" onClick={randomizeShape}>
-                🎲 Randomize
+                Randomize
               </button>
             </div>
             <div className="shp-groups">
