@@ -19,9 +19,13 @@ import { AFFECT_PALETTE } from "@/lib/affectPalette";
 const BASE_CELL = 2.2; // smallest pixel cell, logical px
 const MAX_DOTS = 46000; // dot budget — keeps density matched to the home Field
 const DOT_RATIO = 0.82; // pixel size as a fraction of the cell (the rest is the gap)
-const MARGIN_FRAC = 0.07; // inset from the canvas box, as a fraction of size
+const MARGIN_FRAC = 0.05; // inset from the canvas box, as a fraction of size
 const EDGE0 = 0.975; // soft-edge feather starts here (fraction of the shape radius)
-const EDGE_NOISE_FRAC = 0.002; // per-pixel rim jitter, as a fraction of size
+// Per-dot jitter as a fraction of the cell, so the mosaic keeps the same tight
+// lattice at every render size. The home Field uses a fixed 0.5px nudge, which
+// is ≈0.13·cell at desktop sizes — enough to avoid a sterile grid, small enough
+// that dots stay on the lattice and read as a near-solid mass (not a stipple).
+const EDGE_NOISE_RATIO = 0.13;
 
 export type Background = "white" | "black" | "transparent";
 
@@ -160,7 +164,7 @@ export function renderShapeField(
   const cell = Math.max(BASE_CELL, Math.sqrt((size * size) / MAX_DOTS));
   const dotSize = cell * DOT_RATIO;
   const half = dotSize / 2;
-  const edgeNoise = size * EDGE_NOISE_FRAC;
+  const edgeNoise = cell * EDGE_NOISE_RATIO;
 
   // Paint the radial gradient offscreen so we can sample per-cell colour.
   const off = document.createElement("canvas");
