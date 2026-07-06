@@ -1,12 +1,15 @@
 import type { Easing, Transition, Variants } from "motion/react";
 
 /* ═══ SLBH MOTION SYSTEM ═══
-   See spec §1.4. Easing and durations are locked. */
+   See spec §1.4. Easing and durations are locked.
+   Amendment: `flick` added for route transitions — full-page opacity
+   reads sluggish at 0.6s; content reveals still start at `fast`. */
 
 export const EASE_OUT: Easing = [0.22, 0.61, 0.36, 1];
 export const EASE_IN_OUT: Easing = [0.65, 0, 0.35, 1];
 
 export const DURATIONS = {
+  flick: 0.3,
   fast: 0.6,
   base: 0.9,
   slow: 1.2,
