@@ -96,6 +96,8 @@ export function StatusBar() {
   const [city, setCity] = useState<string | null>(null);
 
   useEffect(() => {
+    // Time and locale only exist client-side; SSR renders the null placeholder.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setClock(formatClock(new Date()));
     setCity(getCityFromTimezone());
     const id = window.setInterval(() => {

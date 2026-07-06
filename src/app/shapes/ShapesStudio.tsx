@@ -10,6 +10,7 @@ import {
   familyById,
   resolveShape,
   makePalette,
+  defaultPalette,
   renderShapeField,
   type Background,
   type Modifiers,
@@ -72,10 +73,16 @@ export function ShapesStudio() {
   const [familyId, setFamilyId] = useState<string>("round");
   const [values, setValues] = useState<ParamValues>(() => defaultValues("round"));
   const [modifiers, setModifiers] = useState<Modifiers>(DEFAULT_MODIFIERS);
-  // Lazy init so the first paint already has a fresh colour (client-side random;
-  // never rendered into the DOM, so no hydration mismatch).
-  const [palette, setPalette] = useState<Palette>(() => makePalette());
+  // Deterministic init — the stops render as DOM swatches, so SSR and hydration
+  // must agree. The mount effect below re-rolls for a fresh colour per visit.
+  const [palette, setPalette] = useState<Palette>(defaultPalette);
   const [background, setBackground] = useState<Background>("white");
+
+  useEffect(() => {
+    // Random colour can only be chosen client-side (SSR must match hydration).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setPalette(makePalette());
+  }, []);
 
   const family = familyById(familyId);
   const shape = useMemo(
