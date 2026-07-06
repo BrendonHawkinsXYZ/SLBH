@@ -10,6 +10,7 @@ import {
   familyById,
   resolveShape,
   makePalette,
+  defaultPalette,
   type Modifiers,
   type Palette,
   type ParamSpec,
@@ -54,6 +55,8 @@ type SlotState = {
 };
 
 let slotSeq = 0;
+/* Initial slots use the deterministic palette so SSR and hydration agree;
+   a mount effect re-rolls them for the fresh-palette-per-visit behavior. */
 function slotFromPreset(presetId: string): SlotState {
   const preset = PRESETS.find((p) => p.id === presetId);
   const familyId = preset?.familyId ?? "round";
@@ -62,7 +65,7 @@ function slotFromPreset(presetId: string): SlotState {
     familyId,
     values: { ...defaultValues(familyId), ...(preset?.values ?? {}) },
     modifiers: { ...DEFAULT_MODIFIERS, ...(preset?.modifiers ?? {}) },
-    palette: makePalette(),
+    palette: defaultPalette(),
   };
 }
 
@@ -126,6 +129,11 @@ export function ChromaStudio() {
 
   const activeSlot = slots[Math.min(active, slots.length - 1)];
   const tpl = TEMPLATES[format];
+
+  // Fresh palettes per visit — after mount, so SSR and hydration agree.
+  useEffect(() => {
+    setSlots((prev) => prev.map((s) => ({ ...s, palette: makePalette() })));
+  }, []);
 
   // Resolve canvas font family names from the next/font CSS variables, once loaded.
   useEffect(() => {

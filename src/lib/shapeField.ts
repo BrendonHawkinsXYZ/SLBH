@@ -412,6 +412,22 @@ export function makePalette(): Palette {
 }
 
 /**
+ * Deterministic palette for initial state. Server and client must render the
+ * same first frame or hydration fails; callers re-roll with makePalette() in a
+ * mount effect to keep the fresh-palette-per-visit behavior.
+ */
+export function defaultPalette(): Palette {
+  const n = AFFECT_PALETTE.length;
+  const count = 6;
+  const step = 5;
+  const stops: Stop[] = [];
+  for (let i = 0; i < count; i++) {
+    stops.push({ color: AFFECT_PALETTE[(i * step) % n], pct: (i * 96) / (count - 1) });
+  }
+  return { stops, cx: 46, cy: 38 };
+}
+
+/**
  * Draw one frame of the field into `ctx`, filling the logical box [0,size]².
  * The caller owns the canvas: for a crisp HiDPI preview, scale the context by
  * devicePixelRatio and pass the CSS size; for an exact-pixel PNG export, use an

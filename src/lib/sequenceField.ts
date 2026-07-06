@@ -173,7 +173,7 @@ export class SequenceField {
     if (N === 0) return;
     const p = ((progress % 1) + 1) % 1;
     const slotF = p * N;
-    let seg = Math.floor(slotF) % N;
+    const seg = Math.floor(slotF) % N;
     const local = slotF - Math.floor(slotF);
     let e: number;
     let next: number;
