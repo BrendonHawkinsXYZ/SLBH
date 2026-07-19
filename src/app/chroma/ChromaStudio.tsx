@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrayBufferTarget as Mp4Target, Muxer as Mp4Muxer } from "mp4-muxer";
+import { ArrayBufferTarget as WebmTarget, Muxer as WebmMuxer } from "webm-muxer";
 import {
   SHAPE_FAMILIES,
   PRESETS,
@@ -41,6 +43,209 @@ const FORMATS: Format[] = ["4:5", "9:16"];
 const DURATION_MS = 15000;
 const MIN_SLOTS = 2;
 const MAX_SLOTS = 5;
+
+// ── Export timing ──
+// The clip is rendered as EXACTLY this many frames with hard-coded timestamps,
+// not captured off a live canvas. MediaRecorder + captureStream stamps frames
+// with the wall-clock moment they happened to arrive, which makes a variable-
+// frame-rate file: real players (Photos, QuickTime) honour the timestamps and
+// look smooth, but platforms that re-encode to constant frame rate (Twitter,
+// Instagram, CapCut) snap those uneven frames onto a rigid grid — duplicating
+// some, dropping others — and the motion visibly jumps. Deterministic CFR
+// output is the fix; MediaRecorder remains only as a fallback.
+const EXPORT_FPS = 30;
+const EXPORT_FRAMES = (DURATION_MS / 1000) * EXPORT_FPS; // 450
+const US_PER_FRAME = 1_000_000 / EXPORT_FPS;
+
+type PaintFn = (ctx: CanvasRenderingContext2D, field: SequenceField | null, progress: number) => void;
+
+// H.264 profiles to try, best first. High 5.1 covers 2000×2500@30; the rest
+// are graceful degradations for stricter hardware encoders. H.264 MP4 is the
+// only container/codec every upload target (Twitter, Instagram, CapCut)
+// accepts, so it leads; VP9 WebM still gives CFR output on browsers whose
+// builds lack an H.264 encoder (Firefox, de-branded Chromiums).
+const AVC_CANDIDATES = ["avc1.640033", "avc1.4d0033", "avc1.42E033", "avc1.640028"];
+const VPX_CANDIDATES = ["vp09.00.50.08", "vp09.00.41.08", "vp8"];
+
+type ExportPlan =
+  | { kind: "mp4" | "webm"; config: VideoEncoderConfig }
+  | { kind: "realtime" };
+
+async function pickCodecConfig(
+  candidates: string[],
+  width: number,
+  height: number,
+  extra?: Partial<VideoEncoderConfig>,
+): Promise<VideoEncoderConfig | null> {
+  for (const codec of candidates) {
+    const config: VideoEncoderConfig = {
+      codec,
+      width,
+      height,
+      framerate: EXPORT_FPS,
+      // ~0.12 bpp — generous for flat colour fields, still platform-friendly.
+      bitrate: Math.min(20_000_000, Math.round(width * height * EXPORT_FPS * 0.12)),
+      latencyMode: "quality",
+      ...extra,
+    };
+    try {
+      if ((await VideoEncoder.isConfigSupported(config)).supported) return config;
+    } catch {
+      // malformed/unknown codec string on this browser — try the next
+    }
+  }
+  return null;
+}
+
+async function pickExportPlan(width: number, height: number): Promise<ExportPlan> {
+  if (typeof VideoEncoder === "undefined") return { kind: "realtime" };
+  const avc = await pickCodecConfig(AVC_CANDIDATES, width, height, { avc: { format: "avc" } });
+  if (avc) return { kind: "mp4", config: avc };
+  const vpx = await pickCodecConfig(VPX_CANDIDATES, width, height);
+  if (vpx) return { kind: "webm", config: vpx };
+  return { kind: "realtime" };
+}
+
+// Yield to the event loop without setTimeout: timer callbacks are throttled to
+// 1/s in background tabs, which would stall an export the moment the user
+// switches away. MessageChannel tasks are not throttled.
+function yieldTask(): Promise<void> {
+  return new Promise((resolve) => {
+    const ch = new MessageChannel();
+    ch.port1.onmessage = () => resolve();
+    ch.port2.postMessage(null);
+  });
+}
+
+/**
+ * Primary export: render every frame deterministically (frame f at progress
+ * f/EXPORT_FRAMES) into a WebCodecs encoder with exact 1/30s timestamps, and
+ * mux to a faststart MP4 (H.264) or a WebM (VP9/VP8). Constant frame rate, so
+ * platform transcoders see a clean stream; also faster than real time on
+ * capable machines and immune to rAF throttling.
+ */
+async function renderCfrVideo(
+  ctx: CanvasRenderingContext2D,
+  cvs: HTMLCanvasElement,
+  field: SequenceField,
+  plan: Extract<ExportPlan, { kind: "mp4" | "webm" }>,
+  paintFrame: PaintFn,
+  onProgress: (p: number) => void,
+): Promise<{ blob: Blob; ext: string }> {
+  let addChunk: (c: EncodedVideoChunk, m?: EncodedVideoChunkMetadata) => void;
+  let finalize: () => ArrayBuffer;
+  if (plan.kind === "mp4") {
+    const target = new Mp4Target();
+    const muxer = new Mp4Muxer({
+      target,
+      video: { codec: "avc", width: cvs.width, height: cvs.height },
+      fastStart: "in-memory", // moov before mdat — upload-friendly
+    });
+    addChunk = (c, m) => muxer.addVideoChunk(c, m);
+    finalize = () => {
+      muxer.finalize();
+      return target.buffer;
+    };
+  } else {
+    const target = new WebmTarget();
+    const muxer = new WebmMuxer({
+      target,
+      video: {
+        codec: plan.config.codec.startsWith("vp8") ? "V_VP8" : "V_VP9",
+        width: cvs.width,
+        height: cvs.height,
+        frameRate: EXPORT_FPS,
+      },
+    });
+    addChunk = (c, m) => muxer.addVideoChunk(c, m);
+    finalize = () => {
+      muxer.finalize();
+      return target.buffer;
+    };
+  }
+
+  let encodeError: unknown = null;
+  const encoder = new VideoEncoder({
+    output: (chunk, meta) => addChunk(chunk, meta),
+    error: (e) => {
+      encodeError = e;
+    },
+  });
+  encoder.configure(plan.config);
+
+  for (let f = 0; f < EXPORT_FRAMES; f++) {
+    if (encodeError) throw encodeError;
+    paintFrame(ctx, field, f / EXPORT_FRAMES);
+    const frame = new VideoFrame(cvs, {
+      timestamp: Math.round(f * US_PER_FRAME),
+      duration: Math.round(US_PER_FRAME),
+    });
+    encoder.encode(frame, { keyFrame: f % (EXPORT_FPS * 2) === 0 });
+    frame.close();
+    onProgress((f + 1) / EXPORT_FRAMES);
+    // Backpressure: don't let painted frames pile up ahead of the encoder.
+    while (encoder.encodeQueueSize > 8) {
+      await new Promise<void>((r) => encoder.addEventListener("dequeue", () => r(), { once: true }));
+    }
+    if (f % 5 === 0) await yieldTask(); // keep the UI responsive
+  }
+  await encoder.flush();
+  if (encodeError) throw encodeError;
+  encoder.close();
+  const buffer = finalize();
+  return plan.kind === "mp4"
+    ? { blob: new Blob([buffer], { type: "video/mp4" }), ext: "mp4" }
+    : { blob: new Blob([buffer], { type: "video/webm" }), ext: "webm" };
+}
+
+/**
+ * Fallback export for browsers without WebCodecs H.264: real-time MediaRecorder
+ * capture. Variable frame rate — fine in players, may stutter after platform
+ * re-encodes; kept only so no browser is left without an export at all.
+ */
+async function recordRealtime(
+  ctx: CanvasRenderingContext2D,
+  cvs: HTMLCanvasElement,
+  field: SequenceField,
+  paintFrame: PaintFn,
+  onProgress: (p: number) => void,
+): Promise<{ blob: Blob; ext: string }> {
+  const candidates = [
+    "video/mp4;codecs=avc1.42E01E",
+    "video/mp4",
+    "video/webm;codecs=vp9",
+    "video/webm;codecs=vp8",
+    "video/webm",
+  ];
+  const mime = candidates.find((m) => MediaRecorder.isTypeSupported(m)) ?? "";
+  const ext = mime.includes("mp4") ? "mp4" : "webm";
+
+  const stream = cvs.captureStream(EXPORT_FPS);
+  const rec = new MediaRecorder(stream, mime ? { mimeType: mime, videoBitsPerSecond: 16_000_000 } : undefined);
+  const chunks: BlobPart[] = [];
+  rec.ondataavailable = (e) => e.data.size && chunks.push(e.data);
+  const stopped = new Promise<void>((res) => (rec.onstop = () => res()));
+
+  paintFrame(ctx, field, 0);
+  rec.start();
+
+  const start = performance.now();
+  await new Promise<void>((resolve) => {
+    const loop = (now: number) => {
+      const el = now - start;
+      const pr = Math.min(el / DURATION_MS, 0.999999);
+      paintFrame(ctx, field, pr);
+      onProgress(Math.min(1, el / DURATION_MS));
+      if (el < DURATION_MS) requestAnimationFrame(loop);
+      else resolve();
+    };
+    requestAnimationFrame(loop);
+  });
+
+  rec.stop();
+  await stopped;
+  return { blob: new Blob(chunks, { type: mime || "video/webm" }), ext };
+}
 
 const TRANSFORM_SPECS = MODIFIER_SPECS.transform;
 const EFFECT_SPECS = MODIFIER_SPECS.effects.filter((s) => s.id !== "pixelScale");
@@ -315,7 +520,20 @@ export function ChromaStudio() {
     [],
   );
 
-  // ── Video export (MediaRecorder → mp4 if supported, else webm) ──
+  // Detect once (per format) which export pipeline is available, so the
+  // readout under the preview can say what the export will actually produce.
+  const [exportKind, setExportKind] = useState<ExportPlan["kind"] | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    pickExportPlan(tpl.W, tpl.H)
+      .then((p) => !cancelled && setExportKind(p.kind))
+      .catch(() => !cancelled && setExportKind("realtime"));
+    return () => {
+      cancelled = true;
+    };
+  }, [tpl]);
+
+  // ── Video export: CFR MP4 via WebCodecs, MediaRecorder as last resort. ──
   const exportVideo = useCallback(async () => {
     if (exporting) return;
     setExporting(true);
@@ -329,47 +547,27 @@ export function ChromaStudio() {
       cvs.height = tpl.H;
       const ctx = cvs.getContext("2d");
       if (!ctx) throw new Error("no 2d context");
-
-      const candidates = [
-        "video/mp4;codecs=avc1.42E01E",
-        "video/mp4",
-        "video/webm;codecs=vp9",
-        "video/webm;codecs=vp8",
-        "video/webm",
-      ];
-      const mime = candidates.find((m) => MediaRecorder.isTypeSupported(m)) ?? "";
-      const ext = mime.includes("mp4") ? "mp4" : "webm";
-
-      const stream = cvs.captureStream(30);
-      const rec = new MediaRecorder(stream, mime ? { mimeType: mime, videoBitsPerSecond: 16_000_000 } : undefined);
-      const chunks: BlobPart[] = [];
-      rec.ondataavailable = (e) => e.data.size && chunks.push(e.data);
-      const stopped = new Promise<void>((res) => (rec.onstop = () => res()));
-
       ctx.setTransform(1, 0, 0, 1, 0, 0);
-      paint(ctx, field, 0);
-      rec.start();
 
-      const start = performance.now();
-      await new Promise<void>((resolve) => {
-        const loop = (now: number) => {
-          const el = now - start;
-          const pr = Math.min(el / DURATION_MS, 0.999999);
-          paint(ctx, field, pr);
-          setExportPct(Math.min(1, el / DURATION_MS));
-          if (el < DURATION_MS) requestAnimationFrame(loop);
-          else resolve();
-        };
-        requestAnimationFrame(loop);
-      });
+      const plan = await pickExportPlan(tpl.W, tpl.H);
+      let out: { blob: Blob; ext: string };
+      if (plan.kind !== "realtime") {
+        try {
+          out = await renderCfrVideo(ctx, cvs, field, plan, paint, setExportPct);
+        } catch (err) {
+          // Encoder died mid-flight (rare) — fall back rather than fail the export.
+          console.warn("CFR export failed, falling back to MediaRecorder:", err);
+          setExportPct(0);
+          out = await recordRealtime(ctx, cvs, field, paint, setExportPct);
+        }
+      } else {
+        out = await recordRealtime(ctx, cvs, field, paint, setExportPct);
+      }
 
-      rec.stop();
-      await stopped;
-      const blob = new Blob(chunks, { type: mime || "video/webm" });
-      const url = URL.createObjectURL(blob);
+      const url = URL.createObjectURL(out.blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `chroma-${slots.length}shapes-${format.replace(":", "x")}-15s.${ext}`;
+      a.download = `chroma-${slots.length}shapes-${format.replace(":", "x")}-15s.${out.ext}`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -411,11 +609,14 @@ export function ChromaStudio() {
               {playing ? "❚❚ Pause" : "▶ Play 15s"}
             </button>
             <button type="button" className="cm-btn cm-btn-primary" onClick={exportVideo} disabled={exporting}>
-              {exporting ? `Recording ${Math.round(exportPct * 100)}%` : "Export video"}
+              {exporting ? `Rendering ${Math.round(exportPct * 100)}%` : "Export video"}
             </button>
           </div>
           <p className="t-mono cm-note">
-            {slots.length} SHAPES · {secondsEach}s EACH · {tpl.W}×{tpl.H} · MP4/WEBM
+            {slots.length} SHAPES · {secondsEach}s EACH · {tpl.W}×{tpl.H} ·{" "}
+            {exportKind == null || exportKind === "realtime"
+              ? "MP4/WEBM · REALTIME"
+              : `${exportKind.toUpperCase()} · 30FPS CONSTANT`}
           </p>
         </div>
 
