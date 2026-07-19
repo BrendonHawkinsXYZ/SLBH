@@ -71,6 +71,23 @@ type ExportPlan =
   | { kind: "mp4" | "webm"; config: VideoEncoderConfig }
   | { kind: "realtime" };
 
+// ── Grounds ──
+// White/black are opaque posters. "Green" paints broadcast chroma green for a
+// one-tap key in editors that can't ingest alpha video (CapCut, IG edits) —
+// H.264 MP4 simply has no alpha channel, so a keyable ground is the portable
+// route. "Alpha" is true transparency: recorded as VP9/VP8 WebM, the only
+// alpha-capable format a browser can produce (MediaRecorder preserves canvas
+// alpha; WebCodecs cannot yet emit alpha, so this ground records in realtime).
+type Ground = "white" | "black" | "green" | "alpha";
+const GROUNDS: { id: Ground; label: string }[] = [
+  { id: "white", label: "White" },
+  { id: "black", label: "Black" },
+  { id: "green", label: "Green" },
+  { id: "alpha", label: "Alpha" },
+];
+const KEY_GREEN = "#00B140"; // broadcast chroma green
+const WEBM_ALPHA_CANDIDATES = ["video/webm;codecs=vp9", "video/webm;codecs=vp8", "video/webm"];
+
 async function pickCodecConfig(
   candidates: string[],
   width: number,
@@ -209,8 +226,9 @@ async function recordRealtime(
   field: SequenceField,
   paintFrame: PaintFn,
   onProgress: (p: number) => void,
+  mimeCandidates?: string[],
 ): Promise<{ blob: Blob; ext: string }> {
-  const candidates = [
+  const candidates = mimeCandidates ?? [
     "video/mp4;codecs=avc1.42E01E",
     "video/mp4",
     "video/webm;codecs=vp9",
@@ -325,7 +343,9 @@ export function ChromaStudio() {
   const [active, setActive] = useState(0);
   const [format, setFormat] = useState<Format>("4:5");
   const [pixelScale, setPixelScale] = useState(1);
-  const [background, setBackground] = useState<"white" | "black">("white");
+  const [background, setBackground] = useState<Ground>("white");
+  // Text ink for grounds that don't imply one (green key / alpha overlays).
+  const [ink, setInk] = useState<"white" | "black">("white");
   const [topText, setTopText] = useState("What does emotion look like?");
   const [playing, setPlaying] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -366,11 +386,21 @@ export function ChromaStudio() {
   const paint = useCallback(
     (ctx: CanvasRenderingContext2D, field: SequenceField | null, progress: number) => {
       ctx.clearRect(0, 0, tpl.W, tpl.H);
-      ctx.fillStyle = background === "white" ? "#ffffff" : "#0A0A0A";
-      ctx.fillRect(0, 0, tpl.W, tpl.H);
+      if (background !== "alpha") {
+        ctx.fillStyle =
+          background === "white" ? "#ffffff" : background === "green" ? KEY_GREEN : "#0A0A0A";
+        ctx.fillRect(0, 0, tpl.W, tpl.H);
+      }
 
-      const ink = background === "white" ? "#0A0A0A" : "#F5F5F3";
-      ctx.fillStyle = ink;
+      const inkColor =
+        background === "white"
+          ? "#0A0A0A"
+          : background === "black"
+            ? "#F5F5F3"
+            : ink === "black"
+              ? "#0A0A0A"
+              : "#F5F5F3";
+      ctx.fillStyle = inkColor;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
 
@@ -389,13 +419,13 @@ export function ChromaStudio() {
 
       field?.render(ctx, tpl.cx, tpl.cy, progress);
 
-      ctx.fillStyle = ink;
+      ctx.fillStyle = inkColor;
       ctx.font = `700 ${tpl.wordFont}px ${fonts.orbitron}`;
       setTracking(ctx, tpl.wordTrack);
       ctx.fillText("CHROMA", tpl.W / 2 + tpl.wordTrack / 2, tpl.wordY);
       setTracking(ctx, 0);
     },
-    [background, topText, fonts, tpl],
+    [background, ink, topText, fonts, tpl],
   );
 
   // Draw the preview canvas (template scaled to fit), at a given progress.
@@ -523,11 +553,18 @@ export function ChromaStudio() {
   // Detect once (per format) which export pipeline is available, so the
   // readout under the preview can say what the export will actually produce.
   const [exportKind, setExportKind] = useState<ExportPlan["kind"] | null>(null);
+  const [webmAlphaOk, setWebmAlphaOk] = useState(true);
   useEffect(() => {
     let cancelled = false;
     pickExportPlan(tpl.W, tpl.H)
       .then((p) => !cancelled && setExportKind(p.kind))
       .catch(() => !cancelled && setExportKind("realtime"));
+    Promise.resolve().then(() => {
+      const ok =
+        typeof MediaRecorder !== "undefined" &&
+        WEBM_ALPHA_CANDIDATES.some((m) => MediaRecorder.isTypeSupported(m));
+      if (!cancelled) setWebmAlphaOk(ok);
+    });
     return () => {
       cancelled = true;
     };
@@ -549,25 +586,32 @@ export function ChromaStudio() {
       if (!ctx) throw new Error("no 2d context");
       ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-      const plan = await pickExportPlan(tpl.W, tpl.H);
       let out: { blob: Blob; ext: string };
-      if (plan.kind !== "realtime") {
-        try {
-          out = await renderCfrVideo(ctx, cvs, field, plan, paint, setExportPct);
-        } catch (err) {
-          // Encoder died mid-flight (rare) — fall back rather than fail the export.
-          console.warn("CFR export failed, falling back to MediaRecorder:", err);
-          setExportPct(0);
+      if (background === "alpha") {
+        // True transparency: only MediaRecorder WebM can carry canvas alpha —
+        // WebCodecs can't emit an alpha plane, and H.264 MP4 has no alpha at all.
+        out = await recordRealtime(ctx, cvs, field, paint, setExportPct, WEBM_ALPHA_CANDIDATES);
+      } else {
+        const plan = await pickExportPlan(tpl.W, tpl.H);
+        if (plan.kind !== "realtime") {
+          try {
+            out = await renderCfrVideo(ctx, cvs, field, plan, paint, setExportPct);
+          } catch (err) {
+            // Encoder died mid-flight (rare) — fall back rather than fail the export.
+            console.warn("CFR export failed, falling back to MediaRecorder:", err);
+            setExportPct(0);
+            out = await recordRealtime(ctx, cvs, field, paint, setExportPct);
+          }
+        } else {
           out = await recordRealtime(ctx, cvs, field, paint, setExportPct);
         }
-      } else {
-        out = await recordRealtime(ctx, cvs, field, paint, setExportPct);
       }
 
+      const groundTag = background === "green" ? "-greenkey" : background === "alpha" ? "-alpha" : "";
       const url = URL.createObjectURL(out.blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `chroma-${slots.length}shapes-${format.replace(":", "x")}-15s.${out.ext}`;
+      a.download = `chroma-${slots.length}shapes-${format.replace(":", "x")}-15s${groundTag}.${out.ext}`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -577,7 +621,7 @@ export function ChromaStudio() {
       setExportPct(0);
       drawPreview(0);
     }
-  }, [exporting, slots, pixelScale, tpl, format, paint, drawPreview]);
+  }, [exporting, slots, pixelScale, tpl, format, background, paint, drawPreview]);
 
   const family = familyById(activeSlot.familyId);
   const secondsEach = (15 / slots.length).toFixed(1);
@@ -614,9 +658,13 @@ export function ChromaStudio() {
           </div>
           <p className="t-mono cm-note">
             {slots.length} SHAPES · {secondsEach}s EACH · {tpl.W}×{tpl.H} ·{" "}
-            {exportKind == null || exportKind === "realtime"
-              ? "MP4/WEBM · REALTIME"
-              : `${exportKind.toUpperCase()} · 30FPS CONSTANT`}
+            {background === "alpha"
+              ? webmAlphaOk
+                ? "WEBM · TRANSPARENT · REALTIME"
+                : "ALPHA UNSUPPORTED IN THIS BROWSER"
+              : exportKind == null || exportKind === "realtime"
+                ? "MP4/WEBM · REALTIME"
+                : `${exportKind.toUpperCase()} · 30FPS CONSTANT${background === "green" ? " · KEY " + KEY_GREEN : ""}`}
           </p>
         </div>
 
@@ -732,19 +780,37 @@ export function ChromaStudio() {
               <Dial spec={PIXEL_SPEC} value={pixelScale} onChange={setPixelScale} />
             </div>
             <span className="cm-dial-label cm-out-label">Ground</span>
-            <div className="cm-seg cm-seg-2">
-              {(["white", "black"] as const).map((bg) => (
+            <div className="cm-seg cm-seg-4">
+              {GROUNDS.map((g) => (
                 <button
-                  key={bg}
+                  key={g.id}
                   type="button"
                   className="cm-seg-btn"
-                  data-active={bg === background}
-                  onClick={() => setBackground(bg)}
+                  data-active={g.id === background}
+                  onClick={() => setBackground(g.id)}
                 >
-                  {bg}
+                  {g.label}
                 </button>
               ))}
             </div>
+            {(background === "green" || background === "alpha") && (
+              <>
+                <span className="cm-dial-label cm-out-label cm-out-gap2">Ink</span>
+                <div className="cm-seg cm-seg-2">
+                  {(["white", "black"] as const).map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      className="cm-seg-btn"
+                      data-active={c === ink}
+                      onClick={() => setInk(c)}
+                    >
+                      {c}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
             <label className="cm-textfield">
               <span className="cm-dial-label">Top line</span>
               <input type="text" value={topText} maxLength={60} onChange={(e) => setTopText(e.target.value)} />
@@ -779,6 +845,15 @@ export function ChromaStudio() {
         .cm-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
         .cm-bg-white { background: #ffffff; }
         .cm-bg-black { background: #000000; }
+        .cm-bg-green { background: ${KEY_GREEN}; }
+        .cm-bg-alpha {
+          background-color: #e7e7e7;
+          background-image:
+            linear-gradient(45deg, #c9c9c9 25%, transparent 25%, transparent 75%, #c9c9c9 75%),
+            linear-gradient(45deg, #c9c9c9 25%, transparent 25%, transparent 75%, #c9c9c9 75%);
+          background-size: 22px 22px;
+          background-position: 0 0, 11px 11px;
+        }
         .cm-transport { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .cm-note { opacity: 0.5; text-align: center; margin: 0; }
 
@@ -848,6 +923,8 @@ export function ChromaStudio() {
         .cm-out-gap { margin-top: 18px; margin-bottom: 18px; }
         .cm-seg { display: grid; border: 0.5px solid var(--hairline-strong); }
         .cm-seg-2 { grid-template-columns: 1fr 1fr; }
+        .cm-seg-4 { grid-template-columns: repeat(4, 1fr); }
+        .cm-out-gap2 { margin-top: 14px; }
         .cm-seg-btn {
           font-family: var(--font-inter), sans-serif; font-weight: 500; font-size: 11px;
           letter-spacing: 0.1em; text-transform: uppercase; padding: 12px 8px;
