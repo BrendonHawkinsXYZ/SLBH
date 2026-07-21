@@ -9,7 +9,7 @@ import { DURATIONS, EASE_OUT } from "@/lib/motion";
    First load renders instantly (SSR paint stays visible; the discovery
    stagger owns the intro) — the fade only plays on client navigations.
    The flex styles must mirror <main> in layout.tsx: pages like the home
-   hero and /field-notes rely on the flex chain to fill the viewport. */
+   hero rely on the flex chain to fill the viewport. */
 
 let hasLoadedOnce = false;
 
