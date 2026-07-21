@@ -8,7 +8,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   // Top-level content pages. (/research redirects to the latest paper, so the
   // individual papers below stand in for it.)
-  const staticPaths = ["", "/projects", "/studio", "/field-notes"];
+  const staticPaths = ["", "/projects", "/studio"];
   const staticEntries: MetadataRoute.Sitemap = staticPaths.map((path) => ({
     url: `${SITE_URL}${path}`,
     lastModified: now,
@@ -23,9 +23,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  // Project detail pages. Some projects override their link via `href`
-  // (e.g. Field Notes -> /field-notes); only internal paths belong here, and
-  // anything already covered by a static entry is dropped.
+  // Project detail pages. Some projects override their link via `href`;
+  // only internal paths belong here, and anything already covered by a
+  // static entry is dropped.
   const projectPaths = new Set<string>();
   for (const project of getAllProjects()) {
     const path = project.href ?? `/projects/${project.slug}`;

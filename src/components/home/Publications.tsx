@@ -18,7 +18,7 @@ const PUBLICATIONS: Publication[] = [
     title:
       "Emotion as System: A Foundational Architecture for Affect, Meaning, Perception, and Action",
     status: "PREPRINT",
-    venue: "arXiv",
+    venue: "SSRN",
     href: "/research/emotion-as-system",
   },
 ];
