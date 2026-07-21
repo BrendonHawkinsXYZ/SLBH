@@ -100,21 +100,21 @@ export default async function PaperPage({
         </div>
       </section>
 
-      {/* ── Primary actions: PDF + DOI ── */}
+      {/* ── Primary actions: venue link + DOI ── */}
       <section className="container-page rp-actions">
-        {paper.pdf ? (
+        {paper.venueUrl ? (
           <a
-            href={paper.pdf}
+            href={paper.venueUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="rp-action rp-action--primary"
           >
-            <span className="rp-action-label">VIEW PDF</span>
+            <span className="rp-action-label">READ HERE</span>
             <span className="rp-action-arrow">↗︎</span>
           </a>
         ) : (
           <span className="rp-action rp-action--disabled">
-            <span className="rp-action-label">PDF FORTHCOMING</span>
+            <span className="rp-action-label">FORTHCOMING</span>
           </span>
         )}
 
@@ -126,20 +126,6 @@ export default async function PaperPage({
             className="rp-action rp-action--secondary"
           >
             <span className="rp-action-label">DOI · {paper.doi}</span>
-            <span className="rp-action-arrow">↗︎</span>
-          </a>
-        )}
-
-        {paper.venueUrl && (
-          <a
-            href={paper.venueUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rp-action rp-action--secondary"
-          >
-            <span className="rp-action-label">
-              {paper.venue.toUpperCase()} LISTING
-            </span>
             <span className="rp-action-arrow">↗︎</span>
           </a>
         )}
