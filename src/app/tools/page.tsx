@@ -4,7 +4,7 @@ import Link from "next/link";
 // same policy as the instruments it links to. Bookmark route for the lab.
 export const metadata = {
   title: "Tools — SLBH",
-  description: "Index of the lab's browser instruments — shapes, steps, trace, chroma.",
+  description: "Index of the lab's browser instruments — shapes, steps, trace, chroma, bloom.",
   robots: { index: false, follow: false },
 };
 
@@ -44,6 +44,13 @@ const TOOLS: Tool[] = [
     href: "/chroma",
     line: "Two to five shapes morphing across a 15-second loop on the CHROMA poster.",
     out: "MP4 · WEBM",
+  },
+  {
+    index: "05",
+    title: "Bloom",
+    href: "/bloom",
+    line: "A seed shape that grows, unfurls, and morphs into an end shape — play and scrub the bloom.",
+    out: "ANIMATION",
   },
 ];
 
