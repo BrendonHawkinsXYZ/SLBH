@@ -12,6 +12,7 @@ import {
   PALETTE,
   PIXEL_SPEC,
   SHOES,
+  figureCode,
   figureSettings,
   figureSlug,
   figureSummary,
@@ -242,10 +243,11 @@ export function FigureStudio() {
         <p className="t-mono fig-kicker">FIGURE / GENERATOR</p>
         <h1 className="t-h1 fig-title">Character instrument</h1>
         <p className="fig-deck">
-          A pixel figure, built from the lab&rsquo;s palette. Dress it — base
-          layer, outer layer, bottom, shoes, one accessory — turn the grain and
-          the direction, choose a ground, and export a clean PNG or the settings
-          as JSON.
+          One agender body and a wardrobe of typed parts — base layer, outer
+          layer, bottom, shoes, one accessory — stacked in a fixed order, the
+          way an avatar system builds a look. Every slot can be emptied down to
+          briefs. Turn the grain and the direction, choose a ground, and export
+          a clean PNG or the settings as JSON.
         </p>
       </div>
 
@@ -270,6 +272,10 @@ export function FigureStudio() {
               ))}
             </span>
           </div>
+
+          <span className="t-mono fig-code" title="Figure code — one part group per slot">
+            {figureCode(params)}
+          </span>
 
           <div className="fig-looks-block">
             <span className="t-label fig-legend fig-looks-legend">Saved looks</span>
@@ -541,6 +547,15 @@ export function FigureStudio() {
           flex-shrink: 0;
         }
         .fig-meta-sw { width: 18px; height: 14px; display: block; }
+
+        .fig-code {
+          display: block;
+          max-width: 380px;
+          opacity: 0.35;
+          letter-spacing: 0.06em;
+          word-break: break-all;
+          line-height: 1.6;
+        }
 
         .fig-looks-block { max-width: 380px; }
         .fig-looks-legend { display: block; margin-bottom: 12px; }
