@@ -12,7 +12,6 @@ import {
   PALETTE,
   PIXEL_SPEC,
   SHOES,
-  figureFromSettings,
   figureSettings,
   figureSlug,
   figureSummary,
@@ -30,12 +29,11 @@ const BACKGROUNDS: { id: Background; label: string }[] = [
   { id: "transparent", label: "Transparent" },
 ];
 
-// 2:3 frame — the figure sits inside it with room to breathe, and the preview
-// and the PNG are the same composition at different sizes.
-const EXPORT_SIZES = [
-  { w: 800, h: 1200 },
-  { w: 1600, h: 2400 },
-];
+const TABS = ["Render", "Demographics", "Clothing"];
+
+// One PNG size, rendered fresh at exact pixels — the 2:3 frame the preview uses.
+const EXPORT_W = 1600;
+const EXPORT_H = 2400;
 
 const MAX_LOOKS = 8;
 
@@ -158,18 +156,14 @@ function LookThumb({ look, onPick }: { look: FigureParams; onPick: () => void })
 
 export function FigureStudio() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const fileRef = useRef<HTMLInputElement | null>(null);
 
   const [params, setParams] = useState<FigureParams>(DEFAULT_FIGURE);
   const [background, setBackground] = useState<Background>("black");
+  const [tab, setTab] = useState(0);
   const [looks, setLooks] = useState<FigureParams[]>([]);
-  const [showJson, setShowJson] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   const dress = isDress(params);
   const summary = useMemo(() => figureSummary(params), [params]);
-  const settings = useMemo(() => figureSettings(params, background), [params, background]);
-  const json = useMemo(() => JSON.stringify(settings, null, 2), [settings]);
 
   // ── Live preview: device-pixel canvas so the sprite blocks stay crisp;
   //    rAF-coalesced so dragging a dial never queues more than one frame. ──
@@ -212,70 +206,35 @@ export function FigureStudio() {
     setLooks((all) => [...all, params].slice(-MAX_LOOKS));
   }, [params]);
 
-  // ── Export: render fresh at exact pixel size, then download a PNG. ──
-  const exportPng = useCallback(
-    (w: number, h: number) => {
-      const c = document.createElement("canvas");
-      c.width = w;
-      c.height = h;
-      const ctx = c.getContext("2d");
-      if (!ctx) return;
-      renderFigure(ctx, w, h, params, background);
-      c.toBlob((blob) => {
-        if (!blob) return;
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `slbh-figure-${figureSlug(params)}-${background}-${w}x${h}.png`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-      }, "image/png");
-    },
-    [params, background],
-  );
-
-  const copyJson = useCallback(() => {
-    navigator.clipboard?.writeText(json).then(
-      () => {
-        setCopied(true);
-        window.setTimeout(() => setCopied(false), 1400);
-      },
-      () => {},
-    );
-  }, [json]);
-
-  const downloadJson = useCallback(() => {
-    const blob = new Blob([json], { type: "application/json" });
+  const download = useCallback((blob: Blob, name: string) => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `slbh-figure-${figureSlug(params)}.json`;
+    a.download = name;
     document.body.appendChild(a);
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
-  }, [json, params]);
-
-  // Settings round-trip: the exported JSON loads back as the same look.
-  const loadJson = useCallback((file: File) => {
-    file
-      .text()
-      .then((raw) => {
-        let parsed: unknown;
-        try {
-          parsed = JSON.parse(raw);
-        } catch {
-          return;
-        }
-        const next = figureFromSettings(parsed);
-        if (next) setParams(next);
-        const bg = (parsed as { render?: { background?: string } })?.render?.background;
-        if (bg === "white" || bg === "black" || bg === "transparent") setBackground(bg);
-      })
-      .catch(() => {});
   }, []);
+
+  // ── Export: render fresh at exact pixel size, then download a PNG. ──
+  const exportPng = useCallback(() => {
+    const c = document.createElement("canvas");
+    c.width = EXPORT_W;
+    c.height = EXPORT_H;
+    const ctx = c.getContext("2d");
+    if (!ctx) return;
+    renderFigure(ctx, EXPORT_W, EXPORT_H, params, background);
+    c.toBlob((blob) => {
+      if (!blob) return;
+      download(blob, `slbh-figure-${figureSlug(params)}-${background}-${EXPORT_W}x${EXPORT_H}.png`);
+    }, "image/png");
+  }, [params, background, download]);
+
+  const exportJson = useCallback(() => {
+    const json = JSON.stringify(figureSettings(params, background), null, 2);
+    download(new Blob([json], { type: "application/json" }), `slbh-figure-${figureSlug(params)}.json`);
+  }, [params, background, download]);
 
   return (
     <section className="fig">
@@ -313,12 +272,7 @@ export function FigureStudio() {
           </div>
 
           <div className="fig-looks-block">
-            <div className="fig-legend-row">
-              <span className="t-label fig-legend">Saved looks</span>
-              <button type="button" className="t-mono fig-mini" onClick={saveLook}>
-                Save look
-              </button>
-            </div>
+            <span className="t-label fig-legend fig-looks-legend">Saved looks</span>
             {looks.length > 0 ? (
               <div className="fig-looks">
                 {looks.map((look, i) => (
@@ -331,174 +285,168 @@ export function FigureStudio() {
           </div>
         </div>
 
-        {/* ── Controls ── */}
+        {/* ── Controls: three tabs, same split as the source instrument ── */}
         <div className="fig-controls">
-          {/* Roll */}
-          <fieldset className="fig-field">
-            <legend className="t-label fig-legend">Roll a look</legend>
-            <div className="fig-row-2">
+          <div className="fig-tabs" role="tablist" aria-label="Settings">
+            {TABS.map((name, i) => (
               <button
+                key={name}
                 type="button"
-                className="fig-btn fig-btn-primary"
-                onClick={() => setParams((p) => randomFigure(p))}
+                role="tab"
+                id={`fig-tab-${i}`}
+                aria-selected={i === tab}
+                aria-controls="fig-panel"
+                className="fig-tab"
+                data-active={i === tab}
+                onClick={() => setTab(i)}
               >
-                Randomize
+                {name}
               </button>
-              <button type="button" className="fig-btn" onClick={() => setParams((p) => randomFigureColors(p))}>
-                Colours only
+            ))}
+          </div>
+
+          <div className="fig-panel" id="fig-panel" role="tabpanel" aria-labelledby={`fig-tab-${tab}`}>
+            {tab === 0 ? (
+              <>
+                <fieldset className="fig-field">
+                  <Dial
+                    label="Pixels"
+                    value={params.px}
+                    min={PIXEL_SPEC.min}
+                    max={PIXEL_SPEC.max}
+                    step={PIXEL_SPEC.step}
+                    format={(v) => v.toFixed(1)}
+                    onChange={(v) => set("px", v)}
+                  />
+                </fieldset>
+                <fieldset className="fig-field">
+                  <legend className="t-label fig-legend">Direction</legend>
+                  <Chips label="Direction" options={DIRECTIONS} value={params.dir} onPick={(i) => set("dir", i)} />
+                </fieldset>
+                <fieldset className="fig-field">
+                  <legend className="t-label fig-legend">Background</legend>
+                  <div className="fig-seg">
+                    {BACKGROUNDS.map((bg) => (
+                      <button
+                        key={bg.id}
+                        type="button"
+                        className="fig-seg-btn"
+                        data-active={bg.id === background}
+                        aria-pressed={bg.id === background}
+                        onClick={() => setBackground(bg.id)}
+                      >
+                        {bg.label}
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
+              </>
+            ) : null}
+
+            {tab === 1 ? (
+              <>
+                <fieldset className="fig-field">
+                  <legend className="t-label fig-legend">Skin</legend>
+                  <Swatches label="Skin colour" value={params.skin} onPick={(i) => set("skin", i)} />
+                </fieldset>
+                <fieldset className="fig-field">
+                  <legend className="t-label fig-legend">Hair colour</legend>
+                  <Swatches label="Hair colour" value={params.hair} onPick={(i) => set("hair", i)} />
+                </fieldset>
+                <fieldset className="fig-field">
+                  <legend className="t-label fig-legend">Hair type</legend>
+                  <Chips label="Hair type" options={HAIR_TYPES} value={params.hairT} onPick={(i) => set("hairT", i)} />
+                </fieldset>
+                <fieldset className="fig-field">
+                  <div className="fig-dials">
+                    <Dial
+                      label="Weight"
+                      value={params.weight}
+                      min={0}
+                      max={1}
+                      step={0.02}
+                      format={(v) => v.toFixed(2)}
+                      onChange={(v) => set("weight", v)}
+                    />
+                    <Dial
+                      label="Height"
+                      value={params.height}
+                      min={0}
+                      max={1}
+                      step={0.02}
+                      format={(v) => v.toFixed(2)}
+                      onChange={(v) => set("height", v)}
+                    />
+                  </div>
+                </fieldset>
+              </>
+            ) : null}
+
+            {tab === 2 ? (
+              <>
+                <fieldset className="fig-field">
+                  <legend className="t-label fig-legend">Base layer</legend>
+                  <Chips label="Base layer" options={BASE_LAYERS} value={params.base} onPick={(i) => set("base", i)} />
+                  <Swatches label="Base layer colour" value={params.basec} onPick={(i) => set("basec", i)} />
+                </fieldset>
+                <fieldset className="fig-field">
+                  <legend className="t-label fig-legend">Outer layer</legend>
+                  <Chips label="Outer layer" options={OUTER_LAYERS} value={params.out} onPick={(i) => set("out", i)} />
+                  <Swatches label="Outer layer colour" value={params.outc} onPick={(i) => set("outc", i)} />
+                </fieldset>
+                <fieldset className="fig-field">
+                  <legend className="t-label fig-legend">Bottom</legend>
+                  <Chips
+                    label="Bottom"
+                    options={BOTTOMS}
+                    value={params.bot}
+                    onPick={(i) => set("bot", i)}
+                    disabled={dress}
+                  />
+                  {dress ? (
+                    <p className="fig-note">The dress takes the bottom slot — garment choice is inactive.</p>
+                  ) : null}
+                  <span className="t-mono fig-sub">Bottom &amp; shoe colour</span>
+                  <Swatches label="Bottom colour" value={params.botc} onPick={(i) => set("botc", i)} />
+                </fieldset>
+                <fieldset className="fig-field">
+                  <legend className="t-label fig-legend">Shoes</legend>
+                  <Chips label="Shoes" options={SHOES} value={params.sho} onPick={(i) => set("sho", i)} />
+                </fieldset>
+                <fieldset className="fig-field">
+                  <legend className="t-label fig-legend">Accessory</legend>
+                  <Chips label="Accessory" options={ACCESSORIES} value={params.acc} onPick={(i) => set("acc", i)} />
+                </fieldset>
+              </>
+            ) : null}
+          </div>
+
+          {/* ── Actions ── */}
+          <div className="fig-actions">
+            <button type="button" className="fig-btn fig-btn-primary" onClick={() => setParams((p) => randomFigure(p))}>
+              Randomize
+            </button>
+            <button type="button" className="fig-btn" onClick={() => setParams((p) => randomFigureColors(p))}>
+              Colours
+            </button>
+            <button type="button" className="fig-btn" onClick={saveLook}>
+              Save look
+            </button>
+          </div>
+
+          <fieldset className="fig-field">
+            <legend className="t-label fig-legend">Export</legend>
+            <div className="fig-export">
+              <button type="button" className="fig-btn" onClick={exportPng}>
+                PNG
+              </button>
+              <button type="button" className="fig-btn" onClick={exportJson}>
+                .JSON
               </button>
             </div>
-          </fieldset>
-
-          {/* Render */}
-          <fieldset className="fig-field">
-            <legend className="t-label fig-legend">Render</legend>
-            <Dial
-              label="Pixels"
-              value={params.px}
-              min={PIXEL_SPEC.min}
-              max={PIXEL_SPEC.max}
-              step={PIXEL_SPEC.step}
-              format={(v) => v.toFixed(1)}
-              onChange={(v) => set("px", v)}
-            />
-            <span className="t-mono fig-sub">Direction</span>
-            <Chips label="Direction" options={DIRECTIONS} value={params.dir} onPick={(i) => set("dir", i)} />
-          </fieldset>
-
-          {/* Demographics */}
-          <fieldset className="fig-field">
-            <legend className="t-label fig-legend">Skin &amp; hair</legend>
-            <span className="t-mono fig-sub">Skin</span>
-            <Swatches label="Skin colour" value={params.skin} onPick={(i) => set("skin", i)} />
-            <span className="t-mono fig-sub">Hair colour</span>
-            <Swatches label="Hair colour" value={params.hair} onPick={(i) => set("hair", i)} />
-            <span className="t-mono fig-sub">Hair type</span>
-            <Chips label="Hair type" options={HAIR_TYPES} value={params.hairT} onPick={(i) => set("hairT", i)} />
-          </fieldset>
-
-          <fieldset className="fig-field">
-            <legend className="t-label fig-legend">Body</legend>
-            <div className="fig-dials">
-              <Dial
-                label="Weight"
-                value={params.weight}
-                min={0}
-                max={1}
-                step={0.02}
-                format={(v) => v.toFixed(2)}
-                onChange={(v) => set("weight", v)}
-              />
-              <Dial
-                label="Height"
-                value={params.height}
-                min={0}
-                max={1}
-                step={0.02}
-                format={(v) => v.toFixed(2)}
-                onChange={(v) => set("height", v)}
-              />
-            </div>
-          </fieldset>
-
-          {/* Clothing */}
-          <fieldset className="fig-field">
-            <legend className="t-label fig-legend">Base layer</legend>
-            <Chips label="Base layer" options={BASE_LAYERS} value={params.base} onPick={(i) => set("base", i)} />
-            <Swatches label="Base layer colour" value={params.basec} onPick={(i) => set("basec", i)} />
-          </fieldset>
-
-          <fieldset className="fig-field">
-            <legend className="t-label fig-legend">Outer layer</legend>
-            <Chips label="Outer layer" options={OUTER_LAYERS} value={params.out} onPick={(i) => set("out", i)} />
-            <Swatches label="Outer layer colour" value={params.outc} onPick={(i) => set("outc", i)} />
-          </fieldset>
-
-          <fieldset className="fig-field">
-            <legend className="t-label fig-legend">Bottom</legend>
-            <Chips
-              label="Bottom"
-              options={BOTTOMS}
-              value={params.bot}
-              onPick={(i) => set("bot", i)}
-              disabled={dress}
-            />
-            {dress ? <p className="fig-note">The dress takes the bottom slot — garment choice is inactive.</p> : null}
-            <span className="t-mono fig-sub">Bottom &amp; shoe colour</span>
-            <Swatches label="Bottom colour" value={params.botc} onPick={(i) => set("botc", i)} />
-          </fieldset>
-
-          <fieldset className="fig-field">
-            <legend className="t-label fig-legend">Shoes</legend>
-            <Chips label="Shoes" options={SHOES} value={params.sho} onPick={(i) => set("sho", i)} />
-          </fieldset>
-
-          <fieldset className="fig-field">
-            <legend className="t-label fig-legend">Accessory</legend>
-            <Chips label="Accessory" options={ACCESSORIES} value={params.acc} onPick={(i) => set("acc", i)} />
-          </fieldset>
-
-          {/* Background */}
-          <fieldset className="fig-field">
-            <legend className="t-label fig-legend">Background</legend>
-            <div className="fig-seg">
-              {BACKGROUNDS.map((bg) => (
-                <button
-                  key={bg.id}
-                  type="button"
-                  className="fig-seg-btn"
-                  data-active={bg.id === background}
-                  aria-pressed={bg.id === background}
-                  onClick={() => setBackground(bg.id)}
-                >
-                  {bg.label}
-                </button>
-              ))}
-            </div>
-          </fieldset>
-
-          {/* Export */}
-          <fieldset className="fig-field">
-            <legend className="t-label fig-legend">Export PNG</legend>
-            <div className="fig-row-2">
-              {EXPORT_SIZES.map((s) => (
-                <button key={s.w} type="button" className="fig-btn" onClick={() => exportPng(s.w, s.h)}>
-                  {s.w} × {s.h}
-                </button>
-              ))}
-            </div>
-          </fieldset>
-
-          <fieldset className="fig-field">
-            <div className="fig-legend-row">
-              <legend className="t-label fig-legend">Export settings</legend>
-              <button type="button" className="t-mono fig-mini" onClick={() => setShowJson((v) => !v)}>
-                {showJson ? "Hide JSON" : "Show JSON"}
-              </button>
-            </div>
-            <div className="fig-row-3">
-              <button type="button" className="fig-btn" onClick={copyJson}>
-                {copied ? "Copied ✓" : "Copy"}
-              </button>
-              <button type="button" className="fig-btn" onClick={downloadJson}>
-                .json
-              </button>
-              <button type="button" className="fig-btn" onClick={() => fileRef.current?.click()}>
-                Load
-              </button>
-              <input
-                ref={fileRef}
-                type="file"
-                accept="application/json,.json"
-                className="fig-file"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) loadJson(file);
-                  e.target.value = "";
-                }}
-              />
-            </div>
-            {showJson ? <pre className="t-mono fig-json">{json}</pre> : null}
+            <p className="t-mono fig-export-note">
+              {EXPORT_W} × {EXPORT_H} · {background.toUpperCase()} GROUND · SETTINGS AS JSON
+            </p>
           </fieldset>
         </div>
       </div>
@@ -543,11 +491,15 @@ export function FigureStudio() {
 
         /* ── Preview ── */
         .fig-stage {
-          position: sticky;
-          top: 88px;
           display: flex;
           flex-direction: column;
           gap: 16px;
+        }
+        /* Sticky only once the stage has its own column — stacked, Chrome
+           constrains it to the grid container, not the row, and it rides over
+           the controls below it. */
+        @media (min-width: 900px) {
+          .fig-stage { position: sticky; top: 88px; }
         }
         .fig-frame {
           position: relative;
@@ -591,6 +543,7 @@ export function FigureStudio() {
         .fig-meta-sw { width: 18px; height: 14px; display: block; }
 
         .fig-looks-block { max-width: 380px; }
+        .fig-looks-legend { display: block; margin-bottom: 12px; }
         .fig-looks {
           display: flex;
           flex-wrap: wrap;
@@ -615,16 +568,39 @@ export function FigureStudio() {
         .fig-controls {
           display: flex;
           flex-direction: column;
-          gap: 30px;
+          gap: 26px;
+        }
+
+        /* Tabs — Render / Demographics / Clothing */
+        .fig-tabs {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          border: 0.5px solid var(--hairline-strong);
+        }
+        .fig-tab {
+          font-family: var(--font-inter), sans-serif;
+          font-weight: 500;
+          font-size: 11px;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          padding: 14px 8px;
+          background: transparent;
+          color: var(--ground);
+          border: none;
+          border-right: 0.5px solid var(--hairline-strong);
+          cursor: pointer;
+          transition: background var(--d-fast) var(--ease-out), color var(--d-fast) var(--ease-out);
+        }
+        .fig-tab:last-child { border-right: none; }
+        .fig-tab:hover { background: var(--hairline); }
+        .fig-tab[data-active="true"] { background: var(--ground); color: var(--signal); }
+
+        .fig-panel {
+          display: flex;
+          flex-direction: column;
+          gap: 26px;
         }
         .fig-field { border: none; padding: 0; margin: 0; min-width: 0; }
-        .fig-legend-row {
-          display: flex;
-          align-items: baseline;
-          justify-content: space-between;
-          gap: 12px;
-          margin-bottom: 14px;
-        }
         .fig-legend { padding: 0; opacity: 0.72; }
         .fig-field > .fig-legend { margin-bottom: 14px; }
         .fig-sub {
@@ -634,17 +610,6 @@ export function FigureStudio() {
           text-transform: uppercase;
           margin: 18px 0 9px;
         }
-        .fig-mini {
-          background: none;
-          border: none;
-          cursor: pointer;
-          color: var(--ground);
-          opacity: 0.6;
-          padding: 0;
-          letter-spacing: 0.08em;
-          transition: opacity var(--d-fast) var(--ease-out);
-        }
-        .fig-mini:hover { opacity: 1; }
 
         /* ── Chips ── */
         .fig-chips { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -678,8 +643,10 @@ export function FigureStudio() {
           max-height: 140px;
           overflow-y: auto;
           padding: 4px;
+          margin-top: 10px;
           border: 0.5px solid var(--hairline);
         }
+        .fig-field > .fig-swatches:first-of-type { margin-top: 0; }
         .fig-sw {
           width: 16px;
           height: 16px;
@@ -757,7 +724,7 @@ export function FigureStudio() {
           font-size: 11px;
           letter-spacing: 0.18em;
           text-transform: uppercase;
-          padding: 14px 18px;
+          padding: 14px 12px;
           border: 1px solid var(--ground);
           background: transparent;
           color: var(--ground);
@@ -768,21 +735,12 @@ export function FigureStudio() {
         .fig-btn-primary { background: var(--ground); color: var(--signal); }
         .fig-btn-primary:hover { opacity: 0.85; }
 
-        .fig-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .fig-row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .fig-file { display: none; }
-
-        .fig-json {
-          margin: 14px 0 0;
-          padding: 14px;
-          border: 0.5px solid var(--hairline-strong);
-          font-size: 10px;
-          line-height: 1.6;
-          max-height: 280px;
-          overflow: auto;
-          white-space: pre-wrap;
-          word-break: break-word;
-          opacity: 0.75;
+        .fig-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .fig-export { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .fig-export-note {
+          margin: 12px 0 0;
+          opacity: 0.45;
+          letter-spacing: 0.14em;
         }
       `}</style>
     </section>
