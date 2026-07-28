@@ -306,6 +306,17 @@ const HC: HairSpec[] = [
   { cy: 10, ch: 10, spike: true },
 ];
 
+/** How far a hairstyle reaches from the centre of the head — what a hood, or
+ *  anything else that has to go over it, needs to clear. */
+function hairSpan(ht: number): number {
+  if (ht === 6) return 16; // bald — just the head
+  const c = HC[ht];
+  let half = 16 + (c.wide ?? 0);
+  if (c.sw) half = Math.max(half, 16 + c.sw);
+  if (c.locs) half = Math.max(half, 23);
+  return half;
+}
+
 // 3 × 5 glyphs, one row per bit-triple, for the printed tees.
 const FONT: Record<string, number[]> = {
   C: [7, 4, 4, 4, 7],
@@ -390,6 +401,12 @@ const GRAIN_SOLID = 2;
 const GUTTER_FRAC = 0.15;
 /** Leg width at the ankle, as a fraction of the width at the thigh. */
 const LEG_TAPER = 0.76;
+/**
+ * The shoulder line. Torso, base layer, and sleeves all start here so the
+ * shoulders read as one edge — start the body above the garment and a band of
+ * it shows across the top of every top in the wardrobe.
+ */
+const SHOULDER = 59;
 
 /**
  * Draw the figure at bake resolution. Coordinates are logical (100 × 182, y
@@ -547,7 +564,7 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
     poly([at(-1, 116), at(1, 116), at(1, 174), at(-1, 174)], s);
     poly([at(0.2, 116), at(1, 116), at(1, 174), at(0.2, 174)], tint(s, 0.78));
   });
-  vol(50 - 14.5 * w, 62, 29 * w, 56, s);
+  vol(50 - 14.5 * w, SHOULDER, 29 * w, 118 - SHOULDER, s);
 
   // Briefs — the layer that never comes off, in the bottom colour. They have to
   // clear the hips down their whole depth: the leg tops run to 14w, so a
@@ -665,8 +682,8 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
   if (!B.bare) {
     poly(
       [
-        [50 - B.tw * w, 64],
-        [50 + B.tw * w, 64],
+        [50 - B.tw * w, SHOULDER],
+        [50 + B.tw * w, SHOULDER],
         [50 + bHemW * w, B.hem],
         [50 - bHemW * w, B.hem],
       ],
@@ -674,8 +691,8 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
     );
     poly(
       [
-        [50 + 1 * w, 64],
-        [50 + B.tw * w, 64],
+        [50 + 1 * w, SHOULDER],
+        [50 + B.tw * w, SHOULDER],
         [50 + bHemW * w, B.hem],
         [50 + 1 * w, B.hem],
       ],
@@ -694,13 +711,22 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
           [50 - B.tw * w - 6 * w, 6.4 * w],
           [50 + B.tw * w - 0.4 * w, 6.4 * w],
         ];
+  // Sleeves hang from the same shoulder line as the body, so the armhole is a
+  // single edge rather than a notch.
   ax.forEach((A) => {
-    if (B.slv < 0) vol(A[0], 66, A[1], 46, s);
+    if (B.slv < 0) vol(A[0], SHOULDER, A[1], 112 - SHOULDER, s);
     else if (B.slv === 0) {
-      vol(A[0], 66, A[1], 22, bcol);
-      vol(A[0] + 0.4, 88, A[1] - 0.8, 24, s);
-    } else vol(A[0], 66, A[1], 46, bcol);
+      vol(A[0], SHOULDER, A[1], 22, bcol);
+      vol(A[0] + 0.4, SHOULDER + 22, A[1] - 0.8, 90 - SHOULDER, s);
+    } else vol(A[0], SHOULDER, A[1], 112 - SHOULDER, bcol);
   });
+
+  // Head position and, if there's a raised hood, the box it occupies — the hood
+  // is painted in two passes around the head, so both need these up front.
+  const hx = 50 + (side ? D.fx * 0.35 : 0);
+  const hoodH = hairSpan(P.hairT) + 3.6;
+  const hoodTop = Math.max(0.5, Math.min(P.hairT === 6 ? 14 : HC[P.hairT].cy, 12) - 4);
+  const hoodBot = SHOULDER + 4;
 
   // ── Overalls: bib and straps, worn over the base layer ──
   if (ovr && !back) {
@@ -761,7 +787,12 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
             [50 - O.w * w - 5.4 * w, 6.6 * w],
             [50 + O.w * w - 1.2 * w, 6.6 * w],
           ];
-    oa.forEach((A) => vol(A[0], 62, A[1], O.hem < 110 ? 42 : 48, oc));
+    // Sleeves start on the coat's own shoulder line — a unit lower and the
+    // outer shoulder opens into a notch on every coat in the wardrobe.
+    oa.forEach((A) => vol(A[0], O.top, A[1], (O.hem < 110 ? 104 : 110) - O.top, oc));
+    // The back of a raised hood goes behind the head, so the hood reads as a
+    // volume the head sits inside rather than a rim stuck to it.
+    if (O.hood === "up") box(hx - hoodH, hoodTop, hoodH * 2, hoodBot - hoodTop, tint(oc, 0.7));
     // Open front: whatever is underneath shows through the slit.
     if (O.slit && !back) {
       const cut = Math.min(B.hem, O.hem);
@@ -810,7 +841,7 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
   }
 
   ax.forEach((A) => vol(A[0] + 0.3, 112, A[1] - 0.6, 10, s)); // hands
-  if (!side) vol(45.5, 54, 9, 12, tint(s, 0.86)); // neck
+  if (!side) vol(45.5, 54, 9, 8, tint(s, 0.86)); // neck, tucked into the neckline
   if (B.neck) vol(50 - 8, 48, 16, 14, tint(bcol, 1.06)); // turtleneck collar
   if (B.collar && !back) {
     poly(
@@ -857,7 +888,6 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
   }
 
   // ── Head ──
-  const hx = 50 + (side ? D.fx * 0.35 : 0);
   vol(hx - 16, 16, 32, 42, s);
   hairMass(hx, hr, P.hairT, back, side);
   if (ac === 5) {
@@ -866,11 +896,15 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
   }
   // Hood up goes over the hair — and over a beanie, if there's one under it.
   if (O?.hood === "up") {
-    // Down to the shoulder line, or the back of the head shows under the hem.
-    box(hx - 19.5, 7, 39, 11, oc);
-    box(hx - 19.5, 7, 6.5, 51, tint(oc, 1.06));
-    box(hx + 13, 7, 6.5, 51, tint(oc, 0.82));
-    if (back) box(hx - 19.5, 7, 39, 55, tint(oc, 0.94)); // from behind it's a solid mass
+    // The front of the hood, over the hair. It takes the shape of what's inside
+    // it — clearing the widest hairstyle by a margin and sitting above its crown,
+    // so an afro or locs push it out instead of poking through — and it runs
+    // past the shoulder line to meet the body.
+    const cw = Math.max(6.5, hoodH * 0.28);
+    box(hx - hoodH, hoodTop, hoodH * 2, 12, oc);
+    box(hx - hoodH, hoodTop, cw, hoodBot - hoodTop, tint(oc, 1.06));
+    box(hx + hoodH - cw, hoodTop, cw, hoodBot - hoodTop, tint(oc, 0.82));
+    if (back) box(hx - hoodH, hoodTop, hoodH * 2, hoodBot - hoodTop, tint(oc, 0.94));
   }
 
   const fd = lum(s) > 120 ? 0.5 : 1.7; // features read dark on light skin, light on dark
