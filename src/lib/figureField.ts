@@ -11,7 +11,7 @@
  * preview at higher fidelity rather than a different composition.
  *
  * Everything is a pure function of `FigureParams` plus a background, so a look
- * round-trips through JSON exactly.
+ * is fully described by the settings the tool exports.
  */
 
 export type Background = "white" | "black" | "transparent";
@@ -303,6 +303,10 @@ const BAKE_W = FIG_W * SC;
 const BAKE_H = FIG_H * SC;
 /** Inset of the figure inside its frame, as a fraction of the frame height. */
 export const MARGIN_FRAC = 0.06;
+/** Below this grain the mosaic closes up and reads as a solid figure. */
+const GRAIN_SOLID = 2;
+/** Gutter between blocks once the grain is coarse, as a fraction of the cell. */
+const GUTTER_FRAC = 0.15;
 
 /**
  * Draw the figure at bake resolution. Coordinates are logical (100 × 182, y
@@ -775,14 +779,22 @@ export function renderFigure(
 
   const px = Math.min(PIXEL_SPEC.max, Math.max(PIXEL_SPEC.min, p.px));
   const scale = dh / FIG_H;
+  const step = px * scale; // one cell, in destination pixels
   const cols = Math.ceil(FIG_W / px);
   const rows = Math.ceil(FIG_H / px);
-  // Fine grain reads as a solid mass, coarse grain wants a visible gutter.
-  const gap = px < 1.1 ? 0.97 : 0.85;
-  const block = Math.max(1, Math.round(px * scale * gap));
+  // Fine grain reads as one solid mass — blocks butt together, no seam at any
+  // render size. Coarse grain is a mosaic, so it keeps a gutter proportional to
+  // the block (never below a pixel, or it would vanish in a small preview).
+  const gutter = px < GRAIN_SOLID ? 0 : Math.max(1, Math.round(step * GUTTER_FRAC));
+  // Block edges come from the rounded lattice rather than a rounded width, so
+  // the cells tile exactly instead of drifting in and out of alignment.
+  const edgeX = (i: number) => Math.round(x0 + i * step);
+  const edgeY = (j: number) => Math.round(y0 + j * step);
 
   let lastFill = "";
   for (let i = 0; i < cols; i++) {
+    const bx = edgeX(i);
+    const bw = Math.max(1, edgeX(i + 1) - bx - gutter);
     for (let j = 0; j < rows; j++) {
       const sx = Math.floor((i + 0.5) * px * SC);
       const sy = Math.floor((j + 0.5) * px * SC);
@@ -794,7 +806,8 @@ export function renderFigure(
         ctx.fillStyle = fill;
         lastFill = fill;
       }
-      ctx.fillRect(Math.round(x0 + i * px * scale), Math.round(y0 + j * px * scale), block, block);
+      const by = edgeY(j);
+      ctx.fillRect(bx, by, bw, Math.max(1, edgeY(j + 1) - by - gutter));
     }
   }
 }
@@ -915,41 +928,6 @@ export function figureSettings(p: FigureParams, background: Background) {
     },
     state: { ...p, px: +p.px.toFixed(1), weight: +p.weight.toFixed(2), height: +p.height.toFixed(2) },
   };
-}
-
-/** Accept a settings object back — tolerant of hand-edited or partial JSON. */
-export function figureFromSettings(raw: unknown): FigureParams | null {
-  if (!raw || typeof raw !== "object") return null;
-  const src = raw as Record<string, unknown>;
-  const state = (typeof src.state === "object" && src.state ? src.state : src) as Record<string, unknown>;
-  const out: FigureParams = { ...DEFAULT_FIGURE };
-  let hits = 0;
-  const clampIdx = (v: unknown, len: number, fallback: number) => {
-    if (typeof v !== "number" || !Number.isFinite(v)) return fallback;
-    hits++;
-    return Math.min(len - 1, Math.max(0, Math.round(v)));
-  };
-  const clampNum = (v: unknown, lo: number, hi: number, fallback: number) => {
-    if (typeof v !== "number" || !Number.isFinite(v)) return fallback;
-    hits++;
-    return Math.min(hi, Math.max(lo, v));
-  };
-  out.px = clampNum(state.px, PIXEL_SPEC.min, PIXEL_SPEC.max, DEFAULT_FIGURE.px);
-  out.dir = clampIdx(state.dir, DIRECTIONS.length, DEFAULT_FIGURE.dir);
-  out.skin = clampIdx(state.skin, PALETTE.length, DEFAULT_FIGURE.skin);
-  out.hair = clampIdx(state.hair, PALETTE.length, DEFAULT_FIGURE.hair);
-  out.hairT = clampIdx(state.hairT, HAIR_TYPES.length, DEFAULT_FIGURE.hairT);
-  out.weight = clampNum(state.weight, 0, 1, DEFAULT_FIGURE.weight);
-  out.height = clampNum(state.height, 0, 1, DEFAULT_FIGURE.height);
-  out.base = clampIdx(state.base, BASE_LAYERS.length, DEFAULT_FIGURE.base);
-  out.basec = clampIdx(state.basec, PALETTE.length, DEFAULT_FIGURE.basec);
-  out.out = clampIdx(state.out, OUTER_LAYERS.length, DEFAULT_FIGURE.out);
-  out.outc = clampIdx(state.outc, PALETTE.length, DEFAULT_FIGURE.outc);
-  out.bot = clampIdx(state.bot, BOTTOMS.length, DEFAULT_FIGURE.bot);
-  out.botc = clampIdx(state.botc, PALETTE.length, DEFAULT_FIGURE.botc);
-  out.sho = clampIdx(state.sho, SHOES.length, DEFAULT_FIGURE.sho);
-  out.acc = clampIdx(state.acc, ACCESSORIES.length, DEFAULT_FIGURE.acc);
-  return hits > 0 ? out : null;
 }
 
 /** Filename stem for exports — the look, in one slug. */
