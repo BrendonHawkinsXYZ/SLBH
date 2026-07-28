@@ -138,6 +138,9 @@ function mix(a: string, b: string, t: number): string {
 // ── Wardrobe vocabulary ─────────────────────────────────────────────────────
 
 export const DIRECTIONS = ["Front", "3/4", "Side", "3/4 back", "Back"];
+/** Where the key light sits. Flat drops the shaded faces entirely. */
+export const LIGHTS = ["Left", "Flat", "Right"];
+const LIGHT_SIGN = [1, 0, -1];
 export const HAIR_TYPES = ["Crop", "Bowl", "Long", "Bun", "Locs", "Afro", "Bald", "Spiky"];
 // Every slot starts with "None" — the figure can be undressed down to briefs,
 // which are the one thing that never comes off. The body underneath is a single
@@ -335,6 +338,7 @@ const FONT: Record<string, number[]> = {
 export type FigureParams = {
   px: number; // block size, in logical units (the sprite grain)
   dir: number;
+  light: number; // index into LIGHTS
   skin: number;
   hair: number;
   hairT: number;
@@ -355,6 +359,7 @@ export const PIXEL_SPEC = { min: 0.6, max: 4.4, step: 0.1 };
 export const DEFAULT_FIGURE: FigureParams = {
   px: 1.2,
   dir: 1,
+  light: 0,
   skin: colorIndex("#F7C59F"),
   hair: colorIndex("#3A0D3F"),
   hairT: 2,
@@ -433,12 +438,21 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
     ctx.fillStyle = col;
     ctx.fillRect(x * SC, Y(y), w * SC, Y(y + h) - Y(y));
   };
-  // A box plus its shaded right third — the whole figure is built from these,
-  // which is what gives every limb the same one-light-source read.
+  // One light source for the whole figure: +1 from the left (shadow falls to
+  // the right), 0 flat, -1 from the right. Every shaded face is placed off this
+  // sign, so the figure never lights two ways at once.
+  const key = LIGHT_SIGN[P.light] ?? 1;
+  /** Tint for one half of a two-tone detail — `a` on the side the light is on. */
+  const duo = (col: string, leftSide: boolean, a: number, b: number) =>
+    tint(col, key === 0 ? 1 : leftSide === key > 0 ? a : b);
+
+  // A box plus its shaded third — the whole figure is built from these, which
+  // is what gives every limb the same one-light-source read.
   const vol = (x: number, y: number, w: number, h: number, col: string) => {
     if (h <= 0) return;
     box(x, y, w, h, col);
-    box(x + w * 0.6, y, w * 0.4, h, tint(col, 0.78));
+    if (!key) return;
+    box(key > 0 ? x + w * 0.6 : x, y, w * 0.4, h, tint(col, 0.78));
   };
   const poly = (pts: [number, number][], col: string) => {
     ctx.fillStyle = col;
@@ -449,6 +463,54 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
     });
     ctx.closePath();
     ctx.fill();
+  };
+  /**
+   * A garment panel: a quad given by its left and right edge at top and bottom,
+   * plus the shaded band down whichever side the light isn't on. Everything the
+   * figure wears is one of these, so shading a new garment is free.
+   */
+  const panel = (
+    yt: number,
+    lt: number,
+    rt: number,
+    yb: number,
+    lb: number,
+    rb: number,
+    col: string,
+    frac = 0.47,
+  ) => {
+    poly(
+      [
+        [lt, yt],
+        [rt, yt],
+        [rb, yb],
+        [lb, yb],
+      ],
+      col,
+    );
+    if (!key) return;
+    const sc = tint(col, 0.78);
+    if (key > 0) {
+      poly(
+        [
+          [rt - (rt - lt) * frac, yt],
+          [rt, yt],
+          [rb, yb],
+          [rb - (rb - lb) * frac, yb],
+        ],
+        sc,
+      );
+    } else {
+      poly(
+        [
+          [lt, yt],
+          [lt + (rt - lt) * frac, yt],
+          [lb + (rb - lb) * frac, yb],
+          [lb, yb],
+        ],
+        sc,
+      );
+    }
   };
   const text = (str: string, cx: number, cy: number, u: number, col: string) => {
     const wp = str.length * 4 - 1;
@@ -490,8 +552,8 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
       if (side) {
         vol(HL - c.sw, st, c.sw + 4, sb - st, tint(hcol, 0.9));
       } else {
-        vol(HL - c.sw, st, c.sw + 2.5, sb - st, tint(hcol, 1.05));
-        vol(HR - 2.5, st, c.sw + 2.5, sb - st, tint(hcol, 0.8));
+        vol(HL - c.sw, st, c.sw + 2.5, sb - st, duo(hcol, true, 1.05, 0.8));
+        vol(HR - 2.5, st, c.sw + 2.5, sb - st, duo(hcol, false, 1.05, 0.8));
       }
     }
     if (c.locs) {
@@ -560,9 +622,8 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
   legs.forEach((L) => {
     const cx = L[0] + L[1] / 2;
     const h = (L[1] - 1.2) / 2;
-    const at = (f: number, y: number): [number, number] => [cx + f * h * legMul(y), y];
-    poly([at(-1, 116), at(1, 116), at(1, 174), at(-1, 174)], s);
-    poly([at(0.2, 116), at(1, 116), at(1, 174), at(0.2, 174)], tint(s, 0.78));
+    const at = (y: number) => h * legMul(y);
+    panel(116, cx - at(116), cx + at(116), 174, cx - at(174), cx + at(174), s, 0.4);
   });
   vol(50 - 14.5 * w, SHOULDER, 29 * w, 118 - SHOULDER, s);
 
@@ -570,24 +631,7 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
   // clear the hips down their whole depth: the leg tops run to 14w, so a
   // tapered cut leaves the body showing at the outside of the seat.
   const brf = tint(pc, 1.06);
-  poly(
-    [
-      [50 - 14.8 * w, 105],
-      [50 + 14.8 * w, 105],
-      [50 + 14.2 * w, 124],
-      [50 - 14.2 * w, 124],
-    ],
-    brf,
-  );
-  poly(
-    [
-      [50 + 1 * w, 105],
-      [50 + 14.8 * w, 105],
-      [50 + 14.2 * w, 124],
-      [50 + 1 * w, 124],
-    ],
-    tint(brf, 0.78),
-  );
+  panel(105, 50 - 14.8 * w, 50 + 14.8 * w, 124, 50 - 14.2 * w, 50 + 14.2 * w, brf);
 
   const feet = () =>
     legs.forEach((L) => {
@@ -609,24 +653,7 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
   if (bottom.puddle) feet();
 
   if (skirt) {
-    poly(
-      [
-        [50 - 15 * w, 116],
-        [50 + 15 * w, 116],
-        [50 + 19 * w, sHem],
-        [50 - 19 * w, sHem],
-      ],
-      pc,
-    );
-    poly(
-      [
-        [50 + 2 * w, 116],
-        [50 + 15 * w, 116],
-        [50 + 19 * w, sHem],
-        [50 + 2 * w, sHem],
-      ],
-      tint(pc, 0.78),
-    );
+    panel(116, 50 - 15 * w, 50 + 15 * w, sHem, 50 - 19 * w, 50 + 19 * w, pc);
   } else if (bottom.kind === "pants" && pantStop > 116) {
     // Trouser leg by profile: hip → knee → hem. A cropped or tucked leg is cut
     // off wherever it stops, so it keeps the taper it had at that height.
@@ -657,9 +684,9 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
       const cx = L[0] + L[1] / 2;
       const hw = L[1] / 2;
       const edge = (f: number) => ys.map((y) => [cx + f * hw * mul(y), y] as [number, number]);
-      const right = edge(1).reverse();
-      poly([...edge(-1), ...right], pc);
-      poly([...edge(0.2), ...right], tint(pc, 0.78));
+      poly([...edge(-1), ...edge(1).reverse()], pc);
+      if (key > 0) poly([...edge(0.2), ...edge(1).reverse()], tint(pc, 0.78));
+      else if (key < 0) poly([...edge(-1), ...edge(-0.2).reverse()], tint(pc, 0.78));
       if (bottom.crease) box(cx - 0.5, 118, 1, pantStop - 118, tint(pc, 1.12));
       if (bottom.puddle) {
         // Two folds where the fabric stacks up on the floor.
@@ -680,24 +707,7 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
   const fl = B.flare ?? 0;
   const bHemW = fl ? fl : B.tw - 1.6;
   if (!B.bare) {
-    poly(
-      [
-        [50 - B.tw * w, SHOULDER],
-        [50 + B.tw * w, SHOULDER],
-        [50 + bHemW * w, B.hem],
-        [50 - bHemW * w, B.hem],
-      ],
-      bcol,
-    );
-    poly(
-      [
-        [50 + 1 * w, SHOULDER],
-        [50 + B.tw * w, SHOULDER],
-        [50 + bHemW * w, B.hem],
-        [50 + 1 * w, B.hem],
-      ],
-      tint(bcol, 0.78),
-    );
+    panel(SHOULDER, 50 - B.tw * w, 50 + B.tw * w, B.hem, 50 - bHemW * w, 50 + bHemW * w, bcol);
     if (B.print && !back && !side) {
       const u = 26 / (B.print.length * 4 - 1);
       text(B.print, 50, 80, u, lum(bcol) > 110 ? tint(bcol, 0.32) : tint(bcol, 2.4));
@@ -730,51 +740,17 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
 
   // ── Overalls: bib and straps, worn over the base layer ──
   if (ovr && !back) {
-    poly(
-      [
-        [50 - 13 * w, 78],
-        [50 + 13 * w, 78],
-        [50 + 14 * w, 118],
-        [50 - 14 * w, 118],
-      ],
-      pc,
-    );
-    poly(
-      [
-        [50 + 1 * w, 78],
-        [50 + 13 * w, 78],
-        [50 + 14 * w, 118],
-        [50 + 1 * w, 118],
-      ],
-      tint(pc, 0.78),
-    );
-    vol(50 - 11 * w, 64, 3.6, 15, tint(pc, 1.08));
-    vol(50 + 7.4 * w, 64, 3.6, 15, tint(pc, 0.88));
-    box(50 - 11.4 * w, 77, 4.4, 3, tint(pc, 1.3)); // buckles
-    box(50 + 7 * w, 77, 4.4, 3, tint(pc, 1.15));
+    panel(78, 50 - 13 * w, 50 + 13 * w, 118, 50 - 14 * w, 50 + 14 * w, pc);
+    vol(50 - 11 * w, 64, 3.6, 15, duo(pc, true, 1.08, 0.88));
+    vol(50 + 7.4 * w, 64, 3.6, 15, duo(pc, false, 1.08, 0.88));
+    box(50 - 11.4 * w, 77, 4.4, 3, duo(pc, true, 1.3, 1.15)); // buckles
+    box(50 + 7 * w, 77, 4.4, 3, duo(pc, false, 1.3, 1.15));
   }
 
   // ── Outer layer ──
   if (O) {
     const oB = O.slit ? O.w + 1.2 : O.w - 1.4;
-    poly(
-      [
-        [50 - O.w * w, O.top],
-        [50 + O.w * w, O.top],
-        [50 + oB * w, O.hem],
-        [50 - oB * w, O.hem],
-      ],
-      oc,
-    );
-    poly(
-      [
-        [50 + 1 * w, O.top],
-        [50 + O.w * w, O.top],
-        [50 + oB * w, O.hem],
-        [50 + 1 * w, O.hem],
-      ],
-      tint(oc, 0.78),
-    );
+    panel(O.top, 50 - O.w * w, 50 + O.w * w, O.hem, 50 - oB * w, 50 + oB * w, oc);
     if (O.quilt) {
       for (let k = 1; k < 4; k++) {
         box(50 - O.w * w, O.top + k * ((O.hem - O.top) / 4), O.w * 2 * w, 1.4, tint(oc, 0.66));
@@ -822,7 +798,7 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
           [50 - 2.5, 88],
           [50 - 9, 74],
         ],
-        tint(oc, 1.14),
+        duo(oc, true, 1.14, 0.9),
       );
       poly(
         [
@@ -831,7 +807,7 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
           [50 + 9, 74],
           [50 + 2.5, 88],
         ],
-        tint(oc, 0.9),
+        duo(oc, false, 1.14, 0.9),
       );
     }
     if (O.buttons && !back) {
@@ -851,7 +827,7 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
         [50 - 1, 72],
         [50 - 8, 68],
       ],
-      tint(bcol, 1.14),
+      duo(bcol, true, 1.14, 0.92),
     );
     poly(
       [
@@ -860,14 +836,14 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
         [50 + 8, 68],
         [50 + 1, 72],
       ],
-      tint(bcol, 0.92),
+      duo(bcol, false, 1.14, 0.92),
     );
   }
   if (ac === 4) {
     // Scarf: a wrap plus two tails.
     vol(50 - 11, 50, 22, 13, tint(oc, 1.18));
-    vol(50 - 9, 62, 5, 30, tint(oc, 1.06));
-    vol(50 + 4, 62, 5, 22, tint(oc, 0.9));
+    vol(50 - 9, 62, 5, 30, duo(oc, true, 1.06, 0.9));
+    vol(50 + 4, 62, 5, 22, duo(oc, false, 1.06, 0.9));
   }
   // A tie only reads if something is open over it, so it goes on last of the
   // neckline layers — knot at the collar, blade down the shirt.
@@ -902,8 +878,8 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
     // past the shoulder line to meet the body.
     const cw = Math.max(6.5, hoodH * 0.28);
     box(hx - hoodH, hoodTop, hoodH * 2, 12, oc);
-    box(hx - hoodH, hoodTop, cw, hoodBot - hoodTop, tint(oc, 1.06));
-    box(hx + hoodH - cw, hoodTop, cw, hoodBot - hoodTop, tint(oc, 0.82));
+    box(hx - hoodH, hoodTop, cw, hoodBot - hoodTop, duo(oc, true, 1.06, 0.82));
+    box(hx + hoodH - cw, hoodTop, cw, hoodBot - hoodTop, duo(oc, false, 1.06, 0.82));
     if (back) box(hx - hoodH, hoodTop, hoodH * 2, hoodBot - hoodTop, tint(oc, 0.94));
   }
 
@@ -1145,7 +1121,7 @@ export function figureSummary(p: FigureParams): string[] {
       ? "BRIEFS"
       : BOTTOMS[p.bot].toUpperCase();
   return [
-    `PX ${p.px.toFixed(1)} · ${DIRECTIONS[p.dir].toUpperCase()} · ${HAIR_TYPES[p.hairT].toUpperCase()}`,
+    `PX ${p.px.toFixed(1)} · ${DIRECTIONS[p.dir].toUpperCase()} · ${HAIR_TYPES[p.hairT].toUpperCase()} · LIGHT ${LIGHTS[p.light].toUpperCase()}`,
     `${top}${p.out ? ` + ${OUTER_LAYERS[p.out].toUpperCase()}` : ""}`,
     `${leg}${isTucked(p) ? " TUCKED · " : " · "}${SHOES[p.sho].toUpperCase()}`,
   ];
@@ -1178,6 +1154,7 @@ export function figureSettings(p: FigureParams, background: Background) {
     render: {
       pixels: +p.px.toFixed(1),
       direction: DIRECTIONS[p.dir],
+      light: LIGHTS[p.light],
       background,
     },
     demographics: {

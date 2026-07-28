@@ -8,6 +8,7 @@ import {
   DEFAULT_FIGURE,
   DIRECTIONS,
   HAIR_TYPES,
+  LIGHTS,
   OUTER_LAYERS,
   PALETTE,
   PIXEL_SPEC,
@@ -328,6 +329,14 @@ export function FigureStudio() {
                 <fieldset className="fig-field">
                   <legend className="t-label fig-legend">Direction</legend>
                   <Chips label="Direction" options={DIRECTIONS} value={params.dir} onPick={(i) => set("dir", i)} />
+                </fieldset>
+                <fieldset className="fig-field">
+                  <legend className="t-label fig-legend">Light</legend>
+                  <Chips label="Light" options={LIGHTS} value={params.light} onPick={(i) => set("light", i)} />
+                  <p className="fig-note">
+                    Where the key light sits — shading falls on the opposite side. Flat drops it
+                    entirely.
+                  </p>
                 </fieldset>
                 <fieldset className="fig-field">
                   <legend className="t-label fig-legend">Background</legend>
