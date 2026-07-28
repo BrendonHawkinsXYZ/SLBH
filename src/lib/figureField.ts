@@ -139,9 +139,16 @@ function mix(a: string, b: string, t: number): string {
 
 export const DIRECTIONS = ["Front", "3/4", "Side", "3/4 back", "Back"];
 export const HAIR_TYPES = ["Crop", "Bowl", "Long", "Bun", "Locs", "Afro", "Bald", "Spiky"];
+// Every slot starts with "None" — the figure can be undressed down to briefs,
+// which are the one thing that never comes off. The body underneath is a single
+// agender build: no chest shaping, no gendered proportions, nothing the
+// wardrobe doesn't put there.
 export const BASE_LAYERS = [
+  "None",
   "Tank",
+  "Crop tank",
   "Tee",
+  "Crop tee",
   "Sheer tank",
   "Crewneck",
   "Turtleneck",
@@ -150,16 +157,37 @@ export const BASE_LAYERS = [
   "SLBH tee",
   "Dress",
 ];
-export const OUTER_LAYERS = ["None", "Long coat", "Trench", "Big blazer", "Cropped knit", "Puffer"];
-export const BOTTOMS = ["Wide-leg", "Flare", "Straight", "Midi skirt", "Long skirt", "Shorts", "Overalls"];
-export const SHOES = ["Chunky boot", "Thigh boot", "Sneaker", "Loafer", "Derby"];
-export const ACCESSORIES = ["None", "Shades", "Tote", "Shoulder bag", "Scarf", "Beanie"];
+export const OUTER_LAYERS = [
+  "None",
+  "Hoodie",
+  "Hood up",
+  "Long coat",
+  "Trench",
+  "Big blazer",
+  "Suit jacket",
+  "Cropped knit",
+  "Puffer",
+];
+export const BOTTOMS = [
+  "None",
+  "Wide-leg",
+  "Flare",
+  "Straight",
+  "Suit trouser",
+  "Midi skirt",
+  "Long skirt",
+  "Shorts",
+  "Overalls",
+];
+export const SHOES = ["Barefoot", "Chunky boot", "Thigh boot", "Sneaker", "Loafer", "Derby"];
+export const ACCESSORIES = ["None", "Shades", "Tote", "Shoulder bag", "Scarf", "Beanie", "Tie"];
 
 type DirSpec = { w: number; fx: number; face: number; arm: number };
 type BaseSpec = {
   tw: number; // torso half-width at the shoulder
   hem: number;
   slv: number; // -1 sleeveless, 0 short, 1 long
+  bare?: boolean; // nothing on the torso — the body shows
   sheer?: boolean;
   neck?: boolean;
   collar?: boolean;
@@ -167,8 +195,34 @@ type BaseSpec = {
   dress?: boolean;
   flare?: number;
 };
-type OuterSpec = { top: number; hem: number; w: number; slit?: boolean; belt?: boolean; quilt?: boolean };
-type ShoeSpec = { shaft: number; tuck: boolean; rz: number; foot: number };
+type OuterSpec = {
+  top: number;
+  hem: number;
+  w: number;
+  slit?: boolean; // open front — what's under it shows through
+  belt?: boolean;
+  quilt?: boolean;
+  hood?: "down" | "up";
+  pocket?: boolean; // kangaroo pocket
+  cords?: boolean;
+  lapel?: boolean;
+  buttons?: boolean;
+};
+// Trousers are a profile, not a box: a width multiplier on the leg at the hip,
+// at the knee, and at the hem. That's what makes a flare a flare — the leg has
+// to pull in at the knee before it can open out.
+type BottomSpec = {
+  kind: "none" | "pants" | "skirt";
+  hip?: number;
+  knee?: number;
+  hem?: number;
+  stop?: number; // where the leg ends (below 172 = cropped, above = it drags)
+  hemY?: number; // skirt hem
+  bib?: boolean;
+  crease?: boolean;
+  puddle?: boolean; // fabric pools over the shoe instead of stopping at it
+};
+type ShoeSpec = { shaft: number; tuck: boolean; rz: number; foot: number; bare?: boolean };
 type HairSpec = {
   cy: number;
   ch: number;
@@ -191,8 +245,11 @@ const DIR: DirSpec[] = [
 ];
 
 const BSPEC: BaseSpec[] = [
+  { tw: 15, hem: 118, slv: -1, bare: true },
   { tw: 16, hem: 120, slv: -1 },
+  { tw: 16, hem: 102, slv: -1 },
   { tw: 18, hem: 120, slv: 0 },
+  { tw: 18, hem: 102, slv: 0 },
   { tw: 16, hem: 126, slv: -1, sheer: true },
   { tw: 19, hem: 122, slv: 1 },
   { tw: 18, hem: 120, slv: 1, neck: true },
@@ -204,14 +261,33 @@ const BSPEC: BaseSpec[] = [
 
 const OSPEC: (OuterSpec | null)[] = [
   null,
+  { top: 60, hem: 124, w: 21.8, hood: "down", pocket: true, cords: true },
+  { top: 60, hem: 124, w: 21.8, hood: "up", pocket: true, cords: true },
   { top: 60, hem: 150, w: 21.4, slit: true },
   { top: 60, hem: 146, w: 21.4, slit: true, belt: true },
   { top: 58, hem: 128, w: 23, slit: true },
+  { top: 60, hem: 128, w: 20, slit: true, lapel: true, buttons: true },
   { top: 60, hem: 104, w: 21.4 },
   { top: 60, hem: 118, w: 23, quilt: true },
 ];
 
+// The flare is the shape the whole leg vocabulary is built around: pulled in
+// hard at the knee, then opened to well past the width of the body and left
+// long enough to break over the shoe and pool on the floor.
+const BOT_SPEC: BottomSpec[] = [
+  { kind: "none" },
+  { kind: "pants", hip: 1.06, knee: 1.3, hem: 1.66 },
+  { kind: "pants", hip: 1, knee: 0.76, hem: 2.7, stop: 179, puddle: true },
+  { kind: "pants", hip: 1, knee: 1, hem: 1.04 },
+  { kind: "pants", hip: 1.04, knee: 0.94, hem: 1.18, crease: true },
+  { kind: "skirt", hemY: 148 },
+  { kind: "skirt", hemY: 170 },
+  { kind: "pants", hip: 1.08, knee: 1.12, hem: 1.14, stop: 140 },
+  { kind: "pants", hip: 1.14, knee: 1.12, hem: 1.22, bib: true },
+];
+
 const SSPEC: ShoeSpec[] = [
+  { shaft: 0, tuck: false, rz: 0.6, foot: 6, bare: true },
   { shaft: 162, tuck: false, rz: 3, foot: 9 },
   { shaft: 128, tuck: true, rz: 1.4, foot: 9 },
   { shaft: 0, tuck: false, rz: 2.4, foot: 9 },
@@ -273,19 +349,24 @@ export const DEFAULT_FIGURE: FigureParams = {
   hairT: 2,
   weight: 0.4,
   height: 0.5,
-  base: 6,
+  base: BASE_LAYERS.indexOf("CHROMA tee"),
   basec: colorIndex("#2B2F4A"),
   out: 0,
   outc: colorIndex("#4A4E69"),
-  bot: 6,
+  bot: BOTTOMS.indexOf("Overalls"),
   botc: colorIndex("#38405F"),
-  sho: 2,
+  sho: SHOES.indexOf("Sneaker"),
   acc: 0,
 };
 
 /** A dress fills the bottom slot, so the bottom garment is inert. */
 export function isDress(p: FigureParams): boolean {
   return !!BSPEC[p.base].dress;
+}
+
+/** Nothing on the torso and nothing on the legs — briefs only. */
+export function isBare(p: FigureParams): boolean {
+  return !!BSPEC[p.base].bare && BOT_SPEC[p.bot].kind === "none";
 }
 
 /** Trousers tucked into the boot shaft (thigh boots). */
@@ -307,11 +388,24 @@ export const MARGIN_FRAC = 0.06;
 const GRAIN_SOLID = 2;
 /** Gutter between blocks once the grain is coarse, as a fraction of the cell. */
 const GUTTER_FRAC = 0.15;
+/** Leg width at the ankle, as a fraction of the width at the thigh. */
+const LEG_TAPER = 0.76;
 
 /**
  * Draw the figure at bake resolution. Coordinates are logical (100 × 182, y
  * down from the crown); `Y()` folds in the height dial by scaling everything
  * about the ground line, so a taller figure grows upward from its feet.
+ *
+ * Order is the whole game — a garment is only "over" another because it was
+ * painted after it. Back to front:
+ *
+ *   body (legs, torso) → briefs → boot shaft → bottom → shoe → base layer and
+ *   sleeves → overall bib → outer layer, its sleeves, its open front → hands,
+ *   neck, collars, tie, scarf → head → hair → hat or hood → face → carried bags
+ *
+ * Two exceptions earn their place: a tuck-in boot jumps ahead of the trousers
+ * (that's what tucking is), and a hem long enough to puddle is painted after
+ * the shoe so the fabric breaks over it instead of stopping at the ankle.
  */
 function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: string | null): void {
   const hs = 0.9 + P.height * 0.2;
@@ -412,13 +506,17 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
   const back = D.face < 0;
   const side = P.dir === 2;
   const dress = !!B.dress;
-  const ovr = bt === 6 && !dress;
-  const skirt = (bt === 3 || bt === 4) && !dress;
-  const shorts = bt === 5 && !dress;
-  const sHem = bt === 3 ? 148 : 170;
+  // A dress fills the bottom slot, so the bottom garment stops existing.
+  const bottom: BottomSpec = dress ? { kind: "none" } : BOT_SPEC[bt];
+  const ovr = !!bottom.bib;
+  const skirt = bottom.kind === "skirt";
+  const sHem = bottom.hemY ?? 170;
   const bootTop = S.shaft || 172;
-  const legStop = shorts ? 140 : 172;
+  const legStop = bottom.stop ?? 172;
   const pantStop = S.tuck ? Math.min(bootTop, legStop) : legStop;
+  // What shows below the base-layer hem when a coat falls open: the trousers,
+  // or the body if the leg is bare that far up.
+  const underCol = bottom.kind === "none" || legStop < 150 ? s : pc;
 
   ctx.clearRect(0, 0, BAKE_W, BAKE_H);
 
@@ -432,110 +530,161 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
     ctx.fill();
   }
 
+  // ── The body ── one build, drawn before anything is put on it.
   const legs: [number, number][] = side
     ? [[50 - 6.5 * w, 13 * w]]
     : [
         [50 - 14 * w, 12 * w],
         [50 + 2 * w, 12 * w],
       ];
-  legs.forEach((L) => vol(L[0] + 0.6, 116, L[1] - 1.2, 58, s));
+  // The leg tapers thigh → ankle. That taper is what lets a trouser pull in at
+  // the knee without going narrower than the body inside it.
+  const legMul = (y: number) => 1 - (1 - LEG_TAPER) * Math.min(1, Math.max(0, (y - 116) / 56));
+  legs.forEach((L) => {
+    const cx = L[0] + L[1] / 2;
+    const h = (L[1] - 1.2) / 2;
+    const at = (f: number, y: number): [number, number] => [cx + f * h * legMul(y), y];
+    poly([at(-1, 116), at(1, 116), at(1, 174), at(-1, 174)], s);
+    poly([at(0.2, 116), at(1, 116), at(1, 174), at(0.2, 174)], tint(s, 0.78));
+  });
+  vol(50 - 14.5 * w, 62, 29 * w, 56, s);
+
+  // Briefs — the layer that never comes off, in the bottom colour. They have to
+  // clear the hips down their whole depth: the leg tops run to 14w, so a
+  // tapered cut leaves the body showing at the outside of the seat.
+  const brf = tint(pc, 1.06);
+  poly(
+    [
+      [50 - 14.8 * w, 105],
+      [50 + 14.8 * w, 105],
+      [50 + 14.2 * w, 124],
+      [50 - 14.2 * w, 124],
+    ],
+    brf,
+  );
+  poly(
+    [
+      [50 + 1 * w, 105],
+      [50 + 14.8 * w, 105],
+      [50 + 14.2 * w, 124],
+      [50 + 1 * w, 124],
+    ],
+    tint(brf, 0.78),
+  );
+
+  const feet = () =>
+    legs.forEach((L) => {
+      const fw = L[1] + S.rz;
+      vol(
+        L[0] - (fw - L[1]) / 2,
+        S.foot === 6 ? 173 : 170,
+        fw,
+        S.foot,
+        S.bare ? tint(s, 0.9) : tint(pc, S.shaft ? 0.42 : 0.6),
+      );
+    });
 
   // Boots under the trousers unless they're tuck-in (thigh boots), which go over.
   if (!S.tuck && S.shaft) {
     legs.forEach((L) => vol(L[0] + 0.4, S.shaft, L[1] - 0.8, 172 - S.shaft, tint(pc, 0.42)));
   }
+  // A hem long enough to puddle lands on top of the shoe, so the shoe goes first.
+  if (bottom.puddle) feet();
 
-  if (!dress) {
-    if (skirt) {
-      poly(
-        [
-          [50 - 15 * w, 116],
-          [50 + 15 * w, 116],
-          [50 + 19 * w, sHem],
-          [50 - 19 * w, sHem],
-        ],
-        pc,
-      );
-      poly(
-        [
-          [50 + 2 * w, 116],
-          [50 + 15 * w, 116],
-          [50 + 19 * w, sHem],
-          [50 + 2 * w, sHem],
-        ],
-        tint(pc, 0.78),
-      );
-    } else {
-      // Trouser leg: flares out (wide-leg / flare) or tapers, interpolated from
-      // the hip to wherever the leg stops (hem, shorts, or a boot cuff).
-      let hw = bt === 0 ? 1.28 : bt === 1 ? 1.42 : 1;
-      let kn = bt === 1 ? 0.82 : 1;
-      if (ovr) {
-        hw = 1.14;
-        kn = 1;
+  if (skirt) {
+    poly(
+      [
+        [50 - 15 * w, 116],
+        [50 + 15 * w, 116],
+        [50 + 19 * w, sHem],
+        [50 - 19 * w, sHem],
+      ],
+      pc,
+    );
+    poly(
+      [
+        [50 + 2 * w, 116],
+        [50 + 15 * w, 116],
+        [50 + 19 * w, sHem],
+        [50 + 2 * w, sHem],
+      ],
+      tint(pc, 0.78),
+    );
+  } else if (bottom.kind === "pants" && pantStop > 116) {
+    // Trouser leg by profile: hip → knee → hem. A cropped or tucked leg is cut
+    // off wherever it stops, so it keeps the taper it had at that height.
+    const KNEE = 142;
+    const hip = bottom.hip ?? 1;
+    const knee = bottom.knee ?? 1;
+    const hem = bottom.hem ?? 1;
+    // Coverage is structural, not a tuning exercise: whatever profile a garment
+    // asks for, the cloth is never drawn narrower than the leg inside it, so a
+    // pinched knee closes on the body instead of exposing it.
+    const inset = 1 - 1.2 / legs[0][1];
+    const profile = (y: number) =>
+      y <= KNEE
+        ? hip + (knee - hip) * ((y - 116) / (KNEE - 116))
+        : knee + (hem - knee) * ((y - KNEE) / Math.max(1, legStop - KNEE));
+    const mul = (y: number) => Math.max(profile(y), inset * legMul(y) + 0.03);
+    const ys = pantStop > KNEE ? [116, KNEE, pantStop] : [116, pantStop];
+    // The seat: above the crotch a pair of trousers is one piece of cloth, not
+    // two tubes. Without it the gap between the legs runs up into the waistband
+    // and the body shows through it.
+    const seatL = legs[0][0];
+    const seatR = legs[legs.length - 1][0] + legs[legs.length - 1][1];
+    const seatC = (seatL + seatR) / 2;
+    // Never narrower than the briefs, or the underwear shows past the waistband.
+    const seatH = ((seatR - seatL) / 2) * Math.max(hip, 1.06);
+    vol(seatC - seatH, 116, seatH * 2, Math.min(134, pantStop) - 116, pc);
+    legs.forEach((L) => {
+      const cx = L[0] + L[1] / 2;
+      const hw = L[1] / 2;
+      const edge = (f: number) => ys.map((y) => [cx + f * hw * mul(y), y] as [number, number]);
+      const right = edge(1).reverse();
+      poly([...edge(-1), ...right], pc);
+      poly([...edge(0.2), ...right], tint(pc, 0.78));
+      if (bottom.crease) box(cx - 0.5, 118, 1, pantStop - 118, tint(pc, 1.12));
+      if (bottom.puddle) {
+        // Two folds where the fabric stacks up on the floor.
+        const hh = hw * mul(pantStop);
+        box(cx - hh, pantStop - 7.5, hh * 2, 3.4, tint(pc, 1.08));
+        box(cx - hh, pantStop - 4, hh * 2, 4, tint(pc, 0.84));
       }
-      legs.forEach((L) => {
-        const x = L[0];
-        const ww = L[1];
-        if (pantStop <= 116) return;
-        const t = (pantStop - 116) / (legStop - 116);
-        const xl = x - (ww * hw - ww) * 0.5 * t;
-        const xr = x + ww + (x + ww * kn + (ww * hw - ww) * 0.5 + (ww - ww * kn) * 0.5 - (x + ww)) * t;
-        poly(
-          [
-            [x, 116],
-            [x + ww, 116],
-            [xr, pantStop],
-            [xl, pantStop],
-          ],
-          pc,
-        );
-        poly(
-          [
-            [x + ww * 0.6, 116],
-            [x + ww, 116],
-            [xr, pantStop],
-            [x + ww * 0.6, pantStop],
-          ],
-          tint(pc, 0.78),
-        );
-      });
-    }
+    });
   }
 
   if (S.tuck && S.shaft) {
     legs.forEach((L) => vol(L[0] + 0.2, S.shaft, L[1] - 0.4, 172 - S.shaft, tint(pc, 0.42)));
   }
-  legs.forEach((L) => {
-    const fw = L[1] + S.rz;
-    vol(L[0] - (fw - L[1]) / 2, S.foot === 6 ? 173 : 170, fw, S.foot, tint(pc, S.shaft ? 0.42 : 0.6));
-  });
+  if (!bottom.puddle) feet();
 
   // ── Base layer ──
-  const bcol = B.sheer ? mix(bc, s, 0.42) : bc;
+  const bcol = B.bare ? s : B.sheer ? mix(bc, s, 0.42) : bc;
   const fl = B.flare ?? 0;
   const bHemW = fl ? fl : B.tw - 1.6;
-  poly(
-    [
-      [50 - B.tw * w, 64],
-      [50 + B.tw * w, 64],
-      [50 + bHemW * w, B.hem],
-      [50 - bHemW * w, B.hem],
-    ],
-    bcol,
-  );
-  poly(
-    [
-      [50 + 1 * w, 64],
-      [50 + B.tw * w, 64],
-      [50 + bHemW * w, B.hem],
-      [50 + 1 * w, B.hem],
-    ],
-    tint(bcol, 0.78),
-  );
-  if (B.print && !back && !side) {
-    const u = 26 / (B.print.length * 4 - 1);
-    text(B.print, 50, 80, u, lum(bcol) > 110 ? tint(bcol, 0.32) : tint(bcol, 2.4));
+  if (!B.bare) {
+    poly(
+      [
+        [50 - B.tw * w, 64],
+        [50 + B.tw * w, 64],
+        [50 + bHemW * w, B.hem],
+        [50 - bHemW * w, B.hem],
+      ],
+      bcol,
+    );
+    poly(
+      [
+        [50 + 1 * w, 64],
+        [50 + B.tw * w, 64],
+        [50 + bHemW * w, B.hem],
+        [50 + 1 * w, B.hem],
+      ],
+      tint(bcol, 0.78),
+    );
+    if (B.print && !back && !side) {
+      const u = 26 / (B.print.length * 4 - 1);
+      text(B.print, 50, 80, u, lum(bcol) > 110 ? tint(bcol, 0.32) : tint(bcol, 2.4));
+    }
   }
 
   const ax: [number, number][] =
@@ -617,9 +766,47 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
     if (O.slit && !back) {
       const cut = Math.min(B.hem, O.hem);
       box(50 - 3, O.top + 2, 6, cut - O.top - 2, tint(bcol, 0.94));
-      if (O.hem > cut) box(50 - 3, cut, 6, O.hem - cut, tint(ovr || !shorts ? pc : s, 0.94));
+      if (O.hem > cut) box(50 - 3, cut, 6, O.hem - cut, tint(ovr ? pc : underCol, 0.94));
     }
     if (O.belt) box(50 - 14 * w, 102, 28 * w, 5, tint(oc, 0.6));
+    // Pullover details: kangaroo pocket, drawcords, and the hood at rest.
+    if (O.pocket && !back) {
+      box(50 - 8.6 * w, O.hem - 17, 17.2 * w, 12, tint(oc, 0.9));
+      box(50 - 8.6 * w, O.hem - 17, 17.2 * w, 1.6, tint(oc, 0.66));
+    }
+    if (O.cords && !back) {
+      box(50 - 3.6, 65, 1.6, 13, tint(oc, 1.35));
+      box(50 + 2, 65, 1.6, 13, tint(oc, 1.35));
+    }
+    if (O.hood === "down") {
+      vol(50 - 13.5 * w, 46, 27 * w, 20, tint(oc, 1.1));
+      box(50 - 13.5 * w, 62, 27 * w, 3.4, tint(oc, 0.66)); // fold at the shoulders
+    }
+    // Suit lapels sit on top of the open front, buttons on the right side.
+    if (O.lapel && !back) {
+      poly(
+        [
+          [50 - 8.5, O.top],
+          [50 - 1.5, O.top],
+          [50 - 2.5, 88],
+          [50 - 9, 74],
+        ],
+        tint(oc, 1.14),
+      );
+      poly(
+        [
+          [50 + 1.5, O.top],
+          [50 + 8.5, O.top],
+          [50 + 9, 74],
+          [50 + 2.5, 88],
+        ],
+        tint(oc, 0.9),
+      );
+    }
+    if (O.buttons && !back) {
+      box(50 + 2.6, 96, 2.6, 2.6, tint(oc, 1.4));
+      box(50 + 2.6, 104, 2.6, 2.6, tint(oc, 1.4));
+    }
   }
 
   ax.forEach((A) => vol(A[0] + 0.3, 112, A[1] - 0.6, 10, s)); // hands
@@ -651,6 +838,23 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
     vol(50 - 9, 62, 5, 30, tint(oc, 1.06));
     vol(50 + 4, 62, 5, 22, tint(oc, 0.9));
   }
+  // A tie only reads if something is open over it, so it goes on last of the
+  // neckline layers — knot at the collar, blade down the shirt.
+  if (ac === 6 && !back && !side) {
+    // Pushed away from the shirt behind it, the way the printed tees are.
+    const tie = lum(bcol) > 110 ? tint(oc, 0.52) : tint(oc, 1.65);
+    box(50 - 2.8, 60, 5.6, 5, tie);
+    poly(
+      [
+        [50 - 2.2, 65],
+        [50 + 2.2, 65],
+        [50 + 3.4, 92],
+        [50, 97],
+        [50 - 3.4, 92],
+      ],
+      tie,
+    );
+  }
 
   // ── Head ──
   const hx = 50 + (side ? D.fx * 0.35 : 0);
@@ -659,6 +863,14 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
   if (ac === 5) {
     vol(hx - 17, 9, 34, 15, tint(oc, 0.94));
     vol(hx - 17, 20, 34, 4, tint(oc, 0.76)); // beanie band
+  }
+  // Hood up goes over the hair — and over a beanie, if there's one under it.
+  if (O?.hood === "up") {
+    // Down to the shoulder line, or the back of the head shows under the hem.
+    box(hx - 19.5, 7, 39, 11, oc);
+    box(hx - 19.5, 7, 6.5, 51, tint(oc, 1.06));
+    box(hx + 13, 7, 6.5, 51, tint(oc, 0.82));
+    if (back) box(hx - 19.5, 7, 39, 55, tint(oc, 0.94)); // from behind it's a solid mass
   }
 
   const fd = lum(s) > 120 ? 0.5 : 1.7; // features read dark on light skin, light on dark
@@ -858,13 +1070,15 @@ export function randomFigure(prev: FigureParams): FigureParams {
     hairT: Math.floor(Math.random() * HAIR_TYPES.length),
     weight: Math.random(),
     height: Math.random(),
-    base: Math.floor(Math.random() * BASE_LAYERS.length),
+    // Randomize dresses the figure: the empty slots at index 0 are a choice, so
+    // a roll never lands on undressed.
+    base: 1 + Math.floor(Math.random() * (BASE_LAYERS.length - 1)),
     basec: pickIn(bands[0][0], bands[0][1]),
     out: Math.floor(Math.random() * OUTER_LAYERS.length),
     outc: pickIn(bands[1][0], bands[1][1], fam),
-    bot: Math.floor(Math.random() * BOTTOMS.length),
+    bot: 1 + Math.floor(Math.random() * (BOTTOMS.length - 1)),
     botc: pickIn(bands[2][0], bands[2][1], fam),
-    sho: Math.floor(Math.random() * SHOES.length),
+    sho: 1 + Math.floor(Math.random() * (SHOES.length - 1)),
     acc: Math.floor(Math.random() * ACCESSORIES.length),
   };
 }
@@ -890,11 +1104,35 @@ export function randomFigureColors(prev: FigureParams): FigureParams {
 /** The mono spec line under the preview. */
 export function figureSummary(p: FigureParams): string[] {
   const dress = isDress(p);
+  const top = BSPEC[p.base].bare ? "BARE" : BASE_LAYERS[p.base].toUpperCase();
+  const leg = dress
+    ? "NO BOTTOM SLOT"
+    : BOT_SPEC[p.bot].kind === "none"
+      ? "BRIEFS"
+      : BOTTOMS[p.bot].toUpperCase();
   return [
     `PX ${p.px.toFixed(1)} · ${DIRECTIONS[p.dir].toUpperCase()} · ${HAIR_TYPES[p.hairT].toUpperCase()}`,
-    `${BASE_LAYERS[p.base].toUpperCase()}${p.out ? ` + ${OUTER_LAYERS[p.out].toUpperCase()}` : ""}`,
-    `${dress ? "NO BOTTOM SLOT" : BOTTOMS[p.bot].toUpperCase()}${isTucked(p) ? " TUCKED · " : " · "}${SHOES[p.sho].toUpperCase()}`,
+    `${top}${p.out ? ` + ${OUTER_LAYERS[p.out].toUpperCase()}` : ""}`,
+    `${leg}${isTucked(p) ? " TUCKED · " : " · "}${SHOES[p.sho].toUpperCase()}`,
   ];
+}
+
+/**
+ * A short figure code, after the way Habbo encodes a look: one `type-part-colour`
+ * group per slot, joined by dots. Slot names follow the same shorthand — hd body,
+ * hr hair, ch chest, cc coat, lg legs, sh shoes, ea accessory — so a whole
+ * character is one line you can read and pass around.
+ */
+export function figureCode(p: FigureParams): string {
+  return [
+    `hd-${p.skin}`,
+    `hr-${p.hairT}-${p.hair}`,
+    `ch-${p.base}-${p.basec}`,
+    `cc-${p.out}-${p.outc}`,
+    `lg-${p.bot}-${p.botc}`,
+    `sh-${p.sho}`,
+    `ea-${p.acc}`,
+  ].join(".");
 }
 
 /** The exported settings — readable names up top, raw state for a round-trip. */
@@ -902,6 +1140,7 @@ export function figureSettings(p: FigureParams, background: Background) {
   const dress = isDress(p);
   return {
     tool: "slbh-figure",
+    figure: figureCode(p),
     render: {
       pixels: +p.px.toFixed(1),
       direction: DIRECTIONS[p.dir],
@@ -932,9 +1171,10 @@ export function figureSettings(p: FigureParams, background: Background) {
 
 /** Filename stem for exports — the look, in one slug. */
 export function figureSlug(p: FigureParams): string {
+  if (isBare(p)) return "bare";
   const part = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
-  const parts = [part(BASE_LAYERS[p.base])];
-  if (!isDress(p)) parts.push(part(BOTTOMS[p.bot]));
+  const parts = [BSPEC[p.base].bare ? "bare" : part(BASE_LAYERS[p.base])];
+  if (!isDress(p)) parts.push(BOT_SPEC[p.bot].kind === "none" ? "briefs" : part(BOTTOMS[p.bot]));
   parts.push(part(SHOES[p.sho]));
   return parts.join("-");
 }
