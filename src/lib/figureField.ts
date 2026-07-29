@@ -202,7 +202,11 @@ export const CARRIED = ["None", "Tote", "Shoulder bag"];
  * than the sprite lattice and the resample turns it into noise, so the repeat
  * has to stay coarse enough to survive being sampled at one point per cell.
  */
-export const PATTERNS = ["Solid", "Stripe", "Check", "Camo", "Grid"];
+export const PATTERNS = ["Solid", "Stripe", "Camo"];
+/** Stripe reads on a top and nowhere else — a coat or a leg in stripes fights
+ *  every other line on the figure. Outer and bottom get solid or camo. */
+export const PATTERN_BASE_IDS = [0, 1, 2];
+export const PATTERN_LAYER_IDS = [0, 2];
 
 /**
  * How a fabric gathers. Folds aren't decoration — they're the material telling
@@ -651,15 +655,6 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
         if (opt.pattern === 1) {
           for (let y = yt; y < yb; y += 7) mark(L, y, R - L, 3.4, 0.74);
         } else if (opt.pattern === 2) {
-          // Check: a coarse two-tone grid with a lighter line across it.
-          for (let y = yt; y < yb; y += 9) {
-            for (let x = L; x < R; x += 9) {
-              if ((Math.round((x - L) / 9) + Math.round((y - yt) / 9)) % 2) mark(x, y, 9, 9, 0.74);
-            }
-            mark(L, y, R - L, 1.4, 1.34);
-          }
-          for (let x = L; x < R; x += 9) mark(x, yt, 1.4, yb - yt, 1.34);
-        } else if (opt.pattern === 3) {
           // Camo: blobs on a jittered lattice, two tones, never a clean edge.
           for (let y = yt - 4; y < yb; y += 6) {
             for (let x = L; x < R; x += 6) {
@@ -672,9 +667,6 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
               mark(x + bw * 0.5, y + bh * 0.6, bw * 0.6, bh * 0.7, f);
             }
           }
-        } else if (opt.pattern === 4) {
-          for (let y = yt; y < yb; y += 13) mark(L, y, R - L, 1.6, 1.34);
-          for (let x = L; x < R; x += 13) mark(x, yt, 1.6, yb - yt, 1.34);
         }
       });
     }
@@ -690,15 +682,10 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
           box(l, y + 2.2, r - l, 1.2, tint(col, 1.1));
           return;
         }
-        if (drape === "fluid") {
-          // Hanging cloth breaks vertically, not across.
-          const n = 3 + (i % 2);
-          for (let k = 0; k < n; k++) {
-            const x = l + ((r - l) * (k + 0.6 + 0.5 * rnd(seed + k * 3.7 + i))) / (n + 0.4);
-            box(x, y, 1.3, Math.max(6, (yb - y) * (0.4 + 0.4 * rnd(seed + k + i))), tint(col, 0.88));
-          }
-          return;
-        }
+        // Hanging cloth — a dress, a skirt, a wide leg — is left flat. Vertical
+        // breaks down a field that size stop reading as drape and start
+        // reading as stripes, and the rolled hem already says it's cloth.
+        if (drape === "fluid") return;
         const wide = drape === "heavy" ? 0.5 : drape === "crisp" ? 0.2 : 0.32;
         const thick = drape === "heavy" ? 1.8 : drape === "crisp" ? 1 : 1.4;
         const fw = (r - l) * (wide + 0.18 * rnd(seed + i * 3.1));
@@ -774,7 +761,7 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
       const L = HL - wd;
       const R = HR + wd;
       const CB = 44; // the mass frames the face and stops at the jaw
-      const outer = cut(c.cy, L + 4, R - 4, CB, L, R, 9, 8);
+      const outer = cut(c.cy, L + 4, R - 4, CB, L, R, soft ? 9 : 0, soft ? 8 : 0);
       if (back) {
         poly(outer, hcol);
       } else {
@@ -788,11 +775,12 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
         // stops being a hole and fills, which is what put a bar across the
         // face. The back is a solid mass with no hole at all, so neither
         // applies there.
-        ring(outer, cut(19, hx - 13, hx + 13, CB, hx - 13.5, hx + 13.5, 3.4, 0), hcol);
+        ring(outer, cut(19, hx - 13, hx + 13, CB, hx - 13.5, hx + 13.5, soft ? 3.4 : 0, 0), hcol);
       }
       if (soft) {
         // Clumps all the way round the silhouette, each a different depth.
         const n = 8;
+        void 0;
         const step = (R - L) / n;
         for (let i = 0; i < n; i++) {
           const x = L + i * step;
@@ -811,12 +799,17 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
         }
       }
       // Curl, as single light and dark cells scattered through the mass —
-      // never over the face, so the opening stays clean.
-      for (let k = 0; k < 40; k++) {
-        const px2 = L + 2 + (R - L - 5.5) * rnd(k * 2.7 + 1);
-        const py2 = c.cy + 2 + (CB - c.cy - 6) * rnd(k * 4.1 + 3);
-        if (!back && py2 > 19 && Math.abs(px2 - hx) < 13) continue;
-        box(px2, py2, 1.7, 1.7, tint(hcol, rnd(k * 9.3) > 0.5 ? 1.14 : 0.84));
+      // never over the face, so the opening stays clean, and clipped to the
+      // mass so a cell landing on a cut corner can't float off the silhouette.
+      if (soft) {
+        clipTo(outer, () => {
+          for (let k = 0; k < 40; k++) {
+            const px2 = L + 2 + (R - L - 5.5) * rnd(k * 2.7 + 1);
+            const py2 = c.cy + 2 + (CB - c.cy - 6) * rnd(k * 4.1 + 3);
+            if (!back && py2 > 19 && Math.abs(px2 - hx) < 13) continue;
+            box(px2, py2, 1.7, 1.7, tint(hcol, rnd(k * 9.3) > 0.5 ? 1.14 : 0.84));
+          }
+        });
       }
     }
     if (c.spike) {
@@ -825,7 +818,7 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
       const pts: [number, number][] = [[HL, c.cy + 4]];
       for (let i = 0; i < n; i++) {
         const x = HL + ((HR - HL) / n) * (i + 0.5);
-        pts.push([x - 2, c.cy + 3], [x, c.cy - 5 - 6 * rnd(ht + i * 2.3)], [x + 2, c.cy + 3]);
+        pts.push([x - 2, c.cy + 3], [x, c.cy - (soft ? 5 + 6 * rnd(ht + i * 2.3) : 8)], [x + 2, c.cy + 3]);
       }
       pts.push([HR, c.cy + 4]);
       poly(pts, hcol);
@@ -841,8 +834,12 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
     // hanging rather than two planks bolted to the head.
     if (c.sw) {
       const fall = (l: number, r: number, col: string) => {
-        panel(st, l, r, sb, l + 1.4, r - 0.6, col, { frac: 0.42, ct: 1.6, cb: 2.4 });
-        box(l + 1.8, sb - 1, (r - l) * 0.5, 2.6 + 2.4 * rnd(ht + l), tint(col, 0.9));
+        panel(st, l, soft ? r : r, sb, soft ? l + 1.4 : l, soft ? r - 0.6 : r, col, {
+          frac: 0.42,
+          ct: 1.6,
+          cb: 2.4,
+        });
+        if (soft) box(l + 1.8, sb - 1, (r - l) * 0.5, 2.6 + 2.4 * rnd(ht + l), tint(col, 0.9));
       };
       if (side) {
         fall(HL - c.sw, HL + 4, tint(hcol, 0.9));
@@ -856,9 +853,13 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
       const OF = [-23, -19.5, -16];
       // Each loc tapers and ends at its own height.
       const loc = (x: number, len: number, col: string, seed: number) => {
-        const end = len + 4 * rnd(seed);
-        panel(12, x, x + 3, end, x + 0.5, x + 2.6, col, { frac: 0.42, ct: 1.2, cb: 1.2 });
-        box(x + 0.4, end - 2, 2.2, 2, tint(col, 0.86));
+        const end = soft ? len + 4 * rnd(seed) : len;
+        panel(12, x, x + 3, end, soft ? x + 0.5 : x, soft ? x + 2.6 : x + 3, col, {
+          frac: 0.42,
+          ct: 1.2,
+          cb: 1.2,
+        });
+        if (soft) box(x + 0.4, end - 2, 2.2, 2, tint(col, 0.86));
       };
       if (side) {
         for (let k = 0; k < 3; k++) loc(hx - 23 + k * 3.7, LN[k], tint(hcol, k % 2 ? 1.04 : 0.88), k);
@@ -967,7 +968,7 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
       hem: true,
       folds: [126, sHem - 22],
       drape: bottom.drape,
-      pattern: P.botPat,
+      pattern: P.botPat === 1 ? 0 : P.botPat,
       seed: bt + 3,
     });
   } else if (bottom.kind === "pants" && pantStop > 116) {
@@ -1007,41 +1008,36 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
       if (P.botPat) {
         clipTo(shape, () => {
           panel(116, cx - hw * 2, cx + hw * 2, pantStop, cx - hw * 2, cx + hw * 2, pc, {
-            pattern: P.botPat,
+            pattern: P.botPat === 1 ? 0 : P.botPat,
             seed: bt + 2,
           });
         });
       }
       if (key > 0) poly([...edge(0.2), ...edge(1).reverse()], tint(pc, 0.78));
       else if (key < 0) poly([...edge(-1), ...edge(-0.2).reverse()], tint(pc, 0.78));
-      if (bottom.crease) box(cx - 0.5, 118, 1, pantStop - 118, tint(pc, 1.12));
+      if (bottom.crease && soft) box(cx - 0.5, 118, 1, pantStop - 118, tint(pc, 1.12));
       // Where the leg bends and where the cloth catches on the hip: short bars,
       // scattered off a hash so no two legs fold identically.
       const seedL = bt * 5 + cx;
       const dr = bottom.drape ?? "heavy";
+      if (soft)
       [130, 148, 158].forEach((y, i) => {
         if (y > pantStop - 6) return;
         const half = hw * mul(y);
-        if (dr === "fluid") {
-          // A wide leg hangs in vertical breaks rather than creasing across.
-          for (let k = 0; k < 3; k++) {
-            const x = cx - half + ((2 * half) * (k + 0.7)) / 3.4;
-            box(x, y, 1.3, Math.min(26, pantStop - y - 2), tint(pc, 0.88));
-          }
-          return;
-        }
+        // A wide leg is left alone: on a flat figure, drape lines down a big
+        // field are the one place detail turns into visual noise.
+        if (dr === "fluid") return;
         const fw = half * (dr === "crisp" ? 0.4 : 0.9) * (0.6 + 0.4 * rnd(seedL + i * 2.3));
         const fx = cx - half + (2 * half - fw) * rnd(seedL + i * 5.7);
         box(fx, y, fw, dr === "heavy" ? 1.8 : 1.3, tint(pc, dr === "crisp" ? 0.9 : 0.85));
         if (dr === "heavy") box(fx + fw * 0.2, y + 1.8, fw * 0.6, 1.2, tint(pc, 1.08));
       });
       if (bottom.puddle) {
-        // Fabric stacking on the floor — each fold a little wider than the last.
+        // One band where the hem lands on the floor. Three stacked folds on a
+        // hem this wide read as stripes, not as cloth.
         const hh = hw * mul(pantStop);
-        box(cx - hh * 0.94, pantStop - 10, hh * 1.88, 2.6, tint(pc, 0.9));
-        box(cx - hh, pantStop - 7.5, hh * 2, 3.4, tint(pc, 1.08));
         box(cx - hh, pantStop - 4, hh * 2, 4, tint(pc, 0.84));
-      } else if (pantStop > 150) {
+      } else if (pantStop > 150 && soft) {
         // The break: a trouser hem rests on the shoe and rucks up above it.
         const hh = hw * mul(pantStop);
         box(cx - hh, pantStop - 5.4, hh * 2, 2.2, tint(pc, 1.06));
@@ -1125,7 +1121,7 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
   const hoodH = hairSpan(P.hairT) + 4.6;
   const hoodTopH = hairSpan(P.hairT) + 2.2;
   const hoodTop = Math.max(0.5, (P.hairT === 6 ? 14 : HC[P.hairT].cy) - 4);
-  const hoodCut = Math.min(4.5, Math.max(2, (P.hairT === 6 ? 14 : HC[P.hairT].cy) - hoodTop));
+  const hoodCut = soft ? Math.min(4.5, Math.max(2, (P.hairT === 6 ? 14 : HC[P.hairT].cy) - hoodTop)) : 0;
   const hoodBot = SHOULDER + 4;
 
   // ── Overalls: bib and straps, worn over the base layer ──
@@ -1159,7 +1155,7 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
             ? [O.hem - 40, O.hem - 26, O.hem - 12]
             : [O.hem - 16, O.hem - 8],
       drape: O.drape,
-      pattern: P.outPat,
+      pattern: P.outPat === 1 ? 0 : P.outPat,
       seed: P.out + 5,
     });
     const oa: [number, number][] =
@@ -1182,7 +1178,7 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
         hem: true,
         folds: [oTop + (oaBot - oTop) * 0.52, oTop + (oaBot - oTop) * 0.74],
         drape: O.drape === "quilt" ? "quilt" : O.drape,
-        pattern: P.outPat,
+        pattern: P.outPat === 1 ? 0 : P.outPat,
         seed: P.out + k * 6,
       });
     });
@@ -1430,8 +1426,8 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
     // The strap crosses the body from the far shoulder to the near hip.
     poly(
       [
-        [50 - sx + 2, SHOULDER + 3],
-        [50 - sx + 6, SHOULDER + 3],
+        [50 - sx + 2, SHOULDER],
+        [50 - sx + 6, SHOULDER],
         [50 + sx - 2, 104],
         [50 + sx - 6, 104],
       ],
@@ -1593,9 +1589,9 @@ export function randomFigure(prev: FigureParams): FigureParams {
     eyes: Math.floor(Math.random() * EYEWEAR.length),
     neck: Math.floor(Math.random() * NECKWEAR.length),
     carry: Math.floor(Math.random() * CARRIED.length),
-    basePat: Math.random() < 0.3 ? Math.floor(Math.random() * PATTERNS.length) : 0,
-    outPat: Math.random() < 0.25 ? Math.floor(Math.random() * PATTERNS.length) : 0,
-    botPat: Math.random() < 0.3 ? Math.floor(Math.random() * PATTERNS.length) : 0,
+    basePat: Math.random() < 0.3 ? PATTERN_BASE_IDS[Math.floor(Math.random() * PATTERN_BASE_IDS.length)] : 0,
+    outPat: Math.random() < 0.2 ? PATTERN_LAYER_IDS[Math.floor(Math.random() * PATTERN_LAYER_IDS.length)] : 0,
+    botPat: Math.random() < 0.25 ? PATTERN_LAYER_IDS[Math.floor(Math.random() * PATTERN_LAYER_IDS.length)] : 0,
     print: Math.random() < 0.45 ? 1 + Math.floor(Math.random() * (PRINTS.length - 1)) : 0,
   };
 }
