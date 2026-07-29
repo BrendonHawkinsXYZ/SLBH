@@ -4,15 +4,23 @@ import { TrunkLine } from "@/components/TrunkLine";
 import { FallbackImg } from "@/components/projects/FallbackImg";
 import { FlowDiagram } from "@/components/projects/FlowDiagram";
 
-// Scaffold: structure and labels are final, body copy is TK. Paragraphs marked
-// .ag-tk are placeholders waiting on copy; drop images into
-// public/projects/affective-geometry/ and the frames fill in on their own.
+// Image frames fill in on their own as files land in
+// public/projects/affective-geometry/.
 
 export const metadata = {
   title: "Affective Geometry — SLBH",
   description:
-    "An artwork that theorizes emotion as shape and color — the studio's affective research taken as art rather than as an applied system.",
+    "An art project that theorizes emotion as shape and color — a proof of concept for rendering affective computational geometry as 2D plates.",
 };
+
+const PLATES: { base: string; caption: string }[] = [
+  { base: "plate-circle", caption: "CIRCLE · 01" },
+  { base: "plate-triangle", caption: "TRIANGLE · 02" },
+  { base: "plate-square", caption: "SQUARE · 03" },
+  { base: "plate-rhombus", caption: "RHOMBUS · 04" },
+  { base: "plate-heptagon", caption: "HEPTAGON · 05" },
+  { base: "plate-06", caption: "CIRCLE · 06" },
+];
 
 export default function AffectiveGeometryPage() {
   const allProjects = getAllProjects();
@@ -24,14 +32,8 @@ export default function AffectiveGeometryPage() {
   const asset = (base: string) => findImage("affective-geometry", base);
   const heroSrc = asset("hero");
   const premiseSrc = asset("premise");
-  const plates: { base: string; caption: string; wide?: boolean }[] = [
-    { base: "plate-01", caption: "TK / PLATE 01", wide: true },
-    { base: "plate-02", caption: "TK / PLATE 02" },
-    { base: "plate-03", caption: "TK / PLATE 03" },
-    { base: "plate-04", caption: "TK / PLATE 04" },
-    { base: "plate-05", caption: "TK / PLATE 05" },
-    { base: "plate-06", caption: "TK / PLATE 06", wide: true },
-  ];
+  const detailSrc = asset("detail");
+  const contactSrc = asset("contact-sheet");
 
   return (
     <>
@@ -40,9 +42,9 @@ export default function AffectiveGeometryPage() {
         <div className="container-page ag-hero-inner">
           <p className="t-mono ag-kicker">PROJECT 06 / 2026 / ACTIVE / NYC</p>
           <h1 className="t-display ag-title">Affective Geometry</h1>
-          <p className="ag-summary ag-tk">
-            TK — the one-sentence version. An artwork that treats emotion as
-            shape and color, and what that proposition is for.
+          <p className="ag-summary">
+            An art project that theorizes emotion as shape and color — a proof of
+            concept for rendering affective computational geometry as 2D plates.
           </p>
         </div>
         <div className="ag-trunkline">
@@ -59,10 +61,10 @@ export default function AffectiveGeometryPage() {
           className="t-label ag-readout-mid"
           style={{ opacity: 0.55, letterSpacing: "0.18em" }}
         >
-          AFFECT · SHAPE · COLOR · COMPOSITION
+          AFFECT · SHAPE · COLOR · FIELD
         </span>
         <span className="t-mono" style={{ opacity: 0.55, textAlign: "right" }}>
-          STATUS: ACTIVE · 2026 · ARTWORK
+          25 SHAPES / 25 PALETTES · 4:5
         </span>
       </div>
 
@@ -85,16 +87,16 @@ export default function AffectiveGeometryPage() {
         <div className="ag-block ag-block--text-left">
           <div className="ag-block-text">
             <p className="t-mono ag-block-kicker">01 / PREMISE</p>
-            <h2 className="t-h2 ag-block-headline ag-tk-head">
-              TK — headline: emotion has a shape.
-            </h2>
-            <p className="t-body ag-block-body ag-tk">
-              TK — the premise. What it means to claim that a feeling has a
-              form, and why shape and color are the terms this work uses.
+            <h2 className="t-h2 ag-block-headline">Emotion is a shape, a field.</h2>
+            <p className="t-body ag-block-body">
+              Affective Geometry begins from a claim the lab keeps returning to:
+              a feeling has a form. Each sketch takes an emotional state and
+              renders it as a bounded geometric figure filled with a field of
+              color.
             </p>
-            <p className="t-body ag-block-body ag-tk">
-              TK — the second paragraph. Where the proposition comes from in the
-              studio&rsquo;s own research, and what it refuses to reduce.
+            <p className="t-body ag-block-body">
+              The work makes that claim visible rather than arguing it. Where the
+              lab&rsquo;s research writes affect as a model, these plates draw it.
             </p>
           </div>
           <div className="ag-block-visual">
@@ -104,102 +106,124 @@ export default function AffectiveGeometryPage() {
                 {premiseSrc && (
                   <FallbackImg
                     src={premiseSrc}
-                    alt="Affective Geometry, study"
+                    alt="Affective Geometry, sketch"
                     className="ag-img-fill"
                   />
                 )}
               </div>
-              <p className="t-mono ag-img-caption">TK — CAPTION</p>
+              <p className="t-mono ag-img-caption">SKETCH / STUDY</p>
             </div>
           </div>
         </div>
 
-        {/* Block B — GEOMETRY */}
+        {/* Block B — RENDERING */}
         <div className="ag-block ag-block--diagram-left">
           <div className="ag-block-visual ag-flow-wrap">
             <FlowDiagram
-              ariaLabel="Geometry: emotion → shape family → color assignment → composition"
+              ariaLabel="Rendering: emotion state → shape family → color field → 2D plate"
               stages={[
                 { primary: "EMOTION", secondary: "STATE" },
                 { primary: "SHAPE", secondary: "FAMILY" },
-                { primary: "COLOR", secondary: "ASSIGNMENT" },
-                { primary: "COMPOSITION", secondary: "WORK" },
+                { primary: "COLOR", secondary: "FIELD" },
+                { primary: "2D", secondary: "PLATE" },
               ]}
             />
           </div>
           <div className="ag-block-text">
-            <p className="t-mono ag-block-kicker">02 / GEOMETRY</p>
-            <h2 className="t-h2 ag-block-headline ag-tk-head">
-              TK — headline: the rules of the shape language.
+            <p className="t-mono ag-block-kicker">02 / RENDERING</p>
+            <h2 className="t-h2 ag-block-headline">
+              A proof of concept for the geometry.
             </h2>
-            <p className="t-body ag-block-body ag-tk">
-              TK — how a state becomes a shape: the families, what edge,
-              curvature, scale, and repetition are each carrying.
+            <p className="t-body ag-block-body">
+              Every plate is generated the same way. A state selects a shape
+              family — circle, triangle, square, rhombus, heptagon — and the
+              figure is filled with a palette drawn from the 169-colour field
+              gamut, then woven with a dense mark field so the color reads as
+              atmosphere rather than fill.
             </p>
-            <p className="t-body ag-block-body ag-tk">
-              TK — how color enters, and how a single work is composed from the
-              two together.
+            <p className="t-body ag-block-body">
+              The result is a proof of concept: affective computational geometry
+              rendered flat, at plate scale, where it can be looked at directly.
             </p>
           </div>
         </div>
 
-        {/* Block C — SERIES */}
+        {/* Block C — THE SERIES */}
         <div className="ag-block ag-block--text-left">
           <div className="ag-block-text">
-            <p className="t-mono ag-block-kicker">03 / SERIES</p>
-            <h2 className="t-h2 ag-block-headline ag-tk-head">
-              TK — headline: the works themselves.
+            <p className="t-mono ag-block-kicker">03 / THE SERIES</p>
+            <h2 className="t-h2 ag-block-headline">
+              Twenty-five shapes, twenty-five palettes.
             </h2>
-            <p className="t-body ag-block-body ag-tk">
-              TK — what the series consists of, at what scale, in what medium,
-              and how the plates relate to one another.
+            <p className="t-body ag-block-body">
+              The series is read as a contact sheet. Each plate carries its shape
+              name, its index, and the palette strip it was built from, so the
+              full run can be compared at a glance.
             </p>
-            <p className="t-body ag-block-body ag-tk">
-              TK — how a viewer is meant to move through them.
+            <p className="t-body ag-block-body">
+              Repetition is the argument. The same five families recur across
+              palettes until the shape stops reading as a shape and starts
+              reading as a state.
             </p>
           </div>
-          <div className="ag-block-visual ag-flow-wrap">
-            <FlowDiagram
-              ariaLabel="Series: study → plate → series → installation"
-              stages={[
-                { primary: "STUDY", secondary: "TK" },
-                { primary: "PLATE", secondary: "TK" },
-                { primary: "SERIES", secondary: "TK" },
-                { primary: "INSTALLATION", secondary: "TK" },
-              ]}
-            />
+          <div className="ag-block-visual">
+            <div className="ag-img-wrap">
+              <div className="ag-img-frame ag-img-frame--plate">
+                <div className="ag-img-bg" />
+                {detailSrc && (
+                  <FallbackImg
+                    src={detailSrc}
+                    alt="Affective Geometry, plate detail"
+                    className="ag-img-fill"
+                  />
+                )}
+              </div>
+              <p className="t-mono ag-img-caption">PLATE / MARK DETAIL</p>
+            </div>
           </div>
         </div>
 
-        {/* Block D — DISTINCTION */}
+        {/* Block D — RELATION TO ACG */}
         <div className="ag-block ag-block--full">
-          <p className="t-mono ag-block-kicker">04 / DISTINCTION</p>
-          <h2 className="t-h2 ag-block-headline ag-tk-head">
-            TK — headline: near ACG, but not ACG.
-          </h2>
-          <p className="t-body ag-block-body ag-block-body--wide ag-tk">
-            TK — the relationship to ACG by SLBH. Same lineage of thinking, and
-            the same interest in affect made visible.
+          <p className="t-mono ag-block-kicker">04 / RELATION TO ACG</p>
+          <h2 className="t-h2 ag-block-headline">Near ACG, made as art.</h2>
+          <p className="t-body ag-block-body ag-block-body--wide">
+            Affective Geometry shares its lineage with ACG by SLBH. Both take the
+            same computational model of affect as their starting point.
           </p>
-          <p className="t-body ag-block-body ag-block-body--wide ag-tk">
-            TK — and the separation: ACG is an applied system rendering live
-            data in public space; this is art, making an argument in shape and
-            color rather than running an instrument.
+          <p className="t-body ag-block-body ag-block-body--wide">
+            ACG runs that model as a live public system in physical space.
+            Affective Geometry works the other direction, holding the geometry
+            still long enough to render it as an image and see what the form
+            actually looks like.
           </p>
         </div>
       </section>
 
-      {/* ── Section 4b: Plates ── */}
+      {/* ── Section 4b: Contact sheet + plates ── */}
       <section className="container-page ag-plates">
-        <p className="t-mono ag-plates-label">PLATES</p>
+        <p className="t-mono ag-plates-label">FIELD · CONTACT SHEET</p>
+        <figure className="ag-contact">
+          <div className="ag-contact-frame">
+            <div className="ag-plate-bg" />
+            {contactSrc && (
+              <FallbackImg
+                src={contactSrc}
+                alt="Affective Geometry contact sheet, 25 shapes across 25 palettes"
+                className="ag-img-fill"
+              />
+            )}
+          </div>
+          <figcaption className="t-mono ag-plate-caption">
+            25 SHAPES / 25 PALETTES · 4:5 · 169-COLOUR FIELD GAMUT
+          </figcaption>
+        </figure>
+
         <div className="ag-plate-grid">
-          {plates.map((plate) => {
+          {PLATES.map((plate) => {
             const src = asset(plate.base);
             return (
-              <figure
-                key={plate.base}
-                className={`ag-plate-cell${plate.wide ? " ag-plate-cell--wide" : ""}`}
-              >
+              <figure key={plate.base} className="ag-plate-cell">
                 <div className="ag-plate-frame">
                   <div className="ag-plate-bg" />
                   {src && (
@@ -220,11 +244,11 @@ export default function AffectiveGeometryPage() {
         <p className="t-mono ag-work-label">WORK</p>
         <div className="ag-work-rows">
           {[
-            { label: "MEDIUM", value: "TK" },
-            { label: "FORMAT", value: "TK" },
-            { label: "SERIES", value: "TK" },
-            { label: "EDITION", value: "TK" },
-            { label: "EXHIBITION", value: "TK" },
+            { label: "MEDIUM", value: "GENERATIVE 2D RENDER" },
+            { label: "FORMAT", value: "4:5 PLATE" },
+            { label: "SHAPE FAMILIES", value: "CIRCLE / TRIANGLE / SQUARE / RHOMBUS / HEPTAGON" },
+            { label: "SERIES", value: "25 SHAPES · 25 PALETTES" },
+            { label: "GAMUT", value: "169-COLOUR FIELD" },
             { label: "STATUS", value: "ACTIVE · ONGOING" },
           ].map((row, i) => (
             <div
@@ -298,17 +322,16 @@ export default function AffectiveGeometryPage() {
 
       {/* ── Section 8: Footer copy ── */}
       <section className="container-page ag-footer">
-        <p className="t-body ag-footer-body ag-tk">
-          TK — closing note. What the next plates in the series are after, and
-          where the work is headed.
+        <p className="t-body ag-footer-body">
+          The series continues as new palettes enter the gamut and new families
+          are cut.
+        </p>
+        <p className="t-mono ag-mono-line">
+          169-COLOUR FIELD GAMUT · EMOTION IS A SHAPE, A FIELD
         </p>
       </section>
 
       <style>{`
-        /* ── Placeholder register ── */
-        .ag-tk { opacity: 0.45; }
-        .ag-tk-head { opacity: 0.5; }
-
         /* ── Hero ── */
         .ag-hero { position: relative; }
         .ag-hero-inner { padding-top: 56px; padding-bottom: 144px; }
@@ -320,6 +343,7 @@ export default function AffectiveGeometryPage() {
           font-size: 24px;
           line-height: 1.4;
           max-width: 680px;
+          opacity: 0.82;
           margin: 0;
         }
         .ag-trunkline {
@@ -399,11 +423,16 @@ export default function AffectiveGeometryPage() {
           letter-spacing: 0.12em;
         }
         .ag-block-headline { margin: 0 0 28px; }
-        .ag-block-body { margin: 0 0 18px; max-width: 520px; line-height: 1.7; }
+        .ag-block-body {
+          margin: 0 0 18px;
+          max-width: 520px;
+          line-height: 1.7;
+          opacity: 0.82;
+        }
         .ag-block-body--wide { max-width: 640px; }
         .ag-block-body:last-child { margin-bottom: 0; }
 
-        /* Image frame */
+        /* Image frames */
         .ag-img-wrap { width: 100%; }
         .ag-img-frame {
           position: relative;
@@ -412,6 +441,7 @@ export default function AffectiveGeometryPage() {
           border: 0.5px solid var(--hairline-strong);
           overflow: hidden;
         }
+        .ag-img-frame--plate { aspect-ratio: 4/5; max-width: 420px; }
         .ag-img-bg { position: absolute; inset: 0; background: var(--graphite); }
         .ag-img-fill {
           position: absolute;
@@ -430,7 +460,7 @@ export default function AffectiveGeometryPage() {
 
         .ag-flow-wrap { display: flex; align-items: center; padding: 32px 0; }
 
-        /* ── Plates ── */
+        /* ── Contact sheet + plates ── */
         .ag-plates { padding-top: 0; padding-bottom: 96px; }
         .ag-plates-label {
           opacity: 0.45;
@@ -438,14 +468,22 @@ export default function AffectiveGeometryPage() {
           font-size: 10px;
           letter-spacing: 0.12em;
         }
+        .ag-contact { margin: 0 0 48px; }
+        .ag-contact-frame {
+          position: relative;
+          aspect-ratio: 4/5;
+          width: 100%;
+          max-width: 860px;
+          border: 0.5px solid var(--hairline-strong);
+          overflow: hidden;
+        }
         .ag-plate-grid {
           display: grid;
-          grid-template-columns: 1fr;
-          gap: 32px;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 24px;
         }
         @media (min-width: 768px) {
-          .ag-plate-grid { grid-template-columns: repeat(2, 1fr); }
-          .ag-plate-cell--wide { grid-column: span 2; }
+          .ag-plate-grid { grid-template-columns: repeat(3, 1fr); gap: 32px; }
         }
         .ag-plate-cell { margin: 0; }
         .ag-plate-frame {
@@ -455,7 +493,6 @@ export default function AffectiveGeometryPage() {
           border: 0.5px solid var(--hairline-strong);
           overflow: hidden;
         }
-        .ag-plate-cell--wide .ag-plate-frame { aspect-ratio: 16/9; }
         .ag-plate-bg { position: absolute; inset: 0; background: var(--graphite); }
         .ag-plate-caption {
           margin: 12px 0 0;
@@ -546,7 +583,18 @@ export default function AffectiveGeometryPage() {
           padding-bottom: 120px;
           max-width: var(--max-w);
         }
-        .ag-footer-body { max-width: 640px; line-height: 1.7; margin: 0; }
+        .ag-footer-body {
+          max-width: 640px;
+          line-height: 1.7;
+          opacity: 0.72;
+          margin: 0;
+        }
+        .ag-mono-line {
+          margin: 28px 0 0;
+          font-size: 9px;
+          letter-spacing: 0.14em;
+          opacity: 0.45;
+        }
       `}</style>
     </>
   );

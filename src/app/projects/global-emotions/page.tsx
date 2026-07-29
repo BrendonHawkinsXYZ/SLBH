@@ -2,16 +2,15 @@ import Link from "next/link";
 import { getAllProjects, findImage } from "@/lib/projects";
 import { TrunkLine } from "@/components/TrunkLine";
 import { FallbackImg } from "@/components/projects/FallbackImg";
-import { FlowDiagram } from "@/components/projects/FlowDiagram";
+import { StackDiagram } from "@/components/projects/StackDiagram";
 
-// Scaffold: structure and labels are final, body copy is TK. Paragraphs marked
-// .ge-tk are placeholders waiting on copy; drop images into
-// public/projects/global-emotions/ and the frames fill in on their own.
+// Copy follows the live instrument's About and Method sections. Image frames
+// fill in on their own as files land in public/projects/global-emotions/.
 
 export const metadata = {
   title: "Global Emotions — SLBH",
   description:
-    "A live instrument that reads collective affect beyond one country, rendering the world's emotional field as color.",
+    "A public emotional observatory: a daily instrument that reads the world as a weather system of attention.",
 };
 
 const LIVE_URL = "https://globalemotions.studiolabbh.xyz";
@@ -25,13 +24,12 @@ export default function GlobalEmotionsPage() {
 
   const asset = (base: string) => findImage("global-emotions", base);
   const heroSrc = asset("hero");
-  const originSrc = asset("origin");
+  const todaySrc = asset("today");
+  const detailSrc = asset("detail");
   const docs: { base: string; caption: string; wide?: boolean }[] = [
-    { base: "field-world", caption: "TK / WORLD FIELD", wide: true },
-    { base: "region-01", caption: "TK / REGION READOUT" },
-    { base: "region-02", caption: "TK / REGION READOUT" },
-    { base: "interface-01", caption: "TK / INTERFACE" },
-    { base: "interface-02", caption: "TK / INTERFACE" },
+    { base: "field-world", caption: "TODAY / WORLD FIELD", wide: true },
+    { base: "location", caption: "LOCATION / COUNTRY VIEW" },
+    { base: "archive", caption: "ARCHIVE / ACCUMULATED DAYS" },
   ];
 
   return (
@@ -41,9 +39,9 @@ export default function GlobalEmotionsPage() {
         <div className="container-page ge-hero-inner">
           <p className="t-mono ge-kicker">PROJECT 05 / 2026 / ACTIVE / GLOBAL</p>
           <h1 className="t-display ge-title">Global Emotions</h1>
-          <p className="ge-summary ge-tk">
-            TK — the one-sentence version of Global Emotions. What it reads,
-            where it reads it, and what it renders.
+          <p className="ge-summary">
+            Global Emotions is a public emotional observatory — a daily
+            instrument that reads the world as a weather system of attention.
           </p>
         </div>
         <div className="ge-trunkline">
@@ -60,10 +58,10 @@ export default function GlobalEmotionsPage() {
           className="t-label ge-readout-mid"
           style={{ opacity: 0.55, letterSpacing: "0.18em" }}
         >
-          AFFECT · SYSTEMS · DATA · TIME · GEOGRAPHY
+          AFFECT · SYSTEMS · DATA · TIME
         </span>
         <span className="t-mono" style={{ opacity: 0.55, textAlign: "right" }}>
-          STATUS: ACTIVE · 2026 · LIVE INSTRUMENT
+          AFFECT-FIELD-V2 · ONE FIELD PER DAY
         </span>
       </div>
 
@@ -82,107 +80,120 @@ export default function GlobalEmotionsPage() {
 
       {/* ── Section 4: Editorial ── */}
       <section className="container-page ge-editorial">
-        {/* Block A — ORIGIN */}
+        {/* Block A — THE PROJECT */}
         <div className="ge-block ge-block--text-left">
           <div className="ge-block-text">
-            <p className="t-mono ge-block-kicker">01 / ORIGIN</p>
-            <h2 className="t-h2 ge-block-headline ge-tk-head">
-              TK — headline: where Global Emotions came from.
-            </h2>
-            <p className="t-body ge-block-body ge-tk">
-              TK — the origin paragraph. American Emotions read one country;
-              this is the question that pushed the instrument past that border.
-            </p>
-            <p className="t-body ge-block-body ge-tk">
-              TK — what changes when the field is global rather than national:
-              language, time zones, data availability, comparability.
+            <p className="t-mono ge-block-kicker">01 / THE PROJECT</p>
+            <h2 className="t-h2 ge-block-headline">One field a day.</h2>
+            <p className="t-body ge-block-body">
+              Each day, search behavior across countries is classified into
+              emotional categories and mapped to a single color field. Over time
+              the fields accumulate into an archive — a record of how the world
+              felt, one day at a time.
             </p>
           </div>
           <div className="ge-block-visual">
             <div className="ge-img-wrap">
               <div className="ge-img-frame">
                 <div className="ge-img-bg" />
-                {originSrc && (
+                {todaySrc && (
                   <FallbackImg
-                    src={originSrc}
-                    alt="Global Emotions, early field render"
+                    src={todaySrc}
+                    alt="Global Emotions, the day's color field"
                     className="ge-img-fill"
                   />
                 )}
               </div>
-              <p className="t-mono ge-img-caption">TK — CAPTION</p>
+              <p className="t-mono ge-img-caption">TODAY / DAILY FIELD</p>
             </div>
           </div>
         </div>
 
         {/* Block B — METHOD */}
         <div className="ge-block ge-block--diagram-left">
-          <div className="ge-block-visual ge-flow-wrap">
-            <FlowDiagram
-              ariaLabel="Method: public signal → regional aggregation → emotion scoring → color field"
+          <div className="ge-block-visual ge-stack-wrap">
+            <StackDiagram
+              label="SYSTEM OVERVIEW"
+              ariaLabel="System overview: daily global Google Trends, emotional classification, emotion to color mapping, attention weighting, daily color field"
               stages={[
-                { primary: "PUBLIC", secondary: "SIGNAL" },
-                { primary: "REGIONAL", secondary: "AGGREGATION" },
-                { primary: "EMOTION", secondary: "SCORING" },
-                { primary: "COLOR", secondary: "FIELD" },
+                "GOOGLE TRENDS — DAILY (GLOBAL)",
+                "EMOTIONAL CLASSIFICATION",
+                "EMOTION → COLOR MAPPING",
+                "ATTENTION WEIGHTING",
+                "DAILY COLOR FIELD",
               ]}
+              footnote="OUTPUT: 1 FIELD / DAY · SCOPE: GLOBAL"
             />
           </div>
           <div className="ge-block-text">
             <p className="t-mono ge-block-kicker">02 / METHOD</p>
-            <h2 className="t-h2 ge-block-headline ge-tk-head">
-              TK — headline: how the world field is read.
+            <h2 className="t-h2 ge-block-headline">
+              A daily computational artwork.
             </h2>
-            <p className="t-body ge-block-body ge-tk">
-              TK — the pipeline in prose: what the signal is, how it is grouped
-              by region, how it is scored, how a score becomes a color.
+            <p className="t-body ge-block-body">
+              Global Emotions translates search behavior around the world into
+              emotional and chromatic fields. Each day produces one color field
+              per place: an atmospheric reading of the public mood.
             </p>
-            <p className="t-body ge-block-body ge-tk">
-              TK — what the instrument deliberately does not claim. The limits
-              of the reading, stated plainly.
+            <p className="t-body ge-block-body">
+              The instrument reads daily search trends together with the
+              headline context around them, weighted by traffic and publication
+              time. Everything is aggregated by country and stripped of
+              individual identity.
             </p>
           </div>
         </div>
 
-        {/* Block C — COVERAGE */}
+        {/* Block C — COLOR */}
         <div className="ge-block ge-block--text-left">
           <div className="ge-block-text">
-            <p className="t-mono ge-block-kicker">03 / COVERAGE</p>
-            <h2 className="t-h2 ge-block-headline ge-tk-head">
-              TK — headline: what the instrument can see.
+            <p className="t-mono ge-block-kicker">03 / COLOR</p>
+            <h2 className="t-h2 ge-block-headline">
+              How the color is generated.
             </h2>
-            <p className="t-body ge-block-body ge-tk">
-              TK — coverage as it stands: which regions resolve well, which are
-              thin, and what widens the aperture next.
+            <p className="t-body ge-block-body">
+              Search terms are classified into a fixed taxonomy of 169 emotions,
+              each carrying a canonical color and a coordinate in
+              valence–arousal–dominance space.
+            </p>
+            <p className="t-body ge-block-body">
+              A day&rsquo;s headline emotion is the label nearest the
+              traffic-weighted center of its trends in that space — the
+              field&rsquo;s center of mass rather than its most common label. The
+              final gradient is weighted by attention intensity, so louder days
+              burn brighter.
             </p>
           </div>
-          <div className="ge-block-visual ge-flow-wrap">
-            <FlowDiagram
-              ariaLabel="Coverage: source pool → language handling → regional resolution → field state"
-              stages={[
-                { primary: "SOURCE", secondary: "POOL" },
-                { primary: "LANGUAGE", secondary: "HANDLING" },
-                { primary: "REGIONAL", secondary: "RESOLUTION" },
-                { primary: "FIELD", secondary: "STATE" },
-              ]}
-            />
+          <div className="ge-block-visual">
+            <div className="ge-img-wrap">
+              <div className="ge-img-frame">
+                <div className="ge-img-bg" />
+                {detailSrc && (
+                  <FallbackImg
+                    src={detailSrc}
+                    alt="Global Emotions, gradient detail"
+                    className="ge-img-fill"
+                  />
+                )}
+              </div>
+              <p className="t-mono ge-img-caption">FIELD / GRADIENT DETAIL</p>
+            </div>
           </div>
         </div>
 
-        {/* Block D — READING */}
+        {/* Block D — THE LAB */}
         <div className="ge-block ge-block--full">
-          <p className="t-mono ge-block-kicker">04 / READING</p>
-          <h2 className="t-h2 ge-block-headline ge-tk-head">
-            TK — headline: how to read a global field.
+          <p className="t-mono ge-block-kicker">04 / THE LAB</p>
+          <h2 className="t-h2 ge-block-headline">
+            An instrument built by the lab.
           </h2>
-          <p className="t-body ge-block-body ge-block-body--wide ge-tk">
-            TK — what a viewer is actually looking at, and what makes a moment
-            worth noticing: divergence between regions, drift over a day,
-            alignment across the whole field.
+          <p className="t-body ge-block-body ge-block-body--wide">
+            Studio Lab BH is a systems research lab that builds computational
+            instruments for understanding invisible human systems — especially
+            affect. Global Emotions is the observatory that runs continuously.
           </p>
-          <p className="t-body ge-block-body ge-block-body--wide ge-tk">
-            TK — the closing thought of the section. Why a world-scale affective
-            reading matters, in the studio&rsquo;s terms.
+          <p className="t-mono ge-mono-line">
+            MODELING INVISIBLE HUMAN SYSTEMS · SLBH — V1.0
           </p>
         </div>
       </section>
@@ -217,11 +228,13 @@ export default function GlobalEmotionsPage() {
         <p className="t-mono ge-instrument-label">INSTRUMENT</p>
         <div className="ge-instrument-rows">
           {[
-            { label: "PLATFORM", value: "WEB · LIVE" },
-            { label: "COVERAGE", value: "TK" },
-            { label: "UPDATE CADENCE", value: "TK" },
-            { label: "DATA SOURCES", value: "TK" },
-            { label: "OUTPUT", value: "COLOR FIELD" },
+            { label: "SOURCE", value: "GOOGLE TRENDS — DAILY" },
+            { label: "TAXONOMY", value: "169 EMOTIONS" },
+            { label: "SPACE", value: "VALENCE–AROUSAL–DOMINANCE" },
+            { label: "WEIGHTING", value: "ATTENTION INTENSITY" },
+            { label: "OUTPUT", value: "1 FIELD / DAY" },
+            { label: "SCOPE", value: "GLOBAL · BY COUNTRY" },
+            { label: "VERSION", value: "AFFECT-FIELD-V2" },
             { label: "STATUS", value: "ACTIVE · ONGOING" },
           ].map((row, i) => (
             <div
@@ -306,17 +319,12 @@ export default function GlobalEmotionsPage() {
 
       {/* ── Section 8: Footer copy ── */}
       <section className="container-page ge-footer">
-        <p className="t-body ge-footer-body ge-tk">
-          TK — closing note. Global Emotions is ongoing; say what the next
-          version of the instrument is meant to answer.
+        <p className="t-body ge-footer-body">
+          The site is the canonical source. Each day is an artifact you can cite.
         </p>
       </section>
 
       <style>{`
-        /* ── Placeholder register ── */
-        .ge-tk { opacity: 0.45; }
-        .ge-tk-head { opacity: 0.5; }
-
         /* ── Hero ── */
         .ge-hero { position: relative; }
         .ge-hero-inner {
@@ -331,6 +339,7 @@ export default function GlobalEmotionsPage() {
           font-size: 24px;
           line-height: 1.4;
           max-width: 680px;
+          opacity: 0.82;
           margin: 0;
         }
         .ge-trunkline {
@@ -414,9 +423,16 @@ export default function GlobalEmotionsPage() {
           margin: 0 0 18px;
           max-width: 520px;
           line-height: 1.7;
+          opacity: 0.82;
         }
         .ge-block-body--wide { max-width: 640px; }
         .ge-block-body:last-child { margin-bottom: 0; }
+        .ge-mono-line {
+          margin: 28px 0 0;
+          font-size: 9px;
+          letter-spacing: 0.14em;
+          opacity: 0.45;
+        }
 
         /* Image frame */
         .ge-img-wrap { width: 100%; }
@@ -443,7 +459,7 @@ export default function GlobalEmotionsPage() {
           letter-spacing: 0.1em;
         }
 
-        .ge-flow-wrap { display: flex; align-items: center; padding: 32px 0; }
+        .ge-stack-wrap { display: flex; align-items: flex-start; padding-top: 8px; }
 
         /* ── Documentation strip ── */
         .ge-doc-strip { padding-top: 0; padding-bottom: 96px; }
@@ -559,7 +575,12 @@ export default function GlobalEmotionsPage() {
           padding-bottom: 120px;
           max-width: var(--max-w);
         }
-        .ge-footer-body { max-width: 640px; line-height: 1.7; margin: 0; }
+        .ge-footer-body {
+          max-width: 640px;
+          line-height: 1.7;
+          opacity: 0.72;
+          margin: 0;
+        }
       `}</style>
     </>
   );
