@@ -663,7 +663,15 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
       } else {
         // The face opening: the mass carries round the sides of the head, so
         // the hair frames the face instead of sitting on it like a lid.
-        ring(outer, cut(15, hx - 13, hx + 13, CB + 2, hx - 13.5, hx + 13.5, 3.4, 0), hcol);
+        //
+        // Two things the hole has to respect. It starts below the crown of the
+        // head, or a line of background opens between the hair and the
+        // forehead and the mass reads as floating. And it ends level with the
+        // mass, never past it — an even-odd hole that overhangs its own shape
+        // stops being a hole and fills, which is what put a bar across the
+        // face. The back is a solid mass with no hole at all, so neither
+        // applies there.
+        ring(outer, cut(19, hx - 13, hx + 13, CB, hx - 13.5, hx + 13.5, 3.4, 0), hcol);
       }
       if (soft) {
         // Clumps all the way round the silhouette, each a different depth.
@@ -690,7 +698,7 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
       for (let k = 0; k < 40; k++) {
         const px2 = L + 2 + (R - L - 5.5) * rnd(k * 2.7 + 1);
         const py2 = c.cy + 2 + (CB - c.cy - 6) * rnd(k * 4.1 + 3);
-        if (!back && py2 > 15 && Math.abs(px2 - hx) < 13) continue;
+        if (!back && py2 > 19 && Math.abs(px2 - hx) < 13) continue;
         box(px2, py2, 1.7, 1.7, tint(hcol, rnd(k * 9.3) > 0.5 ? 1.14 : 0.84));
       }
     }
