@@ -16,6 +16,8 @@ import {
   OUTER_LAYERS,
   PALETTE,
   PATTERNS,
+  PATTERN_BASE_IDS,
+  PATTERN_LAYER_IDS,
   PRINT_LABELS,
   PIXEL_SPEC,
   SHOES,
@@ -106,6 +108,35 @@ function Chips({
           onClick={() => onPick(i)}
         >
           {name}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function PatternChips({
+  ids,
+  value,
+  onPick,
+  label,
+}: {
+  ids: number[];
+  value: number;
+  onPick: (id: number) => void;
+  label: string;
+}) {
+  return (
+    <div className="fig-chips" role="group" aria-label={label}>
+      {ids.map((id) => (
+        <button
+          key={id}
+          type="button"
+          className="fig-chip"
+          data-active={id === value}
+          aria-pressed={id === value}
+          onClick={() => onPick(id)}
+        >
+          {PATTERNS[id]}
         </button>
       ))}
     </div>
@@ -422,14 +453,14 @@ export function FigureStudio() {
                   <span className="t-mono fig-sub">Print</span>
                   <Chips label="Print" options={PRINT_LABELS} value={params.print} onPick={(i) => set("print", i)} />
                   <span className="t-mono fig-sub">Pattern</span>
-                  <Chips label="Base pattern" options={PATTERNS} value={params.basePat} onPick={(i) => set("basePat", i)} />
+                  <PatternChips label="Base pattern" ids={PATTERN_BASE_IDS} value={params.basePat} onPick={(i) => set("basePat", i)} />
                 </fieldset>
                 <fieldset className="fig-field">
                   <legend className="t-label fig-legend">Outer layer</legend>
                   <Chips label="Outer layer" options={OUTER_LAYERS} value={params.out} onPick={(i) => set("out", i)} />
                   <Swatches label="Outer layer colour" value={params.outc} onPick={(i) => set("outc", i)} />
                   <span className="t-mono fig-sub">Pattern</span>
-                  <Chips label="Outer pattern" options={PATTERNS} value={params.outPat} onPick={(i) => set("outPat", i)} />
+                  <PatternChips label="Outer pattern" ids={PATTERN_LAYER_IDS} value={params.outPat} onPick={(i) => set("outPat", i)} />
                 </fieldset>
                 <fieldset className="fig-field">
                   <legend className="t-label fig-legend">Bottom</legend>
@@ -446,7 +477,7 @@ export function FigureStudio() {
                   <span className="t-mono fig-sub">Bottom &amp; shoe colour</span>
                   <Swatches label="Bottom colour" value={params.botc} onPick={(i) => set("botc", i)} />
                   <span className="t-mono fig-sub">Pattern</span>
-                  <Chips label="Bottom pattern" options={PATTERNS} value={params.botPat} onPick={(i) => set("botPat", i)} />
+                  <PatternChips label="Bottom pattern" ids={PATTERN_LAYER_IDS} value={params.botPat} onPick={(i) => set("botPat", i)} />
                 </fieldset>
                 <fieldset className="fig-field">
                   <legend className="t-label fig-legend">Shoes</legend>
