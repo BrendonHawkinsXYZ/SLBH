@@ -464,10 +464,63 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
     ctx.closePath();
     ctx.fill();
   };
+  // A ring — an outline with a hole punched through it. Cloth that wraps
+  // around something (a hood around a head) is a ring, not two columns.
+  const ring = (outer: [number, number][], inner: [number, number][], col: string) => {
+    ctx.fillStyle = col;
+    ctx.beginPath();
+    [outer, inner].forEach((loop) => {
+      loop.forEach((v, i) => {
+        if (i) ctx.lineTo(v[0] * SC, Y(v[1]));
+        else ctx.moveTo(v[0] * SC, Y(v[1]));
+      });
+      ctx.closePath();
+    });
+    ctx.fill("evenodd");
+  };
+  // Deterministic 0..1 — folds have to fall in the same place every frame, or
+  // the figure crawls while you drag a slider.
+  const rnd = (n: number) => {
+    const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
+    return x - Math.floor(x);
+  };
+  // A quad with its corners cut back. Cloth has no square corners: cut the top
+  // and the silhouette slopes off the shoulder, cut the bottom and the hem
+  // rolls instead of ending in a brick.
+  const cut = (
+    yt: number,
+    lt: number,
+    rt: number,
+    yb: number,
+    lb: number,
+    rb: number,
+    ct: number,
+    cb: number,
+  ): [number, number][] => [
+    [lt + ct, yt],
+    [rt - ct, yt],
+    [rt, yt + ct],
+    [rb, yb - cb],
+    [rb - cb, yb],
+    [lb + cb, yb],
+    [lb, yb - cb],
+    [lt, yt + ct],
+  ];
+
+  type PanelOpt = {
+    frac?: number; // width of the shaded band
+    ct?: number; // corner cut at the shoulder / waist
+    cb?: number; // corner cut at the hem
+    hem?: boolean; // the fabric edge, a shade darker than the face above it
+    folds?: number[]; // heights where the cloth compresses
+    seed?: number;
+  };
+
   /**
    * A garment panel: a quad given by its left and right edge at top and bottom,
-   * plus the shaded band down whichever side the light isn't on. Everything the
-   * figure wears is one of these, so shading a new garment is free.
+   * with cut corners, the shaded band down whichever side the light isn't on,
+   * a rolled hem, and fold marks where the cloth gathers. Everything the figure
+   * wears is one of these, so detail added here lands on the whole wardrobe.
    */
   const panel = (
     yt: number,
@@ -477,39 +530,57 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
     lb: number,
     rb: number,
     col: string,
-    frac = 0.47,
+    opt: PanelOpt = {},
   ) => {
-    poly(
-      [
-        [lt, yt],
-        [rt, yt],
-        [rb, yb],
-        [lb, yb],
-      ],
-      col,
-    );
-    if (!key) return;
-    const sc = tint(col, 0.78);
-    if (key > 0) {
-      poly(
-        [
-          [rt - (rt - lt) * frac, yt],
-          [rt, yt],
-          [rb, yb],
-          [rb - (rb - lb) * frac, yb],
-        ],
-        sc,
-      );
-    } else {
-      poly(
-        [
-          [lt, yt],
-          [lt + (rt - lt) * frac, yt],
-          [lb + (rb - lb) * frac, yb],
-          [lb, yb],
-        ],
-        sc,
-      );
+    const frac = opt.frac ?? 0.47;
+    const ct = opt.ct ?? 0;
+    const cb = opt.cb ?? 0;
+    poly(cut(yt, lt, rt, yb, lb, rb, ct, cb), col);
+    if (key) {
+      const sc = tint(col, 0.78);
+      const mt = key > 0 ? rt - (rt - lt) * frac : lt + (rt - lt) * frac;
+      const mb = key > 0 ? rb - (rb - lb) * frac : lb + (rb - lb) * frac;
+      if (key > 0) {
+        poly(
+          [
+            [mt, yt],
+            [rt - ct, yt],
+            [rt, yt + ct],
+            [rb, yb - cb],
+            [rb - cb, yb],
+            [mb, yb],
+          ],
+          sc,
+        );
+      } else {
+        poly(
+          [
+            [lt + ct, yt],
+            [mt, yt],
+            [mb, yb],
+            [lb + cb, yb],
+            [lb, yb - cb],
+            [lt, yt + ct],
+          ],
+          sc,
+        );
+      }
+    }
+    // Fold marks: short bars where the cloth stacks against itself. Placed off
+    // a hash of the height so they scatter, but always in the same places.
+    if (opt.folds) {
+      const seed = opt.seed ?? 1;
+      opt.folds.forEach((y, i) => {
+        const t = (y - yt) / Math.max(1, yb - yt);
+        const l = lt + (lb - lt) * t;
+        const r = rt + (rb - rt) * t;
+        const fw = (r - l) * (0.26 + 0.22 * rnd(seed + i * 3.1));
+        const fx = l + (r - l - fw) * (0.1 + 0.8 * rnd(seed + i * 7.7));
+        box(fx, y, fw, 1.3, tint(col, 0.87));
+      });
+    }
+    if (opt.hem) {
+      box(lb + cb, yb - 1.5, rb - cb - (lb + cb), 1.5, tint(col, 0.88));
     }
   };
   const text = (str: string, cx: number, cy: number, u: number, col: string) => {
@@ -525,46 +596,94 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
       }
     }
   };
+  /**
+   * Hair, built the way cloth is: a rounded mass rather than a block, with the
+   * front broken into uneven tufts over the brow and every fall tapered to its
+   * ends. The break pattern is hashed off the style so it stays put, but no two
+   * styles break the same way.
+   */
   const hairMass = (hx: number, hcol: string, ht: number, back: boolean, side: boolean) => {
     if (ht === 6) return; // bald
     const c = HC[ht];
-    const HL = hx - 16;
-    const HR = hx + 16;
+    // A unit wider than the skull on each side: the crown is rounded off, and
+    // a rounded crown cut flush to the head leaves the scalp showing at the
+    // corners. Hair sits on top of the head, it isn't inlaid into it.
+    const HL = hx - 17;
+    const HR = hx + 17;
     const wd = c.wide ?? 0;
     const st = c.st ?? 0;
     const sb = c.sb ?? 0;
     const bot = back ? Math.max(sb, 46) : c.cy + c.ch;
-    vol(HL - wd, c.cy, HR + wd - (HL - wd), bot - c.cy, hcol);
-    if (c.spike) {
-      poly(
-        [
-          [HL, c.cy + 3],
-          [HL + 8, c.cy - 7],
-          [hx, c.cy + 3],
-          [hx + 8, c.cy - 7],
-          [HR, c.cy + 3],
-        ],
-        hcol,
-      );
+
+    // The crown. A big round cut on volume styles, a light one on the rest.
+    panel(c.cy, HL - wd, HR + wd, bot, HL - wd + 0.8, HR + wd - 0.8, hcol, {
+      frac: 0.42,
+      ct: wd ? 7 : c.spike ? 2 : 3.4,
+      cb: back ? 2.4 : 0.6,
+    });
+
+    // The fringe: hair falls past the hairline in clumps of different depth,
+    // and the clumps read as separate because they alternate a shade.
+    if (!back) {
+      const n = 5;
+      const fw = ((HR + wd - (HL - wd)) / n) * 0.98;
+      for (let i = 0; i < n; i++) {
+        const seed = ht * 3.7 + i * 1.9;
+        const d = 1.4 + (wd ? 5 : 3.6) * rnd(seed);
+        const x = HL - wd + i * fw + 0.2;
+        box(x, bot - 1, fw, d, duo(hcol, x + fw / 2 < hx, 1.05, 0.9));
+        // A shorter second step, so the edge isn't one hard row of teeth.
+        if (rnd(seed + 0.5) > 0.45) box(x + fw * 0.35, bot - 1 + d, fw * 0.5, 1.6, tint(hcol, 0.88));
+      }
     }
-    if (c.bun) vol(hx - 6, c.cy - 10, 12, 11, tint(hcol, 1.1));
+
+    if (c.spike) {
+      // Uneven spikes — a flat row of triangles reads as a crown, not hair.
+      const n = 5;
+      const pts: [number, number][] = [[HL, c.cy + 4]];
+      for (let i = 0; i < n; i++) {
+        const x = HL + ((HR - HL) / n) * (i + 0.5);
+        pts.push([x - 2, c.cy + 3], [x, c.cy - 5 - 6 * rnd(ht + i * 2.3)], [x + 2, c.cy + 3]);
+      }
+      pts.push([HR, c.cy + 4]);
+      poly(pts, hcol);
+    }
+    if (c.bun) {
+      panel(c.cy - 10, hx - 6, hx + 6, c.cy + 1, hx - 5.4, hx + 5.4, tint(hcol, 1.1), {
+        ct: 3.4,
+        cb: 2.6,
+        frac: 0.42,
+      });
+    }
+    // Side falls, tapered in and stepped at the ends so they read as hair
+    // hanging rather than two planks bolted to the head.
     if (c.sw) {
+      const fall = (l: number, r: number, col: string) => {
+        panel(st, l, r, sb, l + 1.4, r - 0.6, col, { frac: 0.42, ct: 1.6, cb: 2.4 });
+        box(l + 1.8, sb - 1, (r - l) * 0.5, 2.6 + 2.4 * rnd(ht + l), tint(col, 0.9));
+      };
       if (side) {
-        vol(HL - c.sw, st, c.sw + 4, sb - st, tint(hcol, 0.9));
+        fall(HL - c.sw, HL + 4, tint(hcol, 0.9));
       } else {
-        vol(HL - c.sw, st, c.sw + 2.5, sb - st, duo(hcol, true, 1.05, 0.8));
-        vol(HR - 2.5, st, c.sw + 2.5, sb - st, duo(hcol, false, 1.05, 0.8));
+        fall(HL - c.sw, HL + 2.5, duo(hcol, true, 1.05, 0.8));
+        fall(HR - 2.5, HR + c.sw, duo(hcol, false, 1.05, 0.8));
       }
     }
     if (c.locs) {
       const LN = [54, 58, 48];
       const OF = [-23, -19.5, -16];
+      // Each loc tapers and ends at its own height.
+      const loc = (x: number, len: number, col: string, seed: number) => {
+        const end = len + 4 * rnd(seed);
+        panel(12, x, x + 3, end, x + 0.5, x + 2.6, col, { frac: 0.42, ct: 1.2, cb: 1.2 });
+        box(x + 0.4, end - 2, 2.2, 2, tint(col, 0.86));
+      };
       if (side) {
-        for (let k = 0; k < 3; k++) vol(hx - 23 + k * 3.7, 12, 3, LN[k] - 12, tint(hcol, k % 2 ? 1.04 : 0.88));
+        for (let k = 0; k < 3; k++) loc(hx - 23 + k * 3.7, LN[k], tint(hcol, k % 2 ? 1.04 : 0.88), k);
       } else {
         for (let k = 0; k < 3; k++) {
-          vol(hx + OF[k], 12, 3, LN[k] - 12, tint(hcol, k % 2 ? 1.06 : 0.92));
-          vol(hx - OF[k] - 3, 12, 3, LN[2 - k] - 12, tint(hcol, k % 2 ? 0.84 : 0.76));
+          loc(hx + OF[k], LN[k], tint(hcol, k % 2 ? 1.06 : 0.92), k);
+          loc(hx - OF[k] - 3, LN[2 - k], tint(hcol, k % 2 ? 0.84 : 0.76), k + 7);
         }
       }
     }
@@ -623,7 +742,11 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
     const cx = L[0] + L[1] / 2;
     const h = (L[1] - 1.2) / 2;
     const at = (y: number) => h * legMul(y);
-    panel(116, cx - at(116), cx + at(116), 174, cx - at(174), cx + at(174), s, 0.4);
+    panel(116, cx - at(116), cx + at(116), 174, cx - at(174), cx + at(174), s, {
+      frac: 0.4,
+      ct: 1.4,
+      cb: 1.4,
+    });
   });
   vol(50 - 14.5 * w, SHOULDER, 29 * w, 118 - SHOULDER, s);
 
@@ -631,7 +754,11 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
   // clear the hips down their whole depth: the leg tops run to 14w, so a
   // tapered cut leaves the body showing at the outside of the seat.
   const brf = tint(pc, 1.06);
-  panel(105, 50 - 14.8 * w, 50 + 14.8 * w, 124, 50 - 14.2 * w, 50 + 14.2 * w, brf);
+  panel(105, 50 - 14.8 * w, 50 + 14.8 * w, 124, 50 - 14.2 * w, 50 + 14.2 * w, brf, {
+    ct: 1.6,
+    cb: 2.6, // the leg openings
+    hem: true,
+  });
 
   const feet = () =>
     legs.forEach((L) => {
@@ -653,7 +780,13 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
   if (bottom.puddle) feet();
 
   if (skirt) {
-    panel(116, 50 - 15 * w, 50 + 15 * w, sHem, 50 - 19 * w, 50 + 19 * w, pc);
+    panel(116, 50 - 15 * w, 50 + 15 * w, sHem, 50 - 19 * w, 50 + 19 * w, pc, {
+      ct: 1.4,
+      cb: 2.6,
+      hem: true,
+      folds: [sHem - 26, sHem - 15, sHem - 8],
+      seed: bt + 3,
+    });
   } else if (bottom.kind === "pants" && pantStop > 116) {
     // Trouser leg by profile: hip → knee → hem. A cropped or tucked leg is cut
     // off wherever it stops, so it keeps the taper it had at that height.
@@ -688,11 +821,26 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
       if (key > 0) poly([...edge(0.2), ...edge(1).reverse()], tint(pc, 0.78));
       else if (key < 0) poly([...edge(-1), ...edge(-0.2).reverse()], tint(pc, 0.78));
       if (bottom.crease) box(cx - 0.5, 118, 1, pantStop - 118, tint(pc, 1.12));
+      // Where the leg bends and where the cloth catches on the hip: short bars,
+      // scattered off a hash so no two legs fold identically.
+      const seedL = bt * 5 + cx;
+      [130, 148, 158].forEach((y, i) => {
+        if (y > pantStop - 6) return;
+        const half = hw * mul(y);
+        const fw = half * (0.5 + 0.5 * rnd(seedL + i * 2.3));
+        box(cx - half + (2 * half - fw) * rnd(seedL + i * 5.7), y, fw, 1.4, tint(pc, 0.86));
+      });
       if (bottom.puddle) {
-        // Two folds where the fabric stacks up on the floor.
+        // Fabric stacking on the floor — each fold a little wider than the last.
         const hh = hw * mul(pantStop);
+        box(cx - hh * 0.94, pantStop - 10, hh * 1.88, 2.6, tint(pc, 0.9));
         box(cx - hh, pantStop - 7.5, hh * 2, 3.4, tint(pc, 1.08));
         box(cx - hh, pantStop - 4, hh * 2, 4, tint(pc, 0.84));
+      } else if (pantStop > 150) {
+        // The break: a trouser hem rests on the shoe and rucks up above it.
+        const hh = hw * mul(pantStop);
+        box(cx - hh, pantStop - 5.4, hh * 2, 2.2, tint(pc, 1.06));
+        box(cx - hh, pantStop - 2.6, hh * 2, 2.6, tint(pc, 0.86));
       }
     });
   }
@@ -707,7 +855,19 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
   const fl = B.flare ?? 0;
   const bHemW = fl ? fl : B.tw - 1.6;
   if (!B.bare) {
-    panel(SHOULDER, 50 - B.tw * w, 50 + B.tw * w, B.hem, 50 - bHemW * w, 50 + bHemW * w, bcol);
+    // The shoulder cut is what stops a top reading as a crate: the silhouette
+    // slopes off the shoulder, and the hem rolls rather than ending square.
+    panel(SHOULDER, 50 - B.tw * w, 50 + B.tw * w, B.hem, 50 - bHemW * w, 50 + bHemW * w, bcol, {
+      ct: 2.8,
+      cb: B.dress ? 2.6 : 1.6,
+      hem: true,
+      folds: B.dress
+        ? [96, 116, 134, 150]
+        : B.hem > 110
+          ? [B.hem - 22, B.hem - 12]
+          : [B.hem - 9],
+      seed: P.base + 2,
+    });
     if (B.print && !back && !side) {
       const u = 26 / (B.print.length * 4 - 1);
       text(B.print, 50, 80, u, lum(bcol) > 110 ? tint(bcol, 0.32) : tint(bcol, 2.4));
@@ -723,24 +883,46 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
         ];
   // Sleeves hang from the same shoulder line as the body, so the armhole is a
   // single edge rather than a notch.
-  ax.forEach((A) => {
-    if (B.slv < 0) vol(A[0], SHOULDER, A[1], 112 - SHOULDER, s);
+  ax.forEach((A, k) => {
+    // A sleeve tapers on the outside only. Taper the inner edge and it pulls
+    // away from a body panel that's narrowing too, opening a seam of skin down
+    // the side of the figure.
+    const toBody = A[0] + A[1] / 2 < 50 ? 1 : -1;
+    const arm = (yt: number, yb: number, col: string, sleeve: boolean) =>
+      panel(yt, A[0], A[0] + A[1], yb, A[0] + (toBody > 0 ? 0.7 : -1.6), A[0] + A[1] + (toBody > 0 ? 1.6 : -0.7), col, {
+        frac: 0.4,
+        ct: yt === SHOULDER ? 1.8 : 0.8,
+        cb: 1,
+        hem: sleeve,
+        // Cloth gathers at the inside of the elbow.
+        folds: sleeve && yb - yt > 20 ? [yt + (yb - yt) * 0.55] : undefined,
+        seed: P.base + k * 4,
+      });
+    if (B.slv < 0) arm(SHOULDER, 112, s, false);
     else if (B.slv === 0) {
-      vol(A[0], SHOULDER, A[1], 22, bcol);
-      vol(A[0] + 0.4, SHOULDER + 22, A[1] - 0.8, 90 - SHOULDER, s);
-    } else vol(A[0], SHOULDER, A[1], 112 - SHOULDER, bcol);
+      arm(SHOULDER, SHOULDER + 22, bcol, true);
+      arm(SHOULDER + 22, 112, s, false);
+    } else arm(SHOULDER, 112, bcol, true);
   });
 
   // Head position and, if there's a raised hood, the box it occupies — the hood
   // is painted in two passes around the head, so both need these up front.
   const hx = 50 + (side ? D.fx * 0.35 : 0);
-  const hoodH = hairSpan(P.hairT) + 3.6;
-  const hoodTop = Math.max(0.5, Math.min(P.hairT === 6 ? 14 : HC[P.hairT].cy, 12) - 4);
+  // The hood is cut to contain the hair: full width by the height the hair
+  // starts, and wider at the fall than at the crown, the way cloth hangs.
+  const hoodH = hairSpan(P.hairT) + 4.6;
+  const hoodTopH = hairSpan(P.hairT) + 2.2;
+  const hoodTop = Math.max(0.5, (P.hairT === 6 ? 14 : HC[P.hairT].cy) - 4);
+  const hoodCut = Math.min(4.5, Math.max(2, (P.hairT === 6 ? 14 : HC[P.hairT].cy) - hoodTop));
   const hoodBot = SHOULDER + 4;
 
   // ── Overalls: bib and straps, worn over the base layer ──
   if (ovr && !back) {
-    panel(78, 50 - 13 * w, 50 + 13 * w, 118, 50 - 14 * w, 50 + 14 * w, pc);
+    panel(78, 50 - 13 * w, 50 + 13 * w, 118, 50 - 14 * w, 50 + 14 * w, pc, {
+      ct: 2.2, // the bib corners round where the straps take the load
+      folds: [104, 112],
+      seed: 4,
+    });
     vol(50 - 11 * w, 64, 3.6, 15, duo(pc, true, 1.08, 0.88));
     vol(50 + 7.4 * w, 64, 3.6, 15, duo(pc, false, 1.08, 0.88));
     box(50 - 11.4 * w, 77, 4.4, 3, duo(pc, true, 1.3, 1.15)); // buckles
@@ -750,7 +932,13 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
   // ── Outer layer ──
   if (O) {
     const oB = O.slit ? O.w + 1.2 : O.w - 1.4;
-    panel(O.top, 50 - O.w * w, 50 + O.w * w, O.hem, 50 - oB * w, 50 + oB * w, oc);
+    panel(O.top, 50 - O.w * w, 50 + O.w * w, O.hem, 50 - oB * w, 50 + oB * w, oc, {
+      ct: 3.2, // outerwear sits away from the body, so it slopes harder
+      cb: 2,
+      hem: true,
+      folds: O.hem - O.top > 50 ? [O.hem - 34, O.hem - 20, O.hem - 10] : [O.hem - 14, O.hem - 7],
+      seed: P.out + 5,
+    });
     if (O.quilt) {
       for (let k = 1; k < 4; k++) {
         box(50 - O.w * w, O.top + k * ((O.hem - O.top) / 4), O.w * 2 * w, 1.4, tint(oc, 0.66));
@@ -764,11 +952,29 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
             [50 + O.w * w - 1.2 * w, 6.6 * w],
           ];
     // Sleeves start on the coat's own shoulder line — a unit lower and the
-    // outer shoulder opens into a notch on every coat in the wardrobe.
-    oa.forEach((A) => vol(A[0], O.top, A[1], (O.hem < 110 ? 104 : 110) - O.top, oc));
+    // outer shoulder opens into a notch on every coat in the wardrobe. They
+    // taper to a cuff and gather at the elbow.
+    const oaBot = O.hem < 110 ? 104 : 110;
+    oa.forEach((A, k) => {
+      const toBody = A[0] + A[1] / 2 < 50 ? 1 : -1;
+      panel(O.top, A[0], A[0] + A[1], oaBot, A[0] + (toBody > 0 ? 0.9 : -2), A[0] + A[1] + (toBody > 0 ? 2 : -0.9), oc, {
+        frac: 0.4,
+        ct: 2,
+        cb: 1.2,
+        hem: true,
+        folds: [O.top + (oaBot - O.top) * 0.52, O.top + (oaBot - O.top) * 0.74],
+        seed: P.out + k * 6,
+      });
+    });
     // The back of a raised hood goes behind the head, so the hood reads as a
-    // volume the head sits inside rather than a rim stuck to it.
-    if (O.hood === "up") box(hx - hoodH, hoodTop, hoodH * 2, hoodBot - hoodTop, tint(oc, 0.7));
+    // volume the head sits inside rather than a rim stuck to it. It widens as
+    // it falls — cloth hangs off the crown, it doesn't stand up like a wall.
+    if (O.hood === "up") {
+      poly(
+        cut(hoodTop, hx - hoodTopH, hx + hoodTopH, hoodBot, hx - hoodH, hx + hoodH, hoodCut, 2.4),
+        tint(oc, 0.7),
+      );
+    }
     // Open front: whatever is underneath shows through the slit.
     if (O.slit && !back) {
       const cut = Math.min(B.hem, O.hem);
@@ -778,16 +984,27 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
     if (O.belt) box(50 - 14 * w, 102, 28 * w, 5, tint(oc, 0.6));
     // Pullover details: kangaroo pocket, drawcords, and the hood at rest.
     if (O.pocket && !back) {
-      box(50 - 8.6 * w, O.hem - 17, 17.2 * w, 12, tint(oc, 0.9));
-      box(50 - 8.6 * w, O.hem - 17, 17.2 * w, 1.6, tint(oc, 0.66));
+      // The pouch sags: wider and rounder at the bottom than at the opening.
+      panel(O.hem - 17, 50 - 8.6 * w, 50 + 8.6 * w, O.hem - 5, 50 - 9.4 * w, 50 + 9.4 * w, tint(oc, 0.9), {
+        cb: 2.4,
+        frac: 0.42,
+      });
+      box(50 - 8.6 * w, O.hem - 17, 17.2 * w, 1.6, tint(oc, 0.66)); // the opening
     }
     if (O.cords && !back) {
       box(50 - 3.6, 65, 1.6, 13, tint(oc, 1.35));
       box(50 + 2, 65, 1.6, 13, tint(oc, 1.35));
     }
     if (O.hood === "down") {
-      vol(50 - 13.5 * w, 46, 27 * w, 20, tint(oc, 1.1));
-      box(50 - 13.5 * w, 62, 27 * w, 3.4, tint(oc, 0.66)); // fold at the shoulders
+      // A hood at rest is a bag of cloth collapsed behind the neck: wider at
+      // the bottom than the top, with the roll of the opening across it.
+      panel(46, 50 - 10.5 * w, 50 + 10.5 * w, 66, 50 - 14 * w, 50 + 14 * w, tint(oc, 1.1), {
+        ct: 3.4,
+        cb: 2.6,
+        folds: [56, 61],
+        seed: 9,
+      });
+      box(50 - 12 * w, 47, 24 * w, 2.6, tint(oc, 0.72)); // the opening, face down
     }
     // Suit lapels sit on top of the open front, buttons on the right side.
     if (O.lapel && !back) {
@@ -867,20 +1084,65 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
   vol(hx - 16, 16, 32, 42, s);
   hairMass(hx, hr, P.hairT, back, side);
   if (ac === 5) {
-    vol(hx - 17, 9, 34, 15, tint(oc, 0.94));
-    vol(hx - 17, 20, 34, 4, tint(oc, 0.76)); // beanie band
+    // A beanie is knitted onto the skull: rounded at the crown, with the cuff
+    // rolled up at the brow. Sized to sit over whatever hair it covers.
+    const bh = Math.max(17, hairSpan(P.hairT) - 4);
+    panel(8, hx - bh + 1.5, hx + bh - 1.5, 24, hx - bh, hx + bh, tint(oc, 0.94), {
+      ct: 4.5,
+      folds: [14, 19],
+      seed: 15,
+    });
+    box(hx - bh, 20, bh * 2, 4.4, tint(oc, 0.76)); // the cuff
   }
   // Hood up goes over the hair — and over a beanie, if there's one under it.
   if (O?.hood === "up") {
-    // The front of the hood, over the hair. It takes the shape of what's inside
-    // it — clearing the widest hairstyle by a margin and sitting above its crown,
-    // so an afro or locs push it out instead of poking through — and it runs
-    // past the shoulder line to meet the body.
-    const cw = Math.max(6.5, hoodH * 0.28);
-    box(hx - hoodH, hoodTop, hoodH * 2, 12, oc);
-    box(hx - hoodH, hoodTop, cw, hoodBot - hoodTop, duo(oc, true, 1.06, 0.82));
-    box(hx + hoodH - cw, hoodTop, cw, hoodBot - hoodTop, duo(oc, false, 1.06, 0.82));
-    if (back) box(hx - hoodH, hoodTop, hoodH * 2, hoodBot - hoodTop, tint(oc, 0.94));
+    // The front of the hood: one piece of cloth wrapped around the head, drawn
+    // as a ring so the opening is a hole in it rather than a gap between two
+    // columns. It takes the shape of what's inside — clearing the widest
+    // hairstyle by a margin and sitting above its crown, so an afro or locs
+    // push it out instead of poking through — falls wider than it starts, and
+    // runs past the shoulder line to meet the body.
+    const outer = cut(
+      hoodTop,
+      hx - hoodTopH,
+      hx + hoodTopH,
+      hoodBot,
+      hx - hoodH,
+      hx + hoodH,
+      hoodCut,
+      2.4,
+    );
+    if (back) {
+      poly(outer, tint(oc, 0.94)); // from behind it's a solid mass
+    } else {
+      // The opening sits high and narrow at the brow, opening out at the jaw.
+      const oy = Math.max(hoodTop + 4, 11);
+      const inner = cut(oy, hx - 12.5, hx + 12.5, hoodBot, hx - 15, hx + 15, 5.6, 0);
+      ring(outer, inner, oc);
+      // The rim rolls: a band of cloth around the opening, lit on one side.
+      poly(
+        [
+          [hx - hoodTopH + hoodCut, hoodTop],
+          [hx - 8, oy],
+          [hx - 12.5, oy + 5.6],
+          [hx - 15, hoodBot],
+          [hx - hoodH, hoodBot],
+          [hx - hoodTopH, hoodTop + hoodCut],
+        ],
+        duo(oc, true, 1.06, 0.82),
+      );
+      poly(
+        [
+          [hx + hoodTopH - hoodCut, hoodTop],
+          [hx + 8, oy],
+          [hx + 12.5, oy + 5.6],
+          [hx + 15, hoodBot],
+          [hx + hoodH, hoodBot],
+          [hx + hoodTopH, hoodTop + hoodCut],
+        ],
+        duo(oc, false, 1.06, 0.82),
+      );
+    }
   }
 
   const fd = lum(s) > 120 ? 0.5 : 1.7; // features read dark on light skin, light on dark
@@ -926,24 +1188,42 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
   }
 
   // ── Carried accessories ──
+  // Carried bags. The handle starts at the hand, not in mid-air, and the bag
+  // hangs from it — a soft body that widens as it fills and rounds off at the
+  // bottom, with the opening rolled at the top.
   if (ac === 2 && !side) {
     const ex = (O ? O.w : B.tw) * w + 7;
-    box(50 + ex - 8, 66, 2.4, 40, tint(oc, 0.72)); // tote handle
-    vol(50 + ex - 6, 104, 13, 22, tint(oc, 0.86));
-    box(50 + ex - 6, 104, 13, 2.4, tint(oc, 0.6));
+    const hand = 108;
+    box(50 + ex - 8, hand - 42, 2.4, 42, tint(oc, 0.72)); // handle, up to the fist
+    box(50 + ex - 8 + 2.4, hand - 42, 8, 2, tint(oc, 0.72)); // and over it
+    panel(hand - 2, 50 + ex - 6, 50 + ex + 7, hand + 21, 50 + ex - 7.4, 50 + ex + 8.4, tint(oc, 0.86), {
+      ct: 1.4,
+      cb: 3,
+      hem: true,
+      folds: [hand + 8, hand + 15],
+      seed: 11,
+    });
+    box(50 + ex - 6, hand - 2, 13, 2.4, tint(oc, 0.6)); // the opening
   }
   if (ac === 3 && !side) {
     const sx = (O ? O.w : B.tw) * w;
+    // The strap crosses the body from the far shoulder to the near hip.
     poly(
       [
-        [50 - sx + 2, 66],
-        [50 - sx + 6, 66],
+        [50 - sx + 2, SHOULDER + 3],
+        [50 - sx + 6, SHOULDER + 3],
         [50 + sx - 2, 104],
         [50 + sx - 6, 104],
       ],
       tint(oc, 0.66),
-    ); // cross-body strap
-    vol(50 + sx - 8, 102, 12, 17, tint(oc, 0.88));
+    );
+    panel(101, 50 + sx - 8, 50 + sx + 4, 119, 50 + sx - 9, 50 + sx + 5, tint(oc, 0.88), {
+      ct: 1.6,
+      cb: 2.6,
+      hem: true,
+      folds: [112],
+      seed: 13,
+    });
   }
 }
 
