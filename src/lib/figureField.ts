@@ -190,7 +190,27 @@ export const BOTTOMS = [
   "Overalls",
 ];
 export const SHOES = ["Barefoot", "Chunky boot", "Thigh boot", "Sneaker", "Loafer", "Derby"];
-export const ACCESSORIES = ["None", "Shades", "Tote", "Shoulder bag", "Scarf", "Beanie", "Tie"];
+// Accessories are independent slots, the way an avatar system attaches them:
+// each one is its own attachment point, so they combine instead of competing.
+export const HEADWEAR = ["None", "Beanie"];
+export const EYEWEAR = ["None", "Shades"];
+export const NECKWEAR = ["None", "Scarf", "Tie"];
+export const CARRIED = ["None", "Tote", "Shoulder bag"];
+
+/**
+ * Surface pattern. Kept at a scale of several logical units per repeat: finer
+ * than the sprite lattice and the resample turns it into noise, so the repeat
+ * has to stay coarse enough to survive being sampled at one point per cell.
+ */
+export const PATTERNS = ["Solid", "Stripe", "Check", "Camo", "Grid"];
+
+/**
+ * How a fabric gathers. Folds aren't decoration — they're the material telling
+ * you what it is: poplin creases sharp and shallow, wool coats hang in long
+ * heavy breaks, jersey bunches soft, down quilts in bands, and a skirt falls in
+ * vertical drape lines rather than horizontal compression.
+ */
+export type Drape = "crisp" | "soft" | "heavy" | "quilt" | "fluid";
 
 type DirSpec = { w: number; fx: number; face: number; arm: number };
 type BaseSpec = {
@@ -203,6 +223,7 @@ type BaseSpec = {
   collar?: boolean;
   dress?: boolean;
   flare?: number;
+  drape?: Drape;
 };
 type OuterSpec = {
   top: number;
@@ -216,6 +237,7 @@ type OuterSpec = {
   cords?: boolean;
   lapel?: boolean;
   buttons?: boolean;
+  drape?: Drape;
 };
 // Trousers are a profile, not a box: a width multiplier on the leg at the hip,
 // at the knee, and at the hem. That's what makes a flare a flare — the leg has
@@ -230,6 +252,7 @@ type BottomSpec = {
   bib?: boolean;
   crease?: boolean;
   puddle?: boolean; // fabric pools over the shoe instead of stopping at it
+  drape?: Drape;
 };
 type ShoeSpec = { shaft: number; tuck: boolean; rz: number; foot: number; bare?: boolean };
 type HairSpec = {
@@ -256,27 +279,27 @@ const DIR: DirSpec[] = [
 
 const BSPEC: BaseSpec[] = [
   { tw: 15, hem: 118, slv: -1, bare: true },
-  { tw: 16, hem: 120, slv: -1 },
-  { tw: 16, hem: 102, slv: -1 },
-  { tw: 18, hem: 120, slv: 0 },
-  { tw: 18, hem: 102, slv: 0 },
-  { tw: 16, hem: 126, slv: -1, sheer: true },
-  { tw: 19, hem: 122, slv: 1 },
-  { tw: 18, hem: 120, slv: 1, neck: true },
-  { tw: 19, hem: 124, slv: 1, collar: true },
-  { tw: 17, hem: 168, slv: 1, dress: true, flare: 20 },
+  { tw: 16, hem: 120, slv: -1, drape: "soft" },
+  { tw: 16, hem: 102, slv: -1, drape: "soft" },
+  { tw: 18, hem: 120, slv: 0, drape: "soft" },
+  { tw: 18, hem: 102, slv: 0, drape: "soft" },
+  { tw: 16, hem: 126, slv: -1, sheer: true, drape: "fluid" },
+  { tw: 19, hem: 122, slv: 1, drape: "soft" },
+  { tw: 18, hem: 120, slv: 1, neck: true, drape: "soft" },
+  { tw: 19, hem: 124, slv: 1, collar: true, drape: "crisp" },
+  { tw: 17, hem: 168, slv: 1, dress: true, flare: 20, drape: "fluid" },
 ];
 
 const OSPEC: (OuterSpec | null)[] = [
   null,
-  { top: 60, hem: 124, w: 21.8, hood: "down", pocket: true, cords: true },
-  { top: 60, hem: 124, w: 21.8, hood: "up", pocket: true, cords: true },
-  { top: 60, hem: 150, w: 21.4, slit: true },
-  { top: 60, hem: 146, w: 21.4, slit: true, belt: true },
-  { top: 58, hem: 128, w: 23, slit: true },
-  { top: 60, hem: 128, w: 20, slit: true, lapel: true, buttons: true },
-  { top: 60, hem: 104, w: 21.4 },
-  { top: 60, hem: 118, w: 23, quilt: true },
+  { top: 60, hem: 124, w: 21.8, hood: "down", pocket: true, cords: true, drape: "soft" },
+  { top: 60, hem: 124, w: 21.8, hood: "up", pocket: true, cords: true, drape: "soft" },
+  { top: 60, hem: 150, w: 21.4, slit: true, drape: "heavy" },
+  { top: 60, hem: 146, w: 21.4, slit: true, belt: true, drape: "heavy" },
+  { top: 58, hem: 128, w: 23, slit: true, drape: "crisp" },
+  { top: 60, hem: 128, w: 20, slit: true, lapel: true, buttons: true, drape: "crisp" },
+  { top: 60, hem: 104, w: 21.4, drape: "soft" },
+  { top: 60, hem: 118, w: 23, quilt: true, drape: "quilt" },
 ];
 
 // The flare is the shape the whole leg vocabulary is built around: pulled in
@@ -284,14 +307,14 @@ const OSPEC: (OuterSpec | null)[] = [
 // long enough to break over the shoe and pool on the floor.
 const BOT_SPEC: BottomSpec[] = [
   { kind: "none" },
-  { kind: "pants", hip: 1.06, knee: 1.3, hem: 1.66 },
-  { kind: "pants", hip: 1, knee: 0.76, hem: 2.7, stop: 179, puddle: true },
-  { kind: "pants", hip: 1, knee: 1, hem: 1.04 },
-  { kind: "pants", hip: 1.04, knee: 0.94, hem: 1.18, crease: true },
-  { kind: "skirt", hemY: 148 },
-  { kind: "skirt", hemY: 170 },
-  { kind: "pants", hip: 1.08, knee: 1.12, hem: 1.14, stop: 140 },
-  { kind: "pants", hip: 1.14, knee: 1.12, hem: 1.22, bib: true },
+  { kind: "pants", hip: 1.06, knee: 1.3, hem: 1.66, drape: "heavy" },
+  { kind: "pants", hip: 1, knee: 0.76, hem: 2.7, stop: 179, puddle: true, drape: "fluid" },
+  { kind: "pants", hip: 1, knee: 1, hem: 1.04, drape: "heavy" },
+  { kind: "pants", hip: 1.04, knee: 0.94, hem: 1.18, crease: true, drape: "crisp" },
+  { kind: "skirt", hemY: 148, drape: "fluid" },
+  { kind: "skirt", hemY: 170, drape: "fluid" },
+  { kind: "pants", hip: 1.08, knee: 1.12, hem: 1.14, stop: 140, drape: "soft" },
+  { kind: "pants", hip: 1.14, knee: 1.12, hem: 1.22, bib: true, drape: "heavy" },
 ];
 
 const SSPEC: ShoeSpec[] = [
@@ -358,7 +381,13 @@ export type FigureParams = {
   bot: number;
   botc: number;
   sho: number;
-  acc: number;
+  head: number;
+  eyes: number;
+  neck: number;
+  carry: number;
+  basePat: number;
+  outPat: number;
+  botPat: number;
 };
 
 export const PIXEL_SPEC = { min: 0.6, max: 4.4, step: 0.1 };
@@ -381,7 +410,13 @@ export const DEFAULT_FIGURE: FigureParams = {
   bot: BOTTOMS.indexOf("Overalls"),
   botc: colorIndex("#38405F"),
   sho: SHOES.indexOf("Sneaker"),
-  acc: 0,
+  head: 0,
+  eyes: 0,
+  neck: 0,
+  carry: 0,
+  basePat: 0,
+  outPat: 0,
+  botPat: 0,
 };
 
 /** A dress fills the bottom slot, so the bottom garment is inert. */
@@ -524,8 +559,25 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
     ct?: number; // corner cut at the shoulder / waist
     cb?: number; // corner cut at the hem
     hem?: boolean; // the fabric edge, a shade darker than the face above it
-    folds?: number[]; // heights where the cloth compresses
+    folds?: number[]; // heights where the cloth gathers
+    drape?: Drape; // how this fabric gathers there
+    pattern?: number; // index into PATTERNS
     seed?: number;
+  };
+
+  // Draw inside a shape. Patterns are painted through this so they stop at the
+  // garment's edge instead of squaring off its silhouette.
+  const clipTo = (pts: [number, number][], draw: () => void) => {
+    ctx.save();
+    ctx.beginPath();
+    pts.forEach((v, i) => {
+      if (i) ctx.lineTo(v[0] * SC, Y(v[1]));
+      else ctx.moveTo(v[0] * SC, Y(v[1]));
+    });
+    ctx.closePath();
+    ctx.clip();
+    draw();
+    ctx.restore();
   };
 
   /**
@@ -578,17 +630,82 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
         );
       }
     }
-    // Fold marks: short bars where the cloth stacks against itself. Placed off
-    // a hash of the height so they scatter, but always in the same places.
+    const seed = opt.seed ?? 1;
+    const edgeAt = (y: number): [number, number] => {
+      const t = (y - yt) / Math.max(1, yb - yt);
+      return [lt + (lb - lt) * t, rt + (rb - rt) * t];
+    };
+    // Which side of the light a mark falls on, so a pattern keeps the form.
+    const face = (x: number) =>
+      key === 0 ? 1 : (key > 0 ? x >= (lt + rt) / 2 : x <= (lt + rt) / 2) ? 0.78 : 1;
+
+    // ── Pattern ── clipped to the garment, at a repeat coarse enough to
+    // survive the resample, and darkened where it crosses into shadow.
+    if (opt.pattern) {
+      const shape = cut(yt, lt, rt, yb, lb, rb, ct, cb);
+      clipTo(shape, () => {
+        const L = Math.min(lt, lb) - 2;
+        const R = Math.max(rt, rb) + 2;
+        const mark = (x: number, y: number, w2: number, h2: number, f: number) =>
+          box(x, y, w2, h2, tint(col, f * face(x + w2 / 2)));
+        if (opt.pattern === 1) {
+          for (let y = yt; y < yb; y += 7) mark(L, y, R - L, 3.4, 0.74);
+        } else if (opt.pattern === 2) {
+          // Check: a coarse two-tone grid with a lighter line across it.
+          for (let y = yt; y < yb; y += 9) {
+            for (let x = L; x < R; x += 9) {
+              if ((Math.round((x - L) / 9) + Math.round((y - yt) / 9)) % 2) mark(x, y, 9, 9, 0.74);
+            }
+            mark(L, y, R - L, 1.4, 1.34);
+          }
+          for (let x = L; x < R; x += 9) mark(x, yt, 1.4, yb - yt, 1.34);
+        } else if (opt.pattern === 3) {
+          // Camo: blobs on a jittered lattice, two tones, never a clean edge.
+          for (let y = yt - 4; y < yb; y += 6) {
+            for (let x = L; x < R; x += 6) {
+              const r0 = rnd(seed + x * 1.7 + y * 3.3);
+              if (r0 < 0.42) continue;
+              const bw = 4 + 4 * rnd(seed + x * 2.1 + y);
+              const bh = 3.4 + 3 * rnd(seed + y * 2.9 + x);
+              const f = r0 > 0.72 ? 1.3 : 0.7;
+              mark(x + 2 * rnd(x + y), y + 2 * rnd(x * 3 + y), bw, bh, f);
+              mark(x + bw * 0.5, y + bh * 0.6, bw * 0.6, bh * 0.7, f);
+            }
+          }
+        } else if (opt.pattern === 4) {
+          for (let y = yt; y < yb; y += 13) mark(L, y, R - L, 1.6, 1.34);
+          for (let x = L; x < R; x += 13) mark(x, yt, 1.6, yb - yt, 1.34);
+        }
+      });
+    }
+
+    // ── Folds ── the fabric's own signature, not a generic mark.
     if (opt.folds && soft) {
-      const seed = opt.seed ?? 1;
+      const drape = opt.drape ?? "soft";
       opt.folds.forEach((y, i) => {
-        const t = (y - yt) / Math.max(1, yb - yt);
-        const l = lt + (lb - lt) * t;
-        const r = rt + (rb - rt) * t;
-        const fw = (r - l) * (0.26 + 0.22 * rnd(seed + i * 3.1));
+        const [l, r] = edgeAt(y);
+        if (drape === "quilt") {
+          // Down: full-width channels, the seams that hold the loft in.
+          box(l, y, r - l, 2.2, tint(col, 0.72));
+          box(l, y + 2.2, r - l, 1.2, tint(col, 1.1));
+          return;
+        }
+        if (drape === "fluid") {
+          // Hanging cloth breaks vertically, not across.
+          const n = 3 + (i % 2);
+          for (let k = 0; k < n; k++) {
+            const x = l + ((r - l) * (k + 0.6 + 0.5 * rnd(seed + k * 3.7 + i))) / (n + 0.4);
+            box(x, y, 1.3, Math.max(6, (yb - y) * (0.4 + 0.4 * rnd(seed + k + i))), tint(col, 0.88));
+          }
+          return;
+        }
+        const wide = drape === "heavy" ? 0.5 : drape === "crisp" ? 0.2 : 0.32;
+        const thick = drape === "heavy" ? 1.8 : drape === "crisp" ? 1 : 1.4;
+        const fw = (r - l) * (wide + 0.18 * rnd(seed + i * 3.1));
         const fx = l + (r - l - fw) * (0.1 + 0.8 * rnd(seed + i * 7.7));
-        box(fx, y, fw, 1.3, tint(col, 0.87));
+        box(fx, y, fw, thick, tint(col, drape === "crisp" ? 0.9 : 0.85));
+        // Heavy cloth breaks twice: the fold and its shadow underneath.
+        if (drape === "heavy") box(fx + fw * 0.2, y + thick, fw * 0.6, 1.2, tint(col, 1.08));
       });
     }
     if (opt.hem && soft) {
@@ -765,7 +882,6 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
   const O = OSPEC[P.out];
   const S = SSPEC[P.sho];
   const bt = P.bot;
-  const ac = P.acc;
   const back = D.face < 0;
   const side = P.dir === 2;
   const dress = !!B.dress;
@@ -849,7 +965,9 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
       ct: 1.4,
       cb: 2.6,
       hem: true,
-      folds: [sHem - 26, sHem - 15, sHem - 8],
+      folds: [126, sHem - 22],
+      drape: bottom.drape,
+      pattern: P.botPat,
       seed: bt + 3,
     });
   } else if (bottom.kind === "pants" && pantStop > 116) {
@@ -882,18 +1000,40 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
       const cx = L[0] + L[1] / 2;
       const hw = L[1] / 2;
       const edge = (f: number) => ys.map((y) => [cx + f * hw * mul(y), y] as [number, number]);
-      poly([...edge(-1), ...edge(1).reverse()], pc);
+      const shape = [...edge(-1), ...edge(1).reverse()];
+      poly(shape, pc);
+      // The trouser carries its pattern before the shading, then the shading
+      // goes over it, so a camo leg still turns away from the light.
+      if (P.botPat) {
+        clipTo(shape, () => {
+          panel(116, cx - hw * 2, cx + hw * 2, pantStop, cx - hw * 2, cx + hw * 2, pc, {
+            pattern: P.botPat,
+            seed: bt + 2,
+          });
+        });
+      }
       if (key > 0) poly([...edge(0.2), ...edge(1).reverse()], tint(pc, 0.78));
       else if (key < 0) poly([...edge(-1), ...edge(-0.2).reverse()], tint(pc, 0.78));
       if (bottom.crease) box(cx - 0.5, 118, 1, pantStop - 118, tint(pc, 1.12));
       // Where the leg bends and where the cloth catches on the hip: short bars,
       // scattered off a hash so no two legs fold identically.
       const seedL = bt * 5 + cx;
+      const dr = bottom.drape ?? "heavy";
       [130, 148, 158].forEach((y, i) => {
         if (y > pantStop - 6) return;
         const half = hw * mul(y);
-        const fw = half * (0.5 + 0.5 * rnd(seedL + i * 2.3));
-        box(cx - half + (2 * half - fw) * rnd(seedL + i * 5.7), y, fw, 1.4, tint(pc, 0.86));
+        if (dr === "fluid") {
+          // A wide leg hangs in vertical breaks rather than creasing across.
+          for (let k = 0; k < 3; k++) {
+            const x = cx - half + ((2 * half) * (k + 0.7)) / 3.4;
+            box(x, y, 1.3, Math.min(26, pantStop - y - 2), tint(pc, 0.88));
+          }
+          return;
+        }
+        const fw = half * (dr === "crisp" ? 0.4 : 0.9) * (0.6 + 0.4 * rnd(seedL + i * 2.3));
+        const fx = cx - half + (2 * half - fw) * rnd(seedL + i * 5.7);
+        box(fx, y, fw, dr === "heavy" ? 1.8 : 1.3, tint(pc, dr === "crisp" ? 0.9 : 0.85));
+        if (dr === "heavy") box(fx + fw * 0.2, y + 1.8, fw * 0.6, 1.2, tint(pc, 1.08));
       });
       if (bottom.puddle) {
         // Fabric stacking on the floor — each fold a little wider than the last.
@@ -927,10 +1067,12 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
       cb: B.dress ? 2.6 : 1.6,
       hem: true,
       folds: B.dress
-        ? [96, 116, 134, 150]
+        ? [92, 112, 132, 150]
         : B.hem > 110
           ? [B.hem - 22, B.hem - 12]
           : [B.hem - 9],
+      drape: B.drape,
+      pattern: P.basePat,
       seed: P.base + 2,
     });
     // The print goes on whatever top is being worn, sized to the chest and
@@ -964,6 +1106,8 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
         hem: sleeve,
         // Cloth gathers at the inside of the elbow.
         folds: sleeve && yb - yt > 20 ? [yt + (yb - yt) * 0.55] : undefined,
+        drape: B.drape === "fluid" ? "soft" : B.drape,
+        pattern: sleeve ? P.basePat : 0,
         seed: P.base + k * 4,
       });
     if (B.slv < 0) arm(SHOULDER, 112, s, false);
@@ -1008,14 +1152,16 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
       ct: 3.2, // outerwear sits away from the body, so it slopes harder
       cb: 2,
       hem: true,
-      folds: O.hem - oTop > 50 ? [O.hem - 34, O.hem - 20, O.hem - 10] : [O.hem - 14, O.hem - 7],
+      folds:
+        O.drape === "quilt"
+          ? [oTop + 14, oTop + 26, oTop + 38]
+          : O.hem - oTop > 50
+            ? [O.hem - 40, O.hem - 26, O.hem - 12]
+            : [O.hem - 16, O.hem - 8],
+      drape: O.drape,
+      pattern: P.outPat,
       seed: P.out + 5,
     });
-    if (O.quilt) {
-      for (let k = 1; k < 4; k++) {
-        box(50 - O.w * w, oTop + k * ((O.hem - oTop) / 4), O.w * 2 * w, 1.4, tint(oc, 0.66));
-      }
-    }
     const oa: [number, number][] =
       D.arm === 1
         ? [[50 + 10 * w, 7.6 * w]]
@@ -1035,6 +1181,8 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
         cb: 1.2,
         hem: true,
         folds: [oTop + (oaBot - oTop) * 0.52, oTop + (oaBot - oTop) * 0.74],
+        drape: O.drape === "quilt" ? "quilt" : O.drape,
+        pattern: P.outPat,
         seed: P.out + k * 6,
       });
     });
@@ -1128,7 +1276,7 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
       duo(bcol, false, 1.14, 0.92),
     );
   }
-  if (ac === 4) {
+  if (P.neck === 1) {
     // Scarf: a wrap plus two tails.
     vol(50 - 11, 50, 22, 13, tint(oc, 1.18));
     vol(50 - 9, 62, 5, 30, duo(oc, true, 1.06, 0.9));
@@ -1136,7 +1284,7 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
   }
   // A tie only reads if something is open over it, so it goes on last of the
   // neckline layers — knot at the collar, blade down the shirt.
-  if (ac === 6 && !back && !side) {
+  if (P.neck === 2 && !back && !side) {
     // Pushed away from the shirt behind it, the way the printed tees are.
     const tie = lum(bcol) > 110 ? tint(oc, 0.52) : tint(oc, 1.65);
     box(50 - 2.8, 60, 5.6, 5, tie);
@@ -1155,7 +1303,7 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
   // ── Head ──
   vol(hx - 16, 16, 32, 42, s);
   hairMass(hx, hr, P.hairT, back, side);
-  if (ac === 5) {
+  if (P.head === 1) {
     // A beanie is knitted onto the skull: rounded at the crown, with the cuff
     // rolled up at the brow. Sized to sit over whatever hair it covers.
     const bh = Math.max(17, hairSpan(P.hairT) - 4);
@@ -1239,7 +1387,7 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
       ],
       bcl,
     );
-    if (ac === 1) {
+    if (P.eyes === 1) {
       box(fx - 10.5, 32.6, 7.6, 4.6, "#14120F");
       box(fx + 2.9, 32.6, 7.6, 4.6, "#14120F");
       box(fx - 3, 34, 6, 1.6, "#14120F"); // bridge
@@ -1256,14 +1404,14 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
       ],
       bcl,
     );
-    if (ac === 1) box(f2 - 2, 32.6, 7, 4.6, "#14120F");
+    if (P.eyes === 1) box(f2 - 2, 32.6, 7, 4.6, "#14120F");
   }
 
   // ── Carried accessories ──
   // Carried bags. The handle starts at the hand, not in mid-air, and the bag
   // hangs from it — a soft body that widens as it fills and rounds off at the
   // bottom, with the opening rolled at the top.
-  if (ac === 2 && !side) {
+  if (P.carry === 1 && !side) {
     const ex = (O ? O.w : B.tw) * w + 7;
     const hand = 108;
     box(50 + ex - 8, hand - 42, 2.4, 42, tint(oc, 0.72)); // handle, up to the fist
@@ -1277,7 +1425,7 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
     });
     box(50 + ex - 6, hand - 2, 13, 2.4, tint(oc, 0.6)); // the opening
   }
-  if (ac === 3 && !side) {
+  if (P.carry === 2 && !side) {
     const sx = (O ? O.w : B.tw) * w;
     // The strap crosses the body from the far shoulder to the near hip.
     poly(
@@ -1441,7 +1589,13 @@ export function randomFigure(prev: FigureParams): FigureParams {
     bot: 1 + Math.floor(Math.random() * (BOTTOMS.length - 1)),
     botc: pickIn(bands[2][0], bands[2][1], fam),
     sho: 1 + Math.floor(Math.random() * (SHOES.length - 1)),
-    acc: Math.floor(Math.random() * ACCESSORIES.length),
+    head: Math.floor(Math.random() * HEADWEAR.length),
+    eyes: Math.floor(Math.random() * EYEWEAR.length),
+    neck: Math.floor(Math.random() * NECKWEAR.length),
+    carry: Math.floor(Math.random() * CARRIED.length),
+    basePat: Math.random() < 0.3 ? Math.floor(Math.random() * PATTERNS.length) : 0,
+    outPat: Math.random() < 0.25 ? Math.floor(Math.random() * PATTERNS.length) : 0,
+    botPat: Math.random() < 0.3 ? Math.floor(Math.random() * PATTERNS.length) : 0,
     print: Math.random() < 0.45 ? 1 + Math.floor(Math.random() * (PRINTS.length - 1)) : 0,
   };
 }
@@ -1495,7 +1649,11 @@ export function figureCode(p: FigureParams): string {
     `cc-${p.out}-${p.outc}`,
     `lg-${p.bot}-${p.botc}`,
     `sh-${p.sho}`,
-    `ea-${p.acc}`,
+    `ha-${p.head}`,
+    `ea-${p.eyes}`,
+    `nk-${p.neck}`,
+    `bg-${p.carry}`,
+    `pt-${p.basePat}${p.outPat}${p.botPat}`,
   ].join(".");
 }
 
@@ -1530,7 +1688,15 @@ export function figureSettings(p: FigureParams, background: Background) {
       shoes: SHOES[p.sho],
       shoeColor: PALETTE[p.botc],
       tucked: isTucked(p),
-      accessory: ACCESSORIES[p.acc],
+      headwear: HEADWEAR[p.head],
+      eyewear: EYEWEAR[p.eyes],
+      neckwear: NECKWEAR[p.neck],
+      carried: CARRIED[p.carry],
+      patterns: {
+        base: PATTERNS[p.basePat],
+        outer: PATTERNS[p.outPat],
+        bottom: PATTERNS[p.botPat],
+      },
     },
     state: { ...p, px: +p.px.toFixed(1), weight: +p.weight.toFixed(2), height: +p.height.toFixed(2) },
   };

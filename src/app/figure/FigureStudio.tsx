@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  ACCESSORIES,
   BASE_LAYERS,
   BOTTOMS,
   CLOTHS,
@@ -10,8 +9,13 @@ import {
   DIRECTIONS,
   HAIR_TYPES,
   LIGHTS,
+  CARRIED,
+  EYEWEAR,
+  HEADWEAR,
+  NECKWEAR,
   OUTER_LAYERS,
   PALETTE,
+  PATTERNS,
   PRINT_LABELS,
   PIXEL_SPEC,
   SHOES,
@@ -247,10 +251,12 @@ export function FigureStudio() {
         <h1 className="t-h1 fig-title">Character instrument</h1>
         <p className="fig-deck">
           One agender body and a wardrobe of typed parts — base layer, outer
-          layer, bottom, shoes, one accessory — stacked in a fixed order, the
-          way an avatar system builds a look. Every slot can be emptied down to
-          briefs. Turn the grain and the direction, choose a ground, and export
-          a clean PNG or the settings as JSON.
+          layer, bottom, shoes, and four accessory slots that stack rather than
+          compete — assembled in a fixed order, the way an avatar system builds
+          a look. Every slot can be emptied down to briefs. Each fabric gathers
+          in its own way and can carry a pattern. Turn the grain and the
+          direction, choose a ground, and export a clean PNG or the settings as
+          JSON.
         </p>
       </div>
 
@@ -415,11 +421,15 @@ export function FigureStudio() {
                   <Swatches label="Base layer colour" value={params.basec} onPick={(i) => set("basec", i)} />
                   <span className="t-mono fig-sub">Print</span>
                   <Chips label="Print" options={PRINT_LABELS} value={params.print} onPick={(i) => set("print", i)} />
+                  <span className="t-mono fig-sub">Pattern</span>
+                  <Chips label="Base pattern" options={PATTERNS} value={params.basePat} onPick={(i) => set("basePat", i)} />
                 </fieldset>
                 <fieldset className="fig-field">
                   <legend className="t-label fig-legend">Outer layer</legend>
                   <Chips label="Outer layer" options={OUTER_LAYERS} value={params.out} onPick={(i) => set("out", i)} />
                   <Swatches label="Outer layer colour" value={params.outc} onPick={(i) => set("outc", i)} />
+                  <span className="t-mono fig-sub">Pattern</span>
+                  <Chips label="Outer pattern" options={PATTERNS} value={params.outPat} onPick={(i) => set("outPat", i)} />
                 </fieldset>
                 <fieldset className="fig-field">
                   <legend className="t-label fig-legend">Bottom</legend>
@@ -435,14 +445,24 @@ export function FigureStudio() {
                   ) : null}
                   <span className="t-mono fig-sub">Bottom &amp; shoe colour</span>
                   <Swatches label="Bottom colour" value={params.botc} onPick={(i) => set("botc", i)} />
+                  <span className="t-mono fig-sub">Pattern</span>
+                  <Chips label="Bottom pattern" options={PATTERNS} value={params.botPat} onPick={(i) => set("botPat", i)} />
                 </fieldset>
                 <fieldset className="fig-field">
                   <legend className="t-label fig-legend">Shoes</legend>
                   <Chips label="Shoes" options={SHOES} value={params.sho} onPick={(i) => set("sho", i)} />
                 </fieldset>
                 <fieldset className="fig-field">
-                  <legend className="t-label fig-legend">Accessory</legend>
-                  <Chips label="Accessory" options={ACCESSORIES} value={params.acc} onPick={(i) => set("acc", i)} />
+                  <legend className="t-label fig-legend">Accessories</legend>
+                  <span className="t-mono fig-sub">Headwear</span>
+                  <Chips label="Headwear" options={HEADWEAR} value={params.head} onPick={(i) => set("head", i)} />
+                  <span className="t-mono fig-sub">Eyewear</span>
+                  <Chips label="Eyewear" options={EYEWEAR} value={params.eyes} onPick={(i) => set("eyes", i)} />
+                  <span className="t-mono fig-sub">Neckwear</span>
+                  <Chips label="Neckwear" options={NECKWEAR} value={params.neck} onPick={(i) => set("neck", i)} />
+                  <span className="t-mono fig-sub">Carried</span>
+                  <Chips label="Carried" options={CARRIED} value={params.carry} onPick={(i) => set("carry", i)} />
+                  <p className="fig-note">Each slot is independent — they stack rather than replace one another.</p>
                 </fieldset>
               </>
             ) : null}
