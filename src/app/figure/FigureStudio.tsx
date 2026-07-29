@@ -5,12 +5,14 @@ import {
   ACCESSORIES,
   BASE_LAYERS,
   BOTTOMS,
+  CLOTHS,
   DEFAULT_FIGURE,
   DIRECTIONS,
   HAIR_TYPES,
   LIGHTS,
   OUTER_LAYERS,
   PALETTE,
+  PRINT_LABELS,
   PIXEL_SPEC,
   SHOES,
   figureCode,
@@ -331,6 +333,14 @@ export function FigureStudio() {
                   <Chips label="Direction" options={DIRECTIONS} value={params.dir} onPick={(i) => set("dir", i)} />
                 </fieldset>
                 <fieldset className="fig-field">
+                  <legend className="t-label fig-legend">Cloth</legend>
+                  <Chips label="Cloth" options={CLOTHS} value={params.cloth} onPick={(i) => set("cloth", i)} />
+                  <p className="fig-note">
+                    Draped rounds the corners, rolls the hems and breaks the fields with folds.
+                    Blocky keeps the hard silhouette and lets the shading carry it.
+                  </p>
+                </fieldset>
+                <fieldset className="fig-field">
                   <legend className="t-label fig-legend">Light</legend>
                   <Chips label="Light" options={LIGHTS} value={params.light} onPick={(i) => set("light", i)} />
                   <p className="fig-note">
@@ -403,6 +413,8 @@ export function FigureStudio() {
                   <legend className="t-label fig-legend">Base layer</legend>
                   <Chips label="Base layer" options={BASE_LAYERS} value={params.base} onPick={(i) => set("base", i)} />
                   <Swatches label="Base layer colour" value={params.basec} onPick={(i) => set("basec", i)} />
+                  <span className="t-mono fig-sub">Print</span>
+                  <Chips label="Print" options={PRINT_LABELS} value={params.print} onPick={(i) => set("print", i)} />
                 </fieldset>
                 <fieldset className="fig-field">
                   <legend className="t-label fig-legend">Outer layer</legend>
