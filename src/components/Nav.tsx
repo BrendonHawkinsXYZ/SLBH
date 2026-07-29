@@ -9,6 +9,7 @@ const STICKY_OFFSET = 72;
 const LINKS = [
   { href: "/research", label: "Research" },
   { href: "/projects", label: "Projects" },
+  { href: "/product/chroma", label: "Chroma" },
   { href: "/studio", label: "Studio" },
 ];
 

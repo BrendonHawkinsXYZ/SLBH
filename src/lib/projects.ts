@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
+import { findAsset } from "./assets";
 
 export type ProjectStatus = "active" | "paused" | "complete";
 
@@ -25,16 +26,9 @@ export type Project = {
 };
 
 const CONTENT_DIR = path.join(process.cwd(), "content/projects");
-const PUBLIC_DIR = path.join(process.cwd(), "public/projects");
-const EXTS = ["webp", "jpg", "jpeg", "png"];
 
 export function findImage(slug: string, base: string): string {
-  for (const ext of EXTS) {
-    if (fs.existsSync(path.join(PUBLIC_DIR, slug, `${base}.${ext}`))) {
-      return `/projects/${slug}/${base}.${ext}`;
-    }
-  }
-  return "";
+  return findAsset(`projects/${slug}`, base);
 }
 
 export function getAllProjects(): Project[] {
