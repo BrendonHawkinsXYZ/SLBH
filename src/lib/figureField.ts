@@ -682,15 +682,10 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
           box(l, y + 2.2, r - l, 1.2, tint(col, 1.1));
           return;
         }
-        if (drape === "fluid") {
-          // Hanging cloth breaks vertically, not across.
-          const n = 3 + (i % 2);
-          for (let k = 0; k < n; k++) {
-            const x = l + ((r - l) * (k + 0.6 + 0.5 * rnd(seed + k * 3.7 + i))) / (n + 0.4);
-            box(x, y, 1.3, Math.max(6, (yb - y) * (0.4 + 0.4 * rnd(seed + k + i))), tint(col, 0.88));
-          }
-          return;
-        }
+        // Hanging cloth — a dress, a skirt, a wide leg — is left flat. Vertical
+        // breaks down a field that size stop reading as drape and start
+        // reading as stripes, and the rolled hem already says it's cloth.
+        if (drape === "fluid") return;
         const wide = drape === "heavy" ? 0.5 : drape === "crisp" ? 0.2 : 0.32;
         const thick = drape === "heavy" ? 1.8 : drape === "crisp" ? 1 : 1.4;
         const fw = (r - l) * (wide + 0.18 * rnd(seed + i * 3.1));
