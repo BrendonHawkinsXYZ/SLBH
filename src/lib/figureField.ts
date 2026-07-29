@@ -141,6 +141,15 @@ export const DIRECTIONS = ["Front", "3/4", "Side", "3/4 back", "Back"];
 /** Where the key light sits. Flat drops the shaded faces entirely. */
 export const LIGHTS = ["Left", "Flat", "Right"];
 const LIGHT_SIGN = [1, 0, -1];
+/**
+ * How the cloth is cut. Draped rounds the corners, rolls the hems and breaks
+ * the fields with folds; Blocky keeps the hard silhouette and the flat fields,
+ * and lets the shading alone carry the dimension.
+ */
+export const CLOTHS = ["Draped", "Blocky"];
+/** A print sits on whatever top is worn, not on a garment of its own. */
+export const PRINTS = ["", "CHROMA", "SLBH"];
+export const PRINT_LABELS = ["None", "CHROMA", "SLBH"];
 export const HAIR_TYPES = ["Crop", "Bowl", "Long", "Bun", "Locs", "Afro", "Bald", "Spiky"];
 // Every slot starts with "None" — the figure can be undressed down to briefs,
 // which are the one thing that never comes off. The body underneath is a single
@@ -156,8 +165,6 @@ export const BASE_LAYERS = [
   "Crewneck",
   "Turtleneck",
   "Shirt",
-  "CHROMA tee",
-  "SLBH tee",
   "Dress",
 ];
 export const OUTER_LAYERS = [
@@ -194,7 +201,6 @@ type BaseSpec = {
   sheer?: boolean;
   neck?: boolean;
   collar?: boolean;
-  print?: string;
   dress?: boolean;
   flare?: number;
 };
@@ -234,6 +240,7 @@ type HairSpec = {
   sb?: number; // side-fall bottom
   bun?: boolean;
   locs?: boolean;
+  curl?: boolean; // a mass of curl — bumpy silhouette, no falls
   wide?: number;
   spike?: boolean;
 };
@@ -257,8 +264,6 @@ const BSPEC: BaseSpec[] = [
   { tw: 19, hem: 122, slv: 1 },
   { tw: 18, hem: 120, slv: 1, neck: true },
   { tw: 19, hem: 124, slv: 1, collar: true },
-  { tw: 18, hem: 120, slv: 0, print: "CHROMA" },
-  { tw: 18, hem: 120, slv: 0, print: "SLBH" },
   { tw: 17, hem: 168, slv: 1, dress: true, flare: 20 },
 ];
 
@@ -304,7 +309,7 @@ const HC: HairSpec[] = [
   { cy: 11, ch: 9, sw: 6.5, st: 11, sb: 56 },
   { cy: 11, ch: 9, bun: true },
   { cy: 11, ch: 9, locs: true },
-  { cy: 3, ch: 17, sw: 9, st: 5, sb: 44, wide: 9 },
+  { cy: 4, ch: 25, wide: 9, curl: true },
   { cy: 0, ch: 0 }, // bald — never drawn
   { cy: 10, ch: 10, spike: true },
 ];
@@ -339,6 +344,8 @@ export type FigureParams = {
   px: number; // block size, in logical units (the sprite grain)
   dir: number;
   light: number; // index into LIGHTS
+  cloth: number; // index into CLOTHS
+  print: number; // index into PRINTS
   skin: number;
   hair: number;
   hairT: number;
@@ -360,12 +367,14 @@ export const DEFAULT_FIGURE: FigureParams = {
   px: 1.2,
   dir: 1,
   light: 0,
+  cloth: 0,
+  print: 1,
   skin: colorIndex("#F7C59F"),
   hair: colorIndex("#3A0D3F"),
   hairT: 2,
   weight: 0.4,
   height: 0.5,
-  base: BASE_LAYERS.indexOf("CHROMA tee"),
+  base: BASE_LAYERS.indexOf("Tee"),
   basec: colorIndex("#2B2F4A"),
   out: 0,
   outc: colorIndex("#4A4E69"),
@@ -442,6 +451,9 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
   // the right), 0 flat, -1 from the right. Every shaded face is placed off this
   // sign, so the figure never lights two ways at once.
   const key = LIGHT_SIGN[P.light] ?? 1;
+  // Draped or blocky. Shading is not part of this choice — it carries the
+  // dimension in both, which is the whole reason blocky still reads.
+  const soft = P.cloth === 0;
   /** Tint for one half of a two-tone detail — `a` on the side the light is on. */
   const duo = (col: string, leftSide: boolean, a: number, b: number) =>
     tint(col, key === 0 ? 1 : leftSide === key > 0 ? a : b);
@@ -533,8 +545,8 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
     opt: PanelOpt = {},
   ) => {
     const frac = opt.frac ?? 0.47;
-    const ct = opt.ct ?? 0;
-    const cb = opt.cb ?? 0;
+    const ct = soft ? (opt.ct ?? 0) : 0;
+    const cb = soft ? (opt.cb ?? 0) : 0;
     poly(cut(yt, lt, rt, yb, lb, rb, ct, cb), col);
     if (key) {
       const sc = tint(col, 0.78);
@@ -568,7 +580,7 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
     }
     // Fold marks: short bars where the cloth stacks against itself. Placed off
     // a hash of the height so they scatter, but always in the same places.
-    if (opt.folds) {
+    if (opt.folds && soft) {
       const seed = opt.seed ?? 1;
       opt.folds.forEach((y, i) => {
         const t = (y - yt) / Math.max(1, yb - yt);
@@ -579,7 +591,7 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
         box(fx, y, fw, 1.3, tint(col, 0.87));
       });
     }
-    if (opt.hem) {
+    if (opt.hem && soft) {
       box(lb + cb, yb - 1.5, rb - cb - (lb + cb), 1.5, tint(col, 0.88));
     }
   };
@@ -615,8 +627,9 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
     const sb = c.sb ?? 0;
     const bot = back ? Math.max(sb, 46) : c.cy + c.ch;
 
-    // The crown. A big round cut on volume styles, a light one on the rest.
-    panel(c.cy, HL - wd, HR + wd, bot, HL - wd + 0.8, HR + wd - 0.8, hcol, {
+    // The crown. A curl mass draws its own shape below, so it skips this.
+    if (!c.curl)
+      panel(c.cy, HL - wd, HR + wd, bot, HL - wd + 0.8, HR + wd - 0.8, hcol, {
       frac: 0.42,
       ct: wd ? 7 : c.spike ? 2 : 3.4,
       cb: back ? 2.4 : 0.6,
@@ -624,7 +637,7 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
 
     // The fringe: hair falls past the hairline in clumps of different depth,
     // and the clumps read as separate because they alternate a shade.
-    if (!back) {
+    if (!back && soft && !c.curl) {
       const n = 5;
       const fw = ((HR + wd - (HL - wd)) / n) * 0.98;
       for (let i = 0; i < n; i++) {
@@ -637,6 +650,50 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
       }
     }
 
+    // A curl mass. Not a block with tubes down the sides — the silhouette is
+    // broken all the way round by clumps of different depth, and the inside
+    // carries curl as single light and dark cells rather than a flat field.
+    if (c.curl) {
+      const L = HL - wd;
+      const R = HR + wd;
+      const CB = 44; // the mass frames the face and stops at the jaw
+      const outer = cut(c.cy, L + 4, R - 4, CB, L, R, 9, 8);
+      if (back) {
+        poly(outer, hcol);
+      } else {
+        // The face opening: the mass carries round the sides of the head, so
+        // the hair frames the face instead of sitting on it like a lid.
+        ring(outer, cut(15, hx - 13, hx + 13, CB + 2, hx - 13.5, hx + 13.5, 3.4, 0), hcol);
+      }
+      if (soft) {
+        // Clumps all the way round the silhouette, each a different depth.
+        const n = 8;
+        const step = (R - L) / n;
+        for (let i = 0; i < n; i++) {
+          const x = L + i * step;
+          // Follow the rounded crown down at the corners, or the clump floats
+          // off the silhouette with a gap under it.
+          const inset = Math.max(0, 9 - Math.min(x - L, R - (x + step)) * 1.4);
+          const d = 1.4 + 3.6 * rnd(i * 3.3 + 1);
+          box(x, c.cy + inset - d, step + 0.5, d + 2, duo(hcol, x + step / 2 < hx, 1.06, 0.9));
+        }
+        const rows = 7;
+        const rh = (CB - c.cy - 8) / rows;
+        for (let j = 0; j < rows; j++) {
+          const y = c.cy + 7 + j * rh;
+          box(L - (1.4 + 3 * rnd(j * 5.1 + 2)), y, 4.6, rh + 0.5, duo(hcol, true, 1.05, 0.88));
+          box(R - 3.4, y, 1.4 + 3 * rnd(j * 7.7 + 4) + 2, rh + 0.5, duo(hcol, false, 1.05, 0.88));
+        }
+      }
+      // Curl, as single light and dark cells scattered through the mass —
+      // never over the face, so the opening stays clean.
+      for (let k = 0; k < 40; k++) {
+        const px2 = L + 2 + (R - L - 5.5) * rnd(k * 2.7 + 1);
+        const py2 = c.cy + 2 + (CB - c.cy - 6) * rnd(k * 4.1 + 3);
+        if (!back && py2 > 15 && Math.abs(px2 - hx) < 13) continue;
+        box(px2, py2, 1.7, 1.7, tint(hcol, rnd(k * 9.3) > 0.5 ? 1.14 : 0.84));
+      }
+    }
     if (c.spike) {
       // Uneven spikes — a flat row of triangles reads as a crown, not hair.
       const n = 5;
@@ -868,9 +925,12 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
           : [B.hem - 9],
       seed: P.base + 2,
     });
-    if (B.print && !back && !side) {
-      const u = 26 / (B.print.length * 4 - 1);
-      text(B.print, 50, 80, u, lum(bcol) > 110 ? tint(bcol, 0.32) : tint(bcol, 2.4));
+    // The print goes on whatever top is being worn, sized to the chest and
+    // dropped to clear a cropped hem.
+    const str = PRINTS[P.print];
+    if (str && !back && !side) {
+      const u = Math.min(26, B.tw * w * 1.5) / (str.length * 4 - 1);
+      text(str, 50, Math.min(80, B.hem - 22), u, lum(bcol) > 110 ? tint(bcol, 0.32) : tint(bcol, 2.4));
     }
   }
 
@@ -931,17 +991,21 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
 
   // ── Outer layer ──
   if (O) {
+    // Outerwear sits over the base layer, so it starts a shade above the
+    // shoulder line. Left at its own top, a spec a unit lower let the base
+    // layer show as a strip across the shoulders of every coat.
+    const oTop = Math.min(O.top, SHOULDER - 1);
     const oB = O.slit ? O.w + 1.2 : O.w - 1.4;
-    panel(O.top, 50 - O.w * w, 50 + O.w * w, O.hem, 50 - oB * w, 50 + oB * w, oc, {
+    panel(oTop, 50 - O.w * w, 50 + O.w * w, O.hem, 50 - oB * w, 50 + oB * w, oc, {
       ct: 3.2, // outerwear sits away from the body, so it slopes harder
       cb: 2,
       hem: true,
-      folds: O.hem - O.top > 50 ? [O.hem - 34, O.hem - 20, O.hem - 10] : [O.hem - 14, O.hem - 7],
+      folds: O.hem - oTop > 50 ? [O.hem - 34, O.hem - 20, O.hem - 10] : [O.hem - 14, O.hem - 7],
       seed: P.out + 5,
     });
     if (O.quilt) {
       for (let k = 1; k < 4; k++) {
-        box(50 - O.w * w, O.top + k * ((O.hem - O.top) / 4), O.w * 2 * w, 1.4, tint(oc, 0.66));
+        box(50 - O.w * w, oTop + k * ((O.hem - oTop) / 4), O.w * 2 * w, 1.4, tint(oc, 0.66));
       }
     }
     const oa: [number, number][] =
@@ -957,12 +1021,12 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
     const oaBot = O.hem < 110 ? 104 : 110;
     oa.forEach((A, k) => {
       const toBody = A[0] + A[1] / 2 < 50 ? 1 : -1;
-      panel(O.top, A[0], A[0] + A[1], oaBot, A[0] + (toBody > 0 ? 0.9 : -2), A[0] + A[1] + (toBody > 0 ? 2 : -0.9), oc, {
+      panel(oTop, A[0], A[0] + A[1], oaBot, A[0] + (toBody > 0 ? 0.9 : -2), A[0] + A[1] + (toBody > 0 ? 2 : -0.9), oc, {
         frac: 0.4,
         ct: 2,
         cb: 1.2,
         hem: true,
-        folds: [O.top + (oaBot - O.top) * 0.52, O.top + (oaBot - O.top) * 0.74],
+        folds: [oTop + (oaBot - oTop) * 0.52, oTop + (oaBot - oTop) * 0.74],
         seed: P.out + k * 6,
       });
     });
@@ -978,7 +1042,7 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
     // Open front: whatever is underneath shows through the slit.
     if (O.slit && !back) {
       const cut = Math.min(B.hem, O.hem);
-      box(50 - 3, O.top + 2, 6, cut - O.top - 2, tint(bcol, 0.94));
+      box(50 - 3, oTop + 2, 6, cut - oTop - 2, tint(bcol, 0.94));
       if (O.hem > cut) box(50 - 3, cut, 6, O.hem - cut, tint(ovr ? pc : underCol, 0.94));
     }
     if (O.belt) box(50 - 14 * w, 102, 28 * w, 5, tint(oc, 0.6));
@@ -1010,8 +1074,8 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
     if (O.lapel && !back) {
       poly(
         [
-          [50 - 8.5, O.top],
-          [50 - 1.5, O.top],
+          [50 - 8.5, oTop],
+          [50 - 1.5, oTop],
           [50 - 2.5, 88],
           [50 - 9, 74],
         ],
@@ -1019,8 +1083,8 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
       );
       poly(
         [
-          [50 + 1.5, O.top],
-          [50 + 8.5, O.top],
+          [50 + 1.5, oTop],
+          [50 + 8.5, oTop],
           [50 + 9, 74],
           [50 + 2.5, 88],
         ],
@@ -1370,6 +1434,7 @@ export function randomFigure(prev: FigureParams): FigureParams {
     botc: pickIn(bands[2][0], bands[2][1], fam),
     sho: 1 + Math.floor(Math.random() * (SHOES.length - 1)),
     acc: Math.floor(Math.random() * ACCESSORIES.length),
+    print: Math.random() < 0.45 ? 1 + Math.floor(Math.random() * (PRINTS.length - 1)) : 0,
   };
 }
 
@@ -1402,7 +1467,7 @@ export function figureSummary(p: FigureParams): string[] {
       : BOTTOMS[p.bot].toUpperCase();
   return [
     `PX ${p.px.toFixed(1)} · ${DIRECTIONS[p.dir].toUpperCase()} · ${HAIR_TYPES[p.hairT].toUpperCase()} · LIGHT ${LIGHTS[p.light].toUpperCase()}`,
-    `${top}${p.out ? ` + ${OUTER_LAYERS[p.out].toUpperCase()}` : ""}`,
+    `${top}${p.print ? ` · ${PRINTS[p.print]}` : ""}${p.out ? ` + ${OUTER_LAYERS[p.out].toUpperCase()}` : ""}`,
     `${leg}${isTucked(p) ? " TUCKED · " : " · "}${SHOES[p.sho].toUpperCase()}`,
   ];
 }
@@ -1418,6 +1483,7 @@ export function figureCode(p: FigureParams): string {
     `hd-${p.skin}`,
     `hr-${p.hairT}-${p.hair}`,
     `ch-${p.base}-${p.basec}`,
+    `pr-${p.print}`,
     `cc-${p.out}-${p.outc}`,
     `lg-${p.bot}-${p.botc}`,
     `sh-${p.sho}`,
@@ -1435,6 +1501,7 @@ export function figureSettings(p: FigureParams, background: Background) {
       pixels: +p.px.toFixed(1),
       direction: DIRECTIONS[p.dir],
       light: LIGHTS[p.light],
+      cloth: CLOTHS[p.cloth],
       background,
     },
     demographics: {
@@ -1447,6 +1514,7 @@ export function figureSettings(p: FigureParams, background: Background) {
     clothing: {
       base: BASE_LAYERS[p.base],
       baseColor: PALETTE[p.basec],
+      print: PRINT_LABELS[p.print],
       outer: OUTER_LAYERS[p.out],
       outerColor: PALETTE[p.outc],
       bottom: dress ? null : BOTTOMS[p.bot],
