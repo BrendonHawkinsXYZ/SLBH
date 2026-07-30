@@ -12,6 +12,7 @@ import {
   makePalette,
   defaultPalette,
   renderShapeField,
+  shapeFieldToSvg,
   type Background,
   type Modifiers,
   type Palette,
@@ -26,7 +27,10 @@ const BACKGROUNDS: { id: Background; label: string }[] = [
   { id: "transparent", label: "Transparent" },
 ];
 
-const EXPORT_SIZES = [500, 1000];
+// Both exports render at one size: 2000 × 2000. For the PNG that is the pixel
+// size; for the SVG it is the viewBox (and the mosaic density), so the two files
+// are the same composition.
+const EXPORT_SIZE = 2000;
 
 // Preset quick-starts, grouped for the chip row.
 const PRESET_GROUPS = ["Basic", "Polygon", "Rounded", "Organic", "Star"].map((group) => ({
@@ -166,29 +170,43 @@ export function ShapesStudio() {
     }));
   }, []);
 
-  // ── Export: render fresh at exact pixel size, then download a PNG. ──
-  const exportPng = useCallback(
-    (px: number) => {
-      const c = document.createElement("canvas");
-      c.width = px;
-      c.height = px;
-      const ctx = c.getContext("2d");
-      if (!ctx) return;
-      renderShapeField(ctx, px, palette, shape, background, modifiers.pixelScale);
-      c.toBlob((blob) => {
-        if (!blob) return;
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `slbh-field-${familyId}-${background}-${px}.png`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-      }, "image/png");
+  // ── Export: render fresh at 2000 × 2000, then download. ──
+  const download = useCallback(
+    (blob: Blob, ext: string) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `slbh-field-${familyId}-${background}-${EXPORT_SIZE}.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
     },
-    [palette, shape, background, modifiers.pixelScale, familyId],
+    [familyId, background],
   );
+
+  const exportPng = useCallback(() => {
+    const c = document.createElement("canvas");
+    c.width = EXPORT_SIZE;
+    c.height = EXPORT_SIZE;
+    const ctx = c.getContext("2d");
+    if (!ctx) return;
+    renderShapeField(ctx, EXPORT_SIZE, palette, shape, background, modifiers.pixelScale);
+    c.toBlob((blob) => {
+      if (blob) download(blob, "png");
+    }, "image/png");
+  }, [palette, shape, background, modifiers.pixelScale, download]);
+
+  const exportSvg = useCallback(() => {
+    const svg = shapeFieldToSvg(
+      EXPORT_SIZE,
+      palette,
+      shape,
+      background,
+      modifiers.pixelScale,
+    );
+    download(new Blob([svg], { type: "image/svg+xml" }), "svg");
+  }, [palette, shape, background, modifiers.pixelScale, download]);
 
   return (
     <section className="shp">
@@ -198,7 +216,7 @@ export function ShapesStudio() {
         <p className="shp-deck">
           The same mosaic the home Field is built from, as an instrument. Pick a
           base family, turn the dials, warp it with wobble, choose a ground, and
-          export a clean PNG.
+          export a clean PNG or SVG.
         </p>
       </div>
 
@@ -345,13 +363,16 @@ export function ShapesStudio() {
 
           {/* Export */}
           <fieldset className="shp-field">
-            <legend className="t-label shp-legend">Export PNG</legend>
+            <legend className="t-label shp-legend">
+              Export {EXPORT_SIZE} × {EXPORT_SIZE}
+            </legend>
             <div className="shp-export">
-              {EXPORT_SIZES.map((px) => (
-                <button key={px} type="button" className="shp-btn" onClick={() => exportPng(px)}>
-                  {px} × {px}
-                </button>
-              ))}
+              <button type="button" className="shp-btn" onClick={exportPng}>
+                PNG
+              </button>
+              <button type="button" className="shp-btn" onClick={exportSvg}>
+                SVG
+              </button>
             </div>
           </fieldset>
         </div>
