@@ -8,7 +8,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   // Top-level content pages. (/research redirects to the latest paper, so the
   // individual papers below stand in for it.)
-  const staticPaths = ["", "/projects", "/product/chroma", "/studio"];
+  // /product/chroma is left out while it is password-gated.
+  const staticPaths = ["", "/projects", "/studio"];
   const staticEntries: MetadataRoute.Sitemap = staticPaths.map((path) => ({
     url: `${SITE_URL}${path}`,
     lastModified: now,
