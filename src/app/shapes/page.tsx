@@ -3,7 +3,7 @@ import { ShapesStudio } from "./ShapesStudio";
 // Unlisted utility page: not in the nav or sitemap, and kept out of search.
 export const metadata = {
   title: "Shapes — SLBH",
-  description: "Generator for SLBH field shapes — reroll colour, choose a ground, export a PNG.",
+  description: "Generator for SLBH field shapes — reroll colour, choose a ground, export a PNG or SVG.",
   robots: { index: false, follow: false },
 };
 

@@ -427,29 +427,29 @@ export function defaultPalette(): Palette {
   return { stops, cx: 46, cy: 38 };
 }
 
+/** One mosaic pixel: top-left corner, edge length, quantised colour and alpha. */
+type CellEmit = (
+  x: number,
+  y: number,
+  dot: number,
+  r: number,
+  g: number,
+  b: number,
+  alpha: number,
+) => void;
+
 /**
- * Draw one frame of the field into `ctx`, filling the logical box [0,size]².
- * The caller owns the canvas: for a crisp HiDPI preview, scale the context by
- * devicePixelRatio and pass the CSS size; for an exact-pixel PNG export, use an
- * identity transform and pass the pixel size (e.g. 500 or 1000). Density is keyed
- * to `size`, so the composition reads identically at every scale.
+ * The single pass that builds the mosaic — walk the lattice, pour each cell into
+ * the shape, hand the result to `emit`. Every output format (canvas, SVG) is a
+ * different consumer of this one pass, so they can never drift apart.
  */
-export function renderShapeField(
-  ctx: CanvasRenderingContext2D,
+function emitShapeField(
   size: number,
   palette: Palette,
   shape: RenderShape,
-  background: Background,
-  pixelScale = 1,
+  pixelScale: number,
+  emit: CellEmit,
 ): void {
-  ctx.clearRect(0, 0, size, size);
-  if (background === "white") {
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, size, size);
-  } else if (background === "black") {
-    ctx.fillStyle = "#000000";
-    ctx.fillRect(0, 0, size, size);
-  }
   if (size <= 0) return;
 
   const sx = shape.sx ?? 1;
@@ -489,9 +489,7 @@ export function renderShapeField(
   const radius = size / 2 - size * MARGIN_FRAC;
   const cols = Math.ceil(size / cell);
 
-  // Sample the canonical disc; pour each pixel into the chosen shape. Adjacent
-  // cells usually share a quantised colour, so only touch fillStyle on a change.
-  let lastFill = "";
+  // Sample the canonical disc; pour each pixel into the chosen shape.
   for (let j = 0; j < cols; j++) {
     for (let i = 0; i < cols; i++) {
       const px = i * cell + cell / 2;
@@ -526,12 +524,97 @@ export function renderShapeField(
       const x = center + Math.cos(theta) * rad * sx + jx;
       const y = center + Math.sin(theta) * rad * sy + jy;
 
-      const fill = `rgba(${r},${g},${b},${alpha})`;
-      if (fill !== lastFill) {
-        ctx.fillStyle = fill;
-        lastFill = fill;
-      }
-      ctx.fillRect(x - half, y - half, dotSize, dotSize);
+      emit(x - half, y - half, dotSize, r, g, b, alpha);
     }
   }
+}
+
+/**
+ * Draw one frame of the field into `ctx`, filling the logical box [0,size]².
+ * The caller owns the canvas: for a crisp HiDPI preview, scale the context by
+ * devicePixelRatio and pass the CSS size; for an exact-pixel PNG export, use an
+ * identity transform and pass the pixel size (e.g. 2000). Density is keyed to
+ * `size`, so the composition reads identically at every scale.
+ */
+export function renderShapeField(
+  ctx: CanvasRenderingContext2D,
+  size: number,
+  palette: Palette,
+  shape: RenderShape,
+  background: Background,
+  pixelScale = 1,
+): void {
+  ctx.clearRect(0, 0, size, size);
+  if (background === "white") {
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, size, size);
+  } else if (background === "black") {
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(0, 0, size, size);
+  }
+
+  // Adjacent cells usually share a quantised colour, so only touch fillStyle on
+  // a change.
+  let lastFill = "";
+  emitShapeField(size, palette, shape, pixelScale, (x, y, dot, r, g, b, alpha) => {
+    const fill = `rgba(${r},${g},${b},${alpha})`;
+    if (fill !== lastFill) {
+      ctx.fillStyle = fill;
+      lastFill = fill;
+    }
+    ctx.fillRect(x, y, dot, dot);
+  });
+}
+
+function hex(r: number, g: number, b: number): string {
+  return `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1)}`;
+}
+
+/** Trim coordinates to a tenth of a pixel — invisible, and a third off the file. */
+function num(n: number): string {
+  const s = n.toFixed(1);
+  return s.endsWith(".0") ? s.slice(0, -2) : s;
+}
+
+/**
+ * The same frame as a standalone SVG string, one <rect> per mosaic pixel. Colour
+ * and alpha are already quantised by the renderer, so the rects collapse into a
+ * handful of <g fill> groups — the file stays editable in any vector tool and
+ * scales past the pixel size it was generated at.
+ *
+ * `size` still sets the density (as it does for canvas) as well as the viewBox,
+ * so an SVG generated at 2000 matches the 2000px PNG dot-for-dot.
+ */
+export function shapeFieldToSvg(
+  size: number,
+  palette: Palette,
+  shape: RenderShape,
+  background: Background,
+  pixelScale = 1,
+): string {
+  const groups = new Map<string, string[]>();
+  emitShapeField(size, palette, shape, pixelScale, (x, y, dot, r, g, b, alpha) => {
+    const key = `${hex(r, g, b)} ${alpha}`;
+    let rects = groups.get(key);
+    if (!rects) groups.set(key, (rects = []));
+    rects.push(
+      `<rect x="${num(x)}" y="${num(y)}" width="${num(dot)}" height="${num(dot)}"/>`,
+    );
+  });
+
+  const out: string[] = [
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">`,
+  ];
+  if (background !== "transparent") {
+    out.push(
+      `<rect width="${size}" height="${size}" fill="${background === "white" ? "#ffffff" : "#000000"}"/>`,
+    );
+  }
+  for (const [key, rects] of groups) {
+    const [fill, alpha] = key.split(" ");
+    const opacity = alpha === "1" ? "" : ` fill-opacity="${alpha}"`;
+    out.push(`<g fill="${fill}"${opacity}>`, rects.join(""), `</g>`);
+  }
+  out.push(`</svg>`);
+  return out.join("\n");
 }
