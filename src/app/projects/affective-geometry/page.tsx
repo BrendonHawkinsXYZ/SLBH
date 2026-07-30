@@ -55,7 +55,7 @@ export default function AffectiveGeometryPage() {
           AFFECT · SHAPE · COLOR · FIELD
         </span>
         <span className="t-mono" style={{ opacity: 0.55, textAlign: "right" }}>
-          25 SHAPES / 25 PALETTES · 4:5
+          25 SHAPES / 25 PALETTES · 4:4
         </span>
       </div>
 
@@ -122,7 +122,7 @@ export default function AffectiveGeometryPage() {
             )}
           </div>
           <figcaption className="t-mono ag-plate-caption">
-            25 SHAPES / 25 PALETTES · 4:5 · 169-COLOUR FIELD GAMUT
+            25 SHAPES / 25 PALETTES · 4:4 · 169-COLOUR FIELD GAMUT
           </figcaption>
         </figure>
 
@@ -313,7 +313,7 @@ export default function AffectiveGeometryPage() {
         .ag-plate-cell { margin: 0; }
         .ag-plate-frame {
           position: relative;
-          aspect-ratio: 4/5;
+          aspect-ratio: 1/1;
           width: 100%;
           border: 0.5px solid var(--hairline-strong);
           overflow: hidden;
