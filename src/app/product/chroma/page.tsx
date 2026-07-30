@@ -6,9 +6,12 @@ import { FallbackImg } from "@/components/projects/FallbackImg";
 // a system readout. Copy marked chr-tk is a placeholder; screens fill in on
 // their own as files land in public/product/chroma/.
 
+// Password-gated by src/middleware.ts while the page is being built, so it
+// stays out of search and out of the sitemap for now.
 export const metadata = {
   title: "Chroma — SLBH",
   description: "Chroma, the app from Studio Lab BH. Launching September 2026.",
+  robots: { index: false, follow: false },
 };
 
 const LAUNCH = "SEPTEMBER 2026";
