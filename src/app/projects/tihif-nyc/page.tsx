@@ -26,7 +26,7 @@ export default function TihifNycPage() {
       {/* ── Section 1: Header ── */}
       <section className="tihif-hero">
         <div className="container-page tihif-hero-inner">
-          <p className="t-mono tihif-kicker">PROJECT 03 / 2025 / COMPLETE / NYC</p>
+          <p className="t-mono tihif-kicker">PROJECT 05 / 2025 / COMPLETE / NYC</p>
           <h1 className="t-display tihif-title">
             This Is How I&rsquo;m Feeling: NYC
           </h1>
