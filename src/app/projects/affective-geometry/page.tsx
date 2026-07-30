@@ -31,7 +31,7 @@ export default function AffectiveGeometryPage() {
       {/* ── Section 1: Header ── */}
       <section className="ag-hero">
         <div className="container-page ag-hero-inner">
-          <p className="t-mono ag-kicker">PROJECT 06 / 2026 / ACTIVE / NYC</p>
+          <p className="t-mono ag-kicker">PROJECT 03 / 2026 / ACTIVE / NYC</p>
           <h1 className="t-display ag-title">Affective Geometry</h1>
           <p className="ag-summary">
             An art project that theorizes emotion as shape and color — a proof of
