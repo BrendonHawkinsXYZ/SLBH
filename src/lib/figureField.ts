@@ -293,7 +293,7 @@ const BSPEC: BaseSpec[] = [
   { tw: 16, hem: 126, slv: -1, sheer: true, drape: "fluid" },
   { tw: 19, hem: 118, slv: 1, drape: "soft" },
   { tw: 18, hem: 118, slv: 1, neck: true, drape: "soft" },
-  { tw: 19, hem: 121, slv: 1, collar: true, drape: "crisp" },
+  { tw: 19, hem: 118, slv: 1, collar: true, drape: "crisp" },
   { tw: 17, hem: 168, slv: 1, dress: true, flare: 20, drape: "fluid" },
 ];
 
@@ -1037,7 +1037,33 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
       ...seatYs.map((y) => [l(y), y] as [number, number]),
       ...seatYs.map((y) => [r(y), y] as [number, number]).reverse(),
     ];
-    const seatShape = seatBand(seatL, seatR);
+    // Cut the crotch out of the bottom of it. Carried straight across, the
+    // bridge fills the whole space between the legs and the figure reads with a
+    // box where its legs should part. Trousers meet at a point and the inseams
+    // run down and out from there, so that's the line: an apex at the centre,
+    // falling away to each leg's inner edge, and the gap opens underneath it.
+    const CROTCH = 126;
+    const INSEAM = 132;
+    const crotch = Math.min(CROTCH, pantStop);
+    const inseam = Math.min(INSEAM, pantStop);
+    const li = inL[0] + inL[1] / 2 + (inL[1] / 2) * mul(INSEAM);
+    const ri = inR[0] + inR[1] / 2 - (inR[1] / 2) * mul(INSEAM);
+    // Nothing to open up if the legs are one leg (side on), if the trouser ends
+    // above the crotch, or if it's cut wide enough that the two legs meet.
+    const notch: [number, number][] =
+      legs.length < 2 || pantStop <= crotch || ri <= li
+        ? []
+        : [
+            [li, inseam],
+            [50, crotch],
+            [ri, inseam],
+          ];
+    const sides = seatBand(seatL, seatR);
+    const seatShape = [
+      ...sides.slice(0, seatYs.length),
+      ...notch,
+      ...sides.slice(seatYs.length),
+    ];
     poly(seatShape, pc);
     if (P.botPat) {
       clipTo(seatShape, () => {
