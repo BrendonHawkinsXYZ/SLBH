@@ -281,6 +281,9 @@ const DIR: DirSpec[] = [
   { w: 1, fx: 0, face: -1, arm: 2 },
 ];
 
+// The waist is 116 — where the trousers start. A top that isn't cropped and
+// isn't a dress breaks just under that line: far enough to overlap the
+// waistband, close enough that the figure keeps a waist instead of a tube.
 const BSPEC: BaseSpec[] = [
   { tw: 15, hem: 118, slv: -1, bare: true },
   { tw: 16, hem: 120, slv: -1, drape: "soft" },
@@ -288,9 +291,9 @@ const BSPEC: BaseSpec[] = [
   { tw: 18, hem: 120, slv: 0, drape: "soft" },
   { tw: 18, hem: 102, slv: 0, drape: "soft" },
   { tw: 16, hem: 126, slv: -1, sheer: true, drape: "fluid" },
-  { tw: 19, hem: 122, slv: 1, drape: "soft" },
-  { tw: 18, hem: 120, slv: 1, neck: true, drape: "soft" },
-  { tw: 19, hem: 124, slv: 1, collar: true, drape: "crisp" },
+  { tw: 19, hem: 118, slv: 1, drape: "soft" },
+  { tw: 18, hem: 118, slv: 1, neck: true, drape: "soft" },
+  { tw: 19, hem: 118, slv: 1, collar: true, drape: "crisp" },
   { tw: 17, hem: 168, slv: 1, dress: true, flare: 20, drape: "fluid" },
 ];
 
@@ -935,12 +938,31 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
   // Briefs — the layer that never comes off, in the bottom colour. They have to
   // clear the hips down their whole depth: the leg tops run to 14w, so a
   // tapered cut leaves the body showing at the outside of the seat.
+  const BRIEF_TOP = 105;
+  const BRIEF_HEM = 124;
+  const BRIEF_CUT = 2.6; // the leg openings, cut back from the bottom corners
+  const briefW = (y: number) =>
+    (14.8 - 0.6 * ((y - BRIEF_TOP) / (BRIEF_HEM - BRIEF_TOP))) * w;
+  /** Where the brief actually is at a height, corner cut included. The trouser
+   *  seat reads this so the waistband is cut to cover the underwear rather than
+   *  guessing wide, and stops widening exactly where the briefs stop being the
+   *  widest thing on the hip. */
+  const briefEdge = (y: number) => briefW(y) - Math.max(0, y - (BRIEF_HEM - BRIEF_CUT));
   const brf = tint(pc, 1.06);
-  panel(105, 50 - 14.8 * w, 50 + 14.8 * w, 124, 50 - 14.2 * w, 50 + 14.2 * w, brf, {
-    ct: 1.6,
-    cb: 2.6, // the leg openings
-    hem: true,
-  });
+  panel(
+    BRIEF_TOP,
+    50 - briefW(BRIEF_TOP),
+    50 + briefW(BRIEF_TOP),
+    BRIEF_HEM,
+    50 - briefW(BRIEF_HEM),
+    50 + briefW(BRIEF_HEM),
+    brf,
+    {
+      ct: 1.6,
+      cb: BRIEF_CUT,
+      hem: true,
+    },
+  );
 
   const feet = () =>
     legs.forEach((L) => {
@@ -990,13 +1012,75 @@ function paintFigure(ctx: CanvasRenderingContext2D, P: FigureParams, shadow: str
     const ys = pantStop > KNEE ? [116, KNEE, pantStop] : [116, pantStop];
     // The seat: above the crotch a pair of trousers is one piece of cloth, not
     // two tubes. Without it the gap between the legs runs up into the waistband
-    // and the body shows through it.
-    const seatL = legs[0][0];
-    const seatR = legs[legs.length - 1][0] + legs[legs.length - 1][1];
-    const seatC = (seatL + seatR) / 2;
-    // Never narrower than the briefs, or the underwear shows past the waistband.
-    const seatH = ((seatR - seatL) / 2) * Math.max(hip, 1.06);
-    vol(seatC - seatH, 116, seatH * 2, Math.min(134, pantStop) - 116, pc);
+    // and the body shows through it. It has to be the trouser, though, not a
+    // block behind it: its sides ride the same profile the legs are cut to, so
+    // the only new silhouette is the bridge across the crotch. A wider box
+    // reads as a slab pinned behind the hips, squared off where the legs have
+    // already begun to taper.
+    const inL = legs[0];
+    const inR = legs[legs.length - 1];
+    // Never narrower than the briefs, or the underwear shows past the waistband
+    // — which is the one place the seat is allowed to sit proud of the leg, and
+    // it runs out on its own by the time the briefs do.
+    const edgeAt = (L: [number, number], f: number) => (y: number) => {
+      const x = L[0] + L[1] / 2 + f * (L[1] / 2) * mul(y);
+      const b = 50 + f * briefEdge(y);
+      return f < 0 ? Math.min(x, b) : Math.max(x, b);
+    };
+    const [seatL, seatR] = [edgeAt(inL, -1), edgeAt(inR, 1)];
+    const seatBot = Math.min(134, pantStop);
+    // The one bend in the outline is where the briefs' leg opening cuts away,
+    // after which the trouser is the widest thing there and the seat follows it.
+    const seatKink = BRIEF_HEM - BRIEF_CUT;
+    const seatYs = seatBot > seatKink ? [116, seatKink, seatBot] : [116, seatBot];
+    const seatBand = (l: (y: number) => number, r: (y: number) => number): [number, number][] => [
+      ...seatYs.map((y) => [l(y), y] as [number, number]),
+      ...seatYs.map((y) => [r(y), y] as [number, number]).reverse(),
+    ];
+    // Cut the crotch out of the bottom of it. Carried straight across, the
+    // bridge fills the whole space between the legs and the figure reads with a
+    // box where its legs should part. Trousers meet at a point and the inseams
+    // run down and out from there, so that's the line: an apex at the centre,
+    // falling away to each leg's inner edge, and the gap opens underneath it.
+    const CROTCH = 126;
+    const INSEAM = 132;
+    const crotch = Math.min(CROTCH, pantStop);
+    const inseam = Math.min(INSEAM, pantStop);
+    const li = inL[0] + inL[1] / 2 + (inL[1] / 2) * mul(INSEAM);
+    const ri = inR[0] + inR[1] / 2 - (inR[1] / 2) * mul(INSEAM);
+    // Nothing to open up if the legs are one leg (side on), if the trouser ends
+    // above the crotch, or if it's cut wide enough that the two legs meet.
+    const notch: [number, number][] =
+      legs.length < 2 || pantStop <= crotch || ri <= li
+        ? []
+        : [
+            [li, inseam],
+            [50, crotch],
+            [ri, inseam],
+          ];
+    const sides = seatBand(seatL, seatR);
+    const seatShape = [
+      ...sides.slice(0, seatYs.length),
+      ...notch,
+      ...sides.slice(seatYs.length),
+    ];
+    poly(seatShape, pc);
+    if (P.botPat) {
+      clipTo(seatShape, () => {
+        panel(116, 50 - 30 * w, 50 + 30 * w, seatBot, 50 - 30 * w, 50 + 30 * w, pc, {
+          pattern: P.botPat === 1 ? 0 : P.botPat,
+          seed: bt + 2,
+        });
+      });
+    }
+    // The hip shades on the same line the thigh does — the shaded band picks up
+    // where the lit leg's does, so the light crosses the seat unbroken instead
+    // of drawing its own edge down the middle of the figure.
+    if (key) {
+      const lit = key > 0 ? inR : inL;
+      const inner = (y: number) => lit[0] + lit[1] / 2 + key * 0.2 * (lit[1] / 2) * mul(y);
+      poly(key > 0 ? seatBand(inner, seatR) : seatBand(seatL, inner), tint(pc, 0.78));
+    }
     legs.forEach((L) => {
       const cx = L[0] + L[1] / 2;
       const hw = L[1] / 2;
