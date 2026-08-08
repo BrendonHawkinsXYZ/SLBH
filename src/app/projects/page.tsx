@@ -1,6 +1,5 @@
-import { getAllProjects, type ProjectStatus } from "@/lib/projects";
+import { getAllProjects, STATUS_ORDER, type ProjectStatus } from "@/lib/projects";
 import { ProjectIndex } from "@/components/projects/ProjectIndex";
-import { BuildingInPublicNotice } from "@/components/projects/BuildingInPublicNotice";
 
 export default function ProjectsPage() {
   const projects = getAllProjects();
@@ -14,15 +13,7 @@ export default function ProjectsPage() {
     archived: "ARCHIVED",
     "in-development": "IN DEVELOPMENT",
   };
-  const order: ProjectStatus[] = [
-    "flagship",
-    "active",
-    "seasonal",
-    "in-development",
-    "complete",
-    "archived",
-  ];
-  const statusReadout = order
+  const statusReadout = STATUS_ORDER
     .map((status) => ({ status, count: projects.filter((p) => p.status === status).length }))
     .filter(({ count }) => count > 0)
     .map(({ status, count }) => `${pad(count)} ${labels[status]}`)
@@ -50,9 +41,6 @@ export default function ProjectsPage() {
           {pad(total)} TOTAL · {statusReadout}
         </span>
       </div>
-
-      {/* Building-in-public notice (auto-opens once per session) */}
-      <BuildingInPublicNotice />
 
       {/* §3.3 Project index */}
       <ProjectIndex projects={projects} />

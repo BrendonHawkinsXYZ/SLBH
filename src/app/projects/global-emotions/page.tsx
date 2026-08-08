@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { getAllProjects, findImage } from "@/lib/projects";
-import { TrunkLine } from "@/components/TrunkLine";
 import { FallbackImg } from "@/components/projects/FallbackImg";
 import { StackDiagram } from "@/components/projects/StackDiagram";
 
@@ -43,9 +42,6 @@ export default function GlobalEmotionsPage() {
             Global Emotions is a public emotional observatory — a daily
             instrument that reads the world as a weather system of attention.
           </p>
-        </div>
-        <div className="ge-trunkline">
-          <TrunkLine length={110} nodePosition="top" />
         </div>
       </section>
 
@@ -342,13 +338,6 @@ export default function GlobalEmotionsPage() {
           opacity: 0.82;
           margin: 0;
         }
-        .ge-trunkline {
-          position: absolute;
-          bottom: 0;
-          left: 50%;
-          transform: translateX(-50%);
-        }
-
         /* ── Readout strip ── */
         .ge-readout {
           display: flex;

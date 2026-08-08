@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { getAllProjects, findImage } from "@/lib/projects";
-import { TrunkLine } from "@/components/TrunkLine";
 import { FallbackImg } from "@/components/projects/convergent-grammar/FallbackImg";
 import { FlowDiagram } from "@/components/projects/convergent-grammar/FlowDiagram";
 
@@ -21,9 +20,27 @@ export default function ConvergentGrammarPage() {
   const asset = (base: string) => findImage("convergent-grammar", base);
   const heroSrc = asset("hero");
   const exampleSrc = asset("example");
-  const landscapeSrc = asset("landscape");
-  const customSrc = asset("custom");
-  const interiorSrc = asset("interior");
+
+  // Portraiture is the spine of the study, so its gallery takes as many plates
+  // as are on disk (portrait-01 … portrait-06) and renders only the ones that
+  // resolve — drop more files in and they appear, no code change.
+  const portraits = [
+    "portrait-01",
+    "portrait-02",
+    "portrait-03",
+    "portrait-04",
+    "portrait-05",
+    "portrait-06",
+  ]
+    .map((base) => ({ base, src: asset(base) }))
+    .filter(({ src }) => src);
+
+  // The widening set: other genres now, other data sources next.
+  const expansion = [
+    { src: asset("landscape"), caption: "LANDSCAPES", alt: "Landscape compositional study" },
+    { src: asset("custom"), caption: "CUSTOM IMAGES", alt: "Custom image compositional study" },
+    { src: asset("interior"), caption: "INTERIOR PAINTINGS", alt: "Interior painting compositional study" },
+  ];
 
   return (
     <>
@@ -36,9 +53,6 @@ export default function ConvergentGrammarPage() {
             A computational study of latent visual grammar across portraiture
             and adjacent image regimes.
           </p>
-        </div>
-        <div className="cg-trunkline">
-          <TrunkLine length={110} nodePosition="top" />
         </div>
       </section>
 
@@ -163,14 +177,21 @@ export default function ConvergentGrammarPage() {
         <div className="cg-block cg-block--full">
           <p className="t-mono cg-block-kicker">03 / SCOPE</p>
           <h2 className="t-h2 cg-block-headline">
-            What the project looks at now.
+            Portraits first, then outward.
           </h2>
           <p className="t-body cg-block-body cg-block-body--wide">
-            The current active scans cover painted portraits, painted
-            landscapes, garments, and interiors. Photographic portraiture and
-            machine-generated portraiture are being added as a longitudinal
-            follow-up, tracking how portrait grammar shifts across regimes of
-            image production.
+            Portraiture is the spine of the study. It is the most densely
+            sampled genre and the reference grammar every other scan is measured
+            against — a corpus deep enough that convergence and divergence can
+            be told apart rather than guessed at.
+          </p>
+          <p className="t-body cg-block-body cg-block-body--wide">
+            From there the work widens in two directions. Into other image
+            types: landscapes, interiors, garments, and figure studies. And into
+            other data sources beyond open museum collections — photographic
+            archives, contemporary image libraries, and machine-generated
+            imagery. Each new source is a test of whether portrait grammar
+            survives a change of regime.
           </p>
           <p className="t-body cg-block-body cg-block-body--wide">
             The project is in its research phase. Outputs
@@ -180,23 +201,59 @@ export default function ConvergentGrammarPage() {
         </div>
       </section>
 
-      {/* ── Section 4.5: Study image gallery ── */}
+      {/* ── Section 4.5: Portrait studies — the primary evidence ── */}
       <section className="container-page cg-gallery">
-        <p className="t-mono cg-gallery-label">STUDY IMAGES</p>
+        <p className="t-mono cg-gallery-label">PORTRAIT STUDIES</p>
+        <p className="t-body cg-gallery-intro">
+          Each plate pairs a source portrait with the spatial grammar extracted
+          from it — the geometric relationships between figure, ground, focal
+          point, and negative space, held apart from subject and style.
+        </p>
         <div className="cg-gallery-grid">
-          {[
-            { src: landscapeSrc, caption: "LANDSCAPES", alt: "Landscape compositional study" },
-            { src: customSrc, caption: "CUSTOM IMAGES", alt: "Custom image compositional study" },
-            { src: interiorSrc, caption: "INTERIOR PAINTINGS", alt: "Interior painting compositional study" },
-          ].map(({ src, caption, alt }) => (
+          {portraits.length > 0 ? (
+            portraits.map(({ base, src }, i) => (
+              <figure key={base} className="cg-gallery-item">
+                <div className="cg-gallery-frame">
+                  <FallbackImg
+                    src={src}
+                    alt={`Source portrait with extracted spatial grammar, study ${i + 1}`}
+                    className="cg-gallery-img"
+                  />
+                </div>
+                <figcaption className="t-mono cg-gallery-caption">
+                  PORTRAIT / {String(i + 1).padStart(2, "0")}
+                </figcaption>
+              </figure>
+            ))
+          ) : (
+            <figure className="cg-gallery-item">
+              <div className="cg-gallery-frame cg-gallery-frame--empty">
+                <span className="t-mono cg-gallery-tk">TK: PORTRAIT STUDIES</span>
+              </div>
+              <figcaption className="t-mono cg-gallery-caption">PORTRAIT / 01</figcaption>
+            </figure>
+          )}
+        </div>
+      </section>
+
+      {/* ── Section 4.6: Adjacent genres — the widening set ── */}
+      <section className="container-page cg-gallery cg-gallery--secondary">
+        <p className="t-mono cg-gallery-label">ADJACENT GENRES</p>
+        <p className="t-body cg-gallery-intro">
+          The same extraction, run against genres that answer different spatial
+          problems. These are the control against which portrait grammar is
+          measured — where it converges, and where it breaks.
+        </p>
+        <div className="cg-gallery-grid">
+          {expansion.map(({ src, caption, alt }) => (
             <figure key={caption} className="cg-gallery-item">
-              <div className="cg-gallery-frame">
+              <div
+                className={`cg-gallery-frame${src ? "" : " cg-gallery-frame--empty"}`}
+              >
                 {src ? (
                   <FallbackImg src={src} alt={alt} className="cg-gallery-img" />
                 ) : (
-                  <div className="cg-gallery-empty">
-                    <span className="t-mono cg-gallery-tk">TK</span>
-                  </div>
+                  <span className="t-mono cg-gallery-tk">TK</span>
                 )}
               </div>
               <figcaption className="t-mono cg-gallery-caption">{caption}</figcaption>
@@ -315,13 +372,6 @@ export default function ConvergentGrammarPage() {
           opacity: 0.82;
           margin: 0;
         }
-        .cg-trunkline {
-          position: absolute;
-          bottom: 0;
-          left: 50%;
-          transform: translateX(-50%);
-        }
-
         /* ── Readout strip ── */
         .cg-readout {
           display: flex;
@@ -519,39 +569,55 @@ export default function ConvergentGrammarPage() {
         }
         .cg-rel-meta { padding: 0 4px; }
 
-        /* ── Study image gallery ── */
+        /* ── Study image galleries ── */
         .cg-gallery {
           padding-top: 0;
           padding-bottom: 96px;
         }
+        /* The adjacent-genre set reads as a footnote to the portraits above it,
+           so it sits tighter and slightly quieter. */
+        .cg-gallery--secondary .cg-gallery-item { opacity: 0.88; }
         .cg-gallery-label {
           opacity: 0.45;
-          margin: 0 0 24px;
+          margin: 0 0 16px;
           font-size: 10px;
           letter-spacing: 0.12em;
+        }
+        .cg-gallery-intro {
+          margin: 0 0 32px;
+          max-width: 560px;
+          line-height: 1.7;
+          opacity: 0.82;
         }
         .cg-gallery-grid {
           display: grid;
           grid-template-columns: 1fr;
           gap: 32px;
         }
+        @media (min-width: 600px) {
+          .cg-gallery-grid { grid-template-columns: repeat(2, 1fr); }
+        }
         @media (min-width: 900px) {
           .cg-gallery-grid { grid-template-columns: repeat(3, 1fr); }
         }
         .cg-gallery-item { margin: 0; }
         .cg-gallery-frame {
+          position: relative;
+          aspect-ratio: 4 / 5;
           width: 100%;
           border: 0.5px solid var(--hairline-strong);
           overflow: hidden;
           background: var(--graphite);
         }
         .cg-gallery-img {
+          position: absolute;
+          inset: 0;
           width: 100%;
-          height: auto;
+          height: 100%;
+          object-fit: cover;
           display: block;
         }
-        .cg-gallery-empty {
-          min-height: 120px;
+        .cg-gallery-frame--empty {
           display: flex;
           align-items: center;
           justify-content: center;

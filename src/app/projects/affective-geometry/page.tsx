@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { findImage } from "@/lib/projects";
-import { TrunkLine } from "@/components/TrunkLine";
 import { FallbackImg } from "@/components/projects/FallbackImg";
 
 // A sketch page: premise, the contact sheet, the plates. Image frames fill in
@@ -37,9 +36,6 @@ export default function AffectiveGeometryPage() {
             An art project that theorizes emotion as shape and color — a proof of
             concept for rendering affective computational geometry as 2D plates.
           </p>
-        </div>
-        <div className="ag-trunkline">
-          <TrunkLine length={110} nodePosition="top" />
         </div>
       </section>
 
@@ -187,13 +183,6 @@ export default function AffectiveGeometryPage() {
           opacity: 0.82;
           margin: 0;
         }
-        .ag-trunkline {
-          position: absolute;
-          bottom: 0;
-          left: 50%;
-          transform: translateX(-50%);
-        }
-
         /* ── Readout strip ── */
         .ag-readout {
           display: flex;

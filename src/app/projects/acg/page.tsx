@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { getAllProjects, findImage } from "@/lib/projects";
-import { TrunkLine } from "@/components/TrunkLine";
 import { FallbackImg } from "@/components/projects/acg/FallbackImg";
 import { FlowDiagram } from "@/components/projects/acg/FlowDiagram";
 
@@ -39,9 +38,6 @@ export default function ACGPage() {
             affective computation into tangible experience through light, color,
             presence, and sensory systems.
           </p>
-        </div>
-        <div className="acg-trunkline">
-          <TrunkLine length={110} nodePosition="top" />
         </div>
       </section>
 
@@ -554,13 +550,6 @@ export default function ACGPage() {
           opacity: 0.82;
           margin: 0;
         }
-        .acg-trunkline {
-          position: absolute;
-          bottom: 0;
-          left: 50%;
-          transform: translateX(-50%);
-        }
-
         /* ── Readout strip ── */
         .acg-readout {
           display: flex;
