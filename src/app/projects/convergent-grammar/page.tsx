@@ -35,7 +35,6 @@ export default function ConvergentGrammarPage() {
     .map((base) => ({ base, src: asset(base) }))
     .filter(({ src }) => src);
 
-
   return (
     <>
       {/* ── Section 1: Header ── */}
@@ -166,36 +165,9 @@ export default function ConvergentGrammarPage() {
             </p>
           </div>
         </div>
-
-        {/* Block C — SCOPE */}
-        <div className="cg-block cg-block--full">
-          <p className="t-mono cg-block-kicker">03 / SCOPE</p>
-          <h2 className="t-h2 cg-block-headline">
-            Portraits first, then outward.
-          </h2>
-          <p className="t-body cg-block-body cg-block-body--wide">
-            Portraiture is the spine of the study. It is the most densely
-            sampled genre and the reference grammar every other scan is measured
-            against — a corpus deep enough that convergence and divergence can
-            be told apart rather than guessed at.
-          </p>
-          <p className="t-body cg-block-body cg-block-body--wide">
-            From there the work widens in two directions. Into other image
-            types: landscapes, interiors, garments, and figure studies. And into
-            other data sources beyond open museum collections — photographic
-            archives, contemporary image libraries, and machine-generated
-            imagery. Each new source is a test of whether portrait grammar
-            survives a change of regime.
-          </p>
-          <p className="t-body cg-block-body cg-block-body--wide">
-            The project is in its research phase. Outputs
-            will be released as diagrams and, eventually, as a paper on the
-            vertical longitudinal study.
-          </p>
-        </div>
       </section>
 
-      {/* ── Section 4.5: Portrait studies — the primary evidence ── */}
+      {/* ── Section 5: Portrait studies — the primary evidence ── */}
       <section className="container-page cg-gallery">
         <p className="t-mono cg-gallery-label">PORTRAIT STUDIES</p>
         <p className="t-body cg-gallery-intro">
@@ -230,36 +202,37 @@ export default function ConvergentGrammarPage() {
         </div>
       </section>
 
-
-      {/* ── Section 5: Links ── */}
-      <section className="container-page cg-links">
-        {[
-          { label: "ARCHIVE OF RUNS", note: "TK" },
-          { label: "RELATED DIAGRAMS", note: "TK — ONCE DIAGRAMS SHIP" },
-        ].map(({ label, note }, i) => (
-          <div
-            key={label}
-            className="cg-link-row"
-            style={{ borderTop: i === 0 ? "0.5px solid var(--hairline)" : undefined }}
-          >
-            <span
-              style={{
-                fontFamily: "var(--font-inter), sans-serif",
-                fontWeight: 500,
-                fontSize: 13,
-                letterSpacing: "0.04em",
-              }}
-            >
-              {label}
-            </span>
-            <span className="t-mono cg-link-url" style={{ opacity: 0.35 }}>
-              {note}
-            </span>
-          </div>
-        ))}
+      {/* ── Section 6: Scope ── */}
+      <section className="container-page cg-editorial cg-editorial--tail">
+        {/* Block C — SCOPE */}
+        <div className="cg-block cg-block--full">
+          <p className="t-mono cg-block-kicker">03 / SCOPE</p>
+          <h2 className="t-h2 cg-block-headline">
+            Portraits first, then outward.
+          </h2>
+          <p className="t-body cg-block-body cg-block-body--wide">
+            Portraiture is the spine of the study. It is the most densely
+            sampled genre and the reference grammar every other scan is measured
+            against — a corpus deep enough that convergence and divergence can
+            be told apart rather than guessed at.
+          </p>
+          <p className="t-body cg-block-body cg-block-body--wide">
+            From there the work widens in two directions. Into other image
+            types: landscapes, interiors, garments, and figure studies. And into
+            other data sources beyond open museum collections — photographic
+            archives, contemporary image libraries, and machine-generated
+            imagery. Each new source is a test of whether portrait grammar
+            survives a change of regime.
+          </p>
+          <p className="t-body cg-block-body cg-block-body--wide">
+            The project is in its research phase. Outputs
+            will be released as diagrams and, eventually, as a paper on the
+            vertical longitudinal study.
+          </p>
+        </div>
       </section>
 
-      {/* ── Section 6: Related projects ── */}
+      {/* ── Section 7: Related projects ── */}
       {related.length > 0 && (
         <section className="container-page cg-related">
           <p className="t-mono cg-related-label">RELATED PROJECTS</p>
@@ -307,7 +280,7 @@ export default function ConvergentGrammarPage() {
         </section>
       )}
 
-      {/* ── Section 7: Footer ── */}
+      {/* ── Section 8: Footer ── */}
       <section className="container-page cg-footer">
         <p className="t-body cg-footer-body">
           Convergent Grammar is in active research. Findings will be published as
@@ -416,6 +389,9 @@ export default function ConvergentGrammarPage() {
           display: block;
           max-width: 640px;
         }
+        /* Scope sits below the portrait gallery, which already closes with
+           96px — so this one opens flush rather than stacking a second gap. */
+        .cg-editorial--tail { padding-top: 0; }
 
         .cg-block-kicker {
           opacity: 0.45;
@@ -481,25 +457,6 @@ export default function ConvergentGrammarPage() {
           display: flex;
           align-items: center;
           padding: 32px 0;
-        }
-
-        /* ── Links ── */
-        .cg-links {
-          padding-top: 0;
-          padding-bottom: 80px;
-        }
-        .cg-link-row {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 24px;
-          padding: 24px 0;
-          border-bottom: 0.5px solid var(--hairline);
-        }
-        .cg-link-url {
-          font-size: 11px;
-          color: var(--ground);
-          text-decoration: none;
         }
 
         /* ── Related ── */
