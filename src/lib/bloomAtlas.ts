@@ -118,16 +118,16 @@ export function archLayout(
   const out: BloomInstance[] = [];
   const mobile = w < 640;
   const minScale = mobile
-    ? Math.max(44, Math.min(w, h) * 0.09)
+    ? Math.max(52, Math.min(w, h) * 0.115)
     : Math.max(76, Math.min(w, h) * 0.09);
   const maxScale = mobile
-    ? Math.max(112, Math.min(w, h) * 0.24)
+    ? Math.max(134, Math.min(w, h) * 0.3)
     : Math.max(190, Math.min(w, h) * 0.25);
   // A deterministic coverage skeleton prevents random sampling from leaving
   // monitor-sized holes. Three top rows and three columns on each side are laid
   // down first; the remaining objects retain the loose chaotic distribution.
-  const coverageCount = Math.floor(count * 0.5);
-  const topCoverageCount = Math.floor(coverageCount * 0.42);
+  const coverageCount = mobile ? count : Math.floor(count * 0.5);
+  const topCoverageCount = Math.floor(coverageCount * (mobile ? 0.3 : 0.42));
   const sideCoverageCount = Math.floor((coverageCount - topCoverageCount) / 2);
   let guard = 0;
 
@@ -190,15 +190,16 @@ export function archLayout(
       }
     }
 
-    // Reject by the sprite's visible footprint, not only its centre. That keeps
-    // the phone entrance clean even when a large bloom sits beside the gap.
+    // Desktop rejects by the sprite's visible footprint to keep the phone path
+    // clean. Mobile's dedicated top/left/right field must keep its side rails;
+    // applying the phone-width gap there erases almost the entire composition.
     const pad = scale * 0.58;
     const inOpening =
       x > gapRect.x - pad &&
       x < gapRect.x + gapRect.width + pad &&
       y > gapRect.y - pad &&
       y < gapRect.y + gapRect.height + pad;
-    if (inOpening) continue;
+    if (!mobile && inOpening) continue;
 
     out.push({
       // When the atlas and instance counts match, every visible object owns a
