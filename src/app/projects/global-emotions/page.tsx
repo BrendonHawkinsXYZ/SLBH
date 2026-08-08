@@ -296,7 +296,9 @@ export default function GlobalEmotionsPage() {
         /* ── Hero visual ── */
 
         /* ── World field — the lead image ── */
-        .ge-worldfield { padding-top: 56px; padding-bottom: 96px; }
+        /* First section under the readout strip — 96px matches the section
+           rhythm the rest of the site uses. */
+        .ge-worldfield { padding-top: 96px; padding-bottom: 96px; }
         .ge-worldfield-fig { margin: 0; }
         /* The frame takes the image's own proportions rather than cropping it
            to a fixed ratio, so a 1919×987 export (or any other wide one) lands
