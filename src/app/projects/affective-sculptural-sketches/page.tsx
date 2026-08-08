@@ -75,7 +75,7 @@ export default function AffectiveSculpturalSketchesPage() {
       {/* ── Section 1: Header ── */}
       <section className="ss-hero">
         <div className="container-page ss-hero-inner">
-          <p className="t-mono ss-kicker">PROJECT 07 / 2026 — ONGOING / STUDY / NYC</p>
+          <p className="t-mono ss-kicker">PROJECT 04 / 2026 — ONGOING / STUDY / NYC</p>
           <h1 className="t-display ss-title">Affective Sculptural Sketches</h1>
           <p className="ss-summary">
             An ongoing study of light and space as sculptural material for

@@ -36,7 +36,7 @@ export default function GlobalEmotionsPage() {
       {/* ── Section 1: Header ── */}
       <section className="ge-hero">
         <div className="container-page ge-hero-inner">
-          <p className="t-mono ge-kicker">PROJECT 01 / 2026 / SEASONAL / GLOBAL</p>
+          <p className="t-mono ge-kicker">PROJECT 05 / 2026 / SEASONAL / GLOBAL</p>
           <h1 className="t-display ge-title">Global Emotions</h1>
           <p className="ge-summary">
             Global Emotions is a public emotional observatory — a daily
