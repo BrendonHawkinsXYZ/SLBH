@@ -123,26 +123,71 @@ export function archLayout(
   const maxScale = mobile
     ? Math.max(112, Math.min(w, h) * 0.24)
     : Math.max(190, Math.min(w, h) * 0.25);
+  // A deterministic coverage skeleton prevents random sampling from leaving
+  // monitor-sized holes. Three top rows and three columns on each side are laid
+  // down first; the remaining objects retain the loose chaotic distribution.
+  const coverageCount = Math.floor(count * 0.5);
+  const topCoverageCount = Math.floor(coverageCount * 0.42);
+  const sideCoverageCount = Math.floor((coverageCount - topCoverageCount) / 2);
   let guard = 0;
 
   while (out.length < count && guard < count * 30) {
     guard++;
-    const region = Math.random();
+    const index = out.length;
     const scale = random(minScale, maxScale);
     let x: number;
     let y: number;
 
-    if (region < 0.5) {
+    if (index < topCoverageCount) {
+      const topIndex = index;
+      const row = topIndex % 3;
+      const column = Math.floor(topIndex / 3);
+      const columns = Math.ceil(topCoverageCount / 3);
+      const spacing = w / columns;
+      x = spacing * (column + 0.5) + random(-spacing * 0.38, spacing * 0.38);
+      y = row === 0
+        ? random(-scale * 0.12, scale * 0.18)
+        : row === 1
+          ? random(h * 0.12, h * 0.24)
+          : random(h * 0.26, h * 0.38);
+    } else if (index < topCoverageCount + sideCoverageCount) {
+      const sideIndex = index - topCoverageCount;
+      const column = sideIndex % 3;
+      const row = Math.floor(sideIndex / 3);
+      const rows = Math.ceil(sideCoverageCount / 3);
+      const spacing = h / rows;
+      x = column === 0
+        ? random(-scale * 0.1, scale * 0.2)
+        : column === 1
+          ? random(w * 0.12, w * 0.21)
+          : random(w * 0.24, w * 0.33);
+      y = spacing * (row + 0.5) + random(-spacing * 0.36, spacing * 0.36);
+    } else if (index < topCoverageCount + sideCoverageCount * 2) {
+      const sideIndex = index - topCoverageCount - sideCoverageCount;
+      const column = sideIndex % 3;
+      const row = Math.floor(sideIndex / 3);
+      const rows = Math.ceil(sideCoverageCount / 3);
+      const spacing = h / rows;
+      x = column === 0
+        ? w - random(-scale * 0.1, scale * 0.2)
+        : column === 1
+          ? random(w * 0.79, w * 0.88)
+          : random(w * 0.67, w * 0.76);
+      y = spacing * (row + 0.5) + random(-spacing * 0.36, spacing * 0.36);
+    } else {
+      const region = Math.random();
+      if (region < 0.5) {
       x = random(-w * 0.08, w * 1.08);
       // The hero now scrolls in a viewport beneath the fixed nav, so shapes can
       // safely press through this clipped edge without entering the nav plane.
-      y = random(-scale * 0.12, h * 0.42);
-    } else if (region < 0.75) {
-      x = random(-w * 0.08, w * 0.38);
-      y = random(h * 0.13, h * 1.08);
-    } else {
-      x = random(w * 0.62, w * 1.08);
-      y = random(h * 0.13, h * 1.08);
+      y = random(-scale * 0.12, h * 0.52);
+      } else if (region < 0.75) {
+        x = random(-w * 0.08, w * 0.46);
+        y = random(h * 0.13, h * 1.08);
+      } else {
+        x = random(w * 0.54, w * 1.08);
+        y = random(h * 0.13, h * 1.08);
+      }
     }
 
     // Reject by the sprite's visible footprint, not only its centre. That keeps

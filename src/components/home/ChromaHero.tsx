@@ -31,17 +31,18 @@ function buildScene(w: number, h: number, mobile: boolean): Scene {
     : Math.min(390, w * 0.285, maxPhoneWForHeight);
   const phoneH = phoneW * (660 / 320);
   const phoneY = Math.max(14, (h - phoneH) / 2 - (mobile ? 2 : 16));
-  // Density target: +50% on mobile, +25% on desktop.
-  const count = mobile ? 150 : 300;
+  // Density scales with the actual browser width: phones and laptop-sized
+  // screens gain 30%, while large external displays double the original field.
+  const count = w >= 1600 ? 600 : mobile ? 195 : 390;
   // One atlas entry per instance keeps every landing shape independent. The
   // source canvases still exceed their maximum display size, so they stay crisp.
   const atlas = makeAtlas(count, mobile ? 160 : 260);
-  const gapWidth = phoneW * 1.55;
+  const gapWidth = phoneW * 1.35;
   const gap = {
     x: (w - gapWidth) / 2,
-    y: h * 0.38,
+    y: h * 0.48,
     width: gapWidth,
-    height: h * 0.38,
+    height: h * 0.58,
   };
   const screen = {
     x: (w - phoneW) / 2 + phoneW * 0.095,
@@ -316,7 +317,7 @@ export function ChromaHero() {
           font-size: clamp(28px, 3.55vw, 64px);
           font-weight: 700;
           line-height: 1;
-          letter-spacing: -0.045em;
+          letter-spacing: 0.012em;
           text-align: center;
           white-space: nowrap;
           text-shadow: 0 2px 28px rgba(0, 0, 0, 0.86);
