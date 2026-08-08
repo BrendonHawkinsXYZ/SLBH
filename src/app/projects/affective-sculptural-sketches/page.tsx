@@ -248,7 +248,7 @@ export default function AffectiveSculpturalSketchesPage() {
         .ss-hero { position: relative; }
         .ss-hero-inner {
           padding-top: 56px;
-          padding-bottom: 144px;
+          padding-bottom: 64px;
         }
         .ss-kicker { opacity: 0.55; margin: 0 0 20px; }
         .ss-title { margin: 0 0 28px; }

@@ -532,7 +532,7 @@ export default function ACGPage() {
         }
         .acg-hero-inner {
           padding-top: 56px;
-          padding-bottom: 144px;
+          padding-bottom: 64px;
         }
         .acg-kicker {
           opacity: 0.55;

@@ -323,7 +323,7 @@ export default function ConvergentGrammarPage() {
         }
         .cg-hero-inner {
           padding-top: 56px;
-          padding-bottom: 144px;
+          padding-bottom: 64px;
         }
         .cg-kicker {
           opacity: 0.55;

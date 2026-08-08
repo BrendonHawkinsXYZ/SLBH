@@ -467,7 +467,7 @@ export default function StudioPage() {
         }
         .st-header-inner {
           padding-top: 56px;
-          padding-bottom: 144px;
+          padding-bottom: 64px;
         }
         .st-kicker {
           opacity: 0.55;

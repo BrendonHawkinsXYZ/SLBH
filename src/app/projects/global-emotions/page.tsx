@@ -325,7 +325,7 @@ export default function GlobalEmotionsPage() {
         .ge-hero { position: relative; }
         .ge-hero-inner {
           padding-top: 56px;
-          padding-bottom: 144px;
+          padding-bottom: 64px;
         }
         .ge-kicker { opacity: 0.55; margin: 0 0 20px; }
         .ge-title { margin: 0 0 28px; }

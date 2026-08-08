@@ -171,7 +171,7 @@ export default function AffectiveGeometryPage() {
       <style>{`
         /* ── Hero ── */
         .ag-hero { position: relative; }
-        .ag-hero-inner { padding-top: 56px; padding-bottom: 144px; }
+        .ag-hero-inner { padding-top: 56px; padding-bottom: 64px; }
         .ag-kicker { opacity: 0.55; margin: 0 0 20px; }
         .ag-title { margin: 0 0 28px; }
         .ag-summary {

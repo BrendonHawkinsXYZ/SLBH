@@ -251,7 +251,7 @@ export default function TihifNycPage() {
         }
         .tihif-hero-inner {
           padding-top: 56px;
-          padding-bottom: 144px;
+          padding-bottom: 64px;
         }
         .tihif-kicker {
           opacity: 0.55;
