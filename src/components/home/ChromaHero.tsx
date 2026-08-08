@@ -4,18 +4,34 @@ import { useEffect, useRef, useState } from "react";
 import {
   archLayout,
   gridLayout,
-  makeAtlas,
+  makeBloomSprite,
   solveFrame,
   type BloomInstance,
 } from "@/lib/bloomAtlas";
 
 type Scene = {
-  atlas: HTMLCanvasElement[];
+  atlas: Array<HTMLCanvasElement | null>;
+  spriteSize: number;
   instances: BloomInstance[];
   phoneW: number;
   phoneH: number;
   phoneY: number;
 };
+
+// Preserve generated sprites across client-side visits. Each breakpoint has a
+// stable atlas, so returning home does not repeat the expensive shape render.
+let atlasCache: {
+  key: string;
+  sprites: Array<HTMLCanvasElement | null>;
+} | null = null;
+
+function cachedAtlas(count: number, size: number) {
+  const key = `${count}:${size}`;
+  if (atlasCache?.key === key) return atlasCache.sprites;
+  const sprites = Array.from<HTMLCanvasElement | null>({ length: count }).fill(null);
+  atlasCache = { key, sprites };
+  return sprites;
+}
 
 const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
 const ease = (t: number) => {
@@ -34,9 +50,10 @@ function buildScene(w: number, h: number, mobile: boolean): Scene {
   // Mobile needs its own overloaded field: a narrow viewport otherwise causes
   // the phone-clearance region to consume both side rails.
   const count = w >= 1600 ? 600 : mobile ? 320 : 390;
-  // One atlas entry per instance keeps every landing shape independent. The
-  // source canvases still exceed their maximum display size, so they stay crisp.
-  const atlas = makeAtlas(count, mobile ? 160 : 260);
+  // Reserve one independent sprite per bloom without rendering all of them in
+  // one blocking burst. Drawing lazily fills this cached atlas as blooms enter.
+  const spriteSize = mobile ? 160 : 260;
+  const atlas = cachedAtlas(count, spriteSize);
   const gapWidth = phoneW * 1.35;
   const gap = {
     x: (w - gapWidth) / 2,
@@ -68,7 +85,7 @@ function buildScene(w: number, h: number, mobile: boolean): Scene {
     if (index < targets.length) item.grid = targets[index];
   });
 
-  return { atlas, instances, phoneW, phoneH, phoneY };
+  return { atlas, spriteSize, instances, phoneW, phoneH, phoneY };
 }
 
 export function ChromaHero() {
@@ -138,11 +155,16 @@ export function ChromaHero() {
       for (let index = 0; index < frames.length; index++) {
         const frame = frames[index];
         const reveal = p < 0.25 ? ease((introduced - index) / 8) : 1;
-        if (reveal <= 0) continue;
+        if (reveal <= 0 || frame.alpha <= 0) continue;
         ctx.save();
         ctx.globalAlpha = frame.alpha * reveal;
         ctx.translate(frame.x, frame.y);
-        const sprite = scene.atlas[frame.spriteIndex % scene.atlas.length];
+        const spriteIndex = frame.spriteIndex % scene.atlas.length;
+        let sprite = scene.atlas[spriteIndex];
+        if (!sprite) {
+          sprite = makeBloomSprite(scene.spriteSize);
+          scene.atlas[spriteIndex] = sprite;
+        }
         ctx.rotate((frame.rotation * Math.PI) / 180);
         const scale = frame.scale * (0.2 + reveal * 0.8);
         ctx.drawImage(sprite, -scale / 2, -scale / 2, scale, scale);
