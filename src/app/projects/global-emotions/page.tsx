@@ -22,11 +22,8 @@ export default function GlobalEmotionsPage() {
     .filter(Boolean) as (typeof allProjects)[0][];
 
   const asset = (base: string) => findImage("global-emotions", base);
-  const heroSrc = asset("hero");
-  const todaySrc = asset("today");
-  const detailSrc = asset("detail");
-  const docs: { base: string; caption: string; wide?: boolean }[] = [
-    { base: "field-world", caption: "TODAY / WORLD FIELD", wide: true },
+  const worldSrc = asset("field-world");
+  const docs: { base: string; caption: string }[] = [
     { base: "location", caption: "LOCATION / COUNTRY VIEW" },
     { base: "archive", caption: "ARCHIVE / ACCUMULATED DAYS" },
   ];
@@ -61,48 +58,38 @@ export default function GlobalEmotionsPage() {
         </span>
       </div>
 
-      {/* ── Section 3: Hero visual ── */}
-      <section className="ge-visual" aria-label="Global Emotions hero visual">
-        <div className="ge-visual-bg" aria-hidden />
-        {heroSrc && <FallbackImg src={heroSrc} alt="" className="ge-visual-img" />}
-        {!heroSrc && (
-          <div className="ge-visual-fallback" aria-hidden>
-            <span className="t-mono" style={{ opacity: 0.3 }}>
-              TK: HERO VISUAL
-            </span>
+      {/* ── Section 3: World field — the lead image ── */}
+      <section className="container-page ge-worldfield">
+        <figure className="ge-worldfield-fig">
+          <div className="ge-worldfield-frame">
+            {worldSrc ? (
+              <FallbackImg
+                src={worldSrc}
+                alt="Global Emotions, today's world field"
+                className="ge-worldfield-img"
+              />
+            ) : (
+              <span className="t-mono ge-worldfield-tk">TK: WORLD FIELD</span>
+            )}
           </div>
-        )}
+          <figcaption className="t-mono ge-doc-caption">
+            TODAY / WORLD FIELD
+          </figcaption>
+        </figure>
       </section>
 
       {/* ── Section 4: Editorial ── */}
       <section className="container-page ge-editorial">
         {/* Block A — THE PROJECT */}
-        <div className="ge-block ge-block--text-left">
-          <div className="ge-block-text">
-            <p className="t-mono ge-block-kicker">01 / THE PROJECT</p>
-            <h2 className="t-h2 ge-block-headline">One field a day.</h2>
-            <p className="t-body ge-block-body">
-              Each day, search behavior across countries is classified into
-              emotional categories and mapped to a single color field. Over time
-              the fields accumulate into an archive — a record of how the world
-              felt, one day at a time.
-            </p>
-          </div>
-          <div className="ge-block-visual">
-            <div className="ge-img-wrap">
-              <div className="ge-img-frame">
-                <div className="ge-img-bg" />
-                {todaySrc && (
-                  <FallbackImg
-                    src={todaySrc}
-                    alt="Global Emotions, the day's color field"
-                    className="ge-img-fill"
-                  />
-                )}
-              </div>
-              <p className="t-mono ge-img-caption">TODAY / DAILY FIELD</p>
-            </div>
-          </div>
+        <div className="ge-block ge-block--full">
+          <p className="t-mono ge-block-kicker">01 / THE PROJECT</p>
+          <h2 className="t-h2 ge-block-headline">One field a day.</h2>
+          <p className="t-body ge-block-body ge-block-body--wide">
+            Each day, search behavior across countries is classified into
+            emotional categories and mapped to a single color field. Over time
+            the fields accumulate into an archive — a record of how the world
+            felt, one day at a time.
+          </p>
         </div>
 
         {/* Block B — METHOD */}
@@ -140,58 +127,6 @@ export default function GlobalEmotionsPage() {
           </div>
         </div>
 
-        {/* Block C — COLOR */}
-        <div className="ge-block ge-block--text-left">
-          <div className="ge-block-text">
-            <p className="t-mono ge-block-kicker">03 / COLOR</p>
-            <h2 className="t-h2 ge-block-headline">
-              How the color is generated.
-            </h2>
-            <p className="t-body ge-block-body">
-              Search terms are classified into a fixed taxonomy of 169 emotions,
-              each carrying a canonical color and a coordinate in
-              valence–arousal–dominance space.
-            </p>
-            <p className="t-body ge-block-body">
-              A day&rsquo;s headline emotion is the label nearest the
-              traffic-weighted center of its trends in that space — the
-              field&rsquo;s center of mass rather than its most common label. The
-              final gradient is weighted by attention intensity, so louder days
-              burn brighter.
-            </p>
-          </div>
-          <div className="ge-block-visual">
-            <div className="ge-img-wrap">
-              <div className="ge-img-frame">
-                <div className="ge-img-bg" />
-                {detailSrc && (
-                  <FallbackImg
-                    src={detailSrc}
-                    alt="Global Emotions, gradient detail"
-                    className="ge-img-fill"
-                  />
-                )}
-              </div>
-              <p className="t-mono ge-img-caption">FIELD / GRADIENT DETAIL</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Block D — THE LAB */}
-        <div className="ge-block ge-block--full">
-          <p className="t-mono ge-block-kicker">04 / THE LAB</p>
-          <h2 className="t-h2 ge-block-headline">
-            An instrument built by the lab.
-          </h2>
-          <p className="t-body ge-block-body ge-block-body--wide">
-            Studio Lab BH is a systems research lab that builds computational
-            instruments for understanding invisible human systems — especially
-            affect. Global Emotions is the observatory that runs continuously.
-          </p>
-          <p className="t-mono ge-mono-line">
-            MODELING INVISIBLE HUMAN SYSTEMS · SLBH — V1.0
-          </p>
-        </div>
       </section>
 
       {/* ── Section 4b: Documentation strip ── */}
@@ -202,7 +137,7 @@ export default function GlobalEmotionsPage() {
             return (
               <figure
                 key={doc.base}
-                className={`ge-doc-cell${doc.wide ? " ge-doc-cell--wide" : ""}`}
+                className="ge-doc-cell"
               >
                 <div className="ge-doc-frame">
                   <div className="ge-doc-bg" />
@@ -359,25 +294,37 @@ export default function GlobalEmotionsPage() {
         }
 
         /* ── Hero visual ── */
-        .ge-visual {
-          min-height: 100vh;
+
+        /* ── World field — the lead image ── */
+        /* First section under the readout strip — 96px matches the section
+           rhythm the rest of the site uses. */
+        .ge-worldfield { padding-top: 96px; padding-bottom: 96px; }
+        .ge-worldfield-fig { margin: 0; }
+        /* The frame takes the image's own proportions rather than cropping it
+           to a fixed ratio, so a 1919×987 export (or any other wide one) lands
+           whole. The ratio below only shapes the empty state. */
+        .ge-worldfield-frame {
           position: relative;
+          aspect-ratio: 1919 / 987;
+          width: 100%;
+          border: 0.5px solid var(--hairline-strong);
           overflow: hidden;
           background: var(--graphite);
           display: flex;
           align-items: center;
           justify-content: center;
         }
-        .ge-visual-bg { position: absolute; inset: 0; background: var(--graphite); }
-        .ge-visual-img {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
+        .ge-worldfield-frame:has(img) { aspect-ratio: auto; }
+        .ge-worldfield-img {
           display: block;
+          width: 100%;
+          height: auto;
         }
-        .ge-visual-fallback { position: relative; z-index: 1; }
+        .ge-worldfield-tk {
+          color: rgba(243, 242, 242, 0.4);
+          font-size: 9px;
+          letter-spacing: 0.12em;
+        }
 
         /* ── Editorial ── */
         .ge-editorial {
@@ -416,12 +363,6 @@ export default function GlobalEmotionsPage() {
         }
         .ge-block-body--wide { max-width: 640px; }
         .ge-block-body:last-child { margin-bottom: 0; }
-        .ge-mono-line {
-          margin: 28px 0 0;
-          font-size: 9px;
-          letter-spacing: 0.14em;
-          opacity: 0.45;
-        }
 
         /* Image frame */
         .ge-img-wrap { width: 100%; }
@@ -459,7 +400,6 @@ export default function GlobalEmotionsPage() {
         }
         @media (min-width: 768px) {
           .ge-doc-grid { grid-template-columns: repeat(2, 1fr); }
-          .ge-doc-cell--wide { grid-column: span 2; }
         }
         .ge-doc-cell { margin: 0; }
         .ge-doc-frame {
@@ -469,7 +409,6 @@ export default function GlobalEmotionsPage() {
           border: 0.5px solid var(--hairline-strong);
           overflow: hidden;
         }
-        .ge-doc-cell--wide .ge-doc-frame { aspect-ratio: 16/9; }
         .ge-doc-bg { position: absolute; inset: 0; background: var(--graphite); }
         .ge-doc-caption {
           margin: 12px 0 0;

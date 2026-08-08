@@ -265,7 +265,9 @@ export default function AffectiveSculpturalSketchesPage() {
         }
 
         /* ── Sketches — three across, stacked on mobile ── */
-        .ss-sketches { padding-top: 0; padding-bottom: 96px; }
+        /* First section under the readout strip — 96px matches the section
+           rhythm the rest of the site uses. */
+        .ss-sketches { padding-top: 96px; padding-bottom: 96px; }
         .ss-plate-grid {
           display: grid;
           grid-template-columns: 1fr;
