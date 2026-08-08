@@ -8,47 +8,18 @@ export const metadata = {
     "An ongoing study of light and space as sculptural material for affect.",
 };
 
-// Each sketch takes as many plates as are on disk — drop files into
-// public/projects/affective-sculptural-sketches/ and they appear, no code change.
-const PLATE_SLOTS = ["01", "02", "03", "04"];
-
+// One plate per sketch. Drop first-date / affective-infrastructure /
+// temporary-emotional-architectures into public/projects/affective-sculptural-sketches/
+// and they appear — no code change.
 const SKETCHES = [
+  { base: "first-date", title: "High Fidelity Sketch: First Date" },
   {
-    index: "01",
-    base: "first-date",
-    title: "High Fidelity Sketch: First Date",
-    body: [
-      `A single, specific state rendered at full resolution — the heightened
-       attention of a first meeting. Anticipation and exposure at once: the
-       sense of being looked at while looking.`,
-      `The sketch works the problem at the scale of one encounter. One room,
-       one pair of people, one duration.`,
-    ],
-  },
-  {
-    index: "02",
     base: "affective-infrastructure",
     title: "High Fidelity Sketch for Affective Infrastructure",
-    body: [
-      `The same method turned on a larger question: what would it mean to build
-       affect into the fabric of a place rather than stage it as an event?`,
-      `Not a room that holds a feeling for an hour, but light and structure
-       specified the way plumbing is specified — as something a building simply
-       has.`,
-    ],
   },
   {
-    index: "03",
     base: "temporary-emotional-architectures",
     title: "Temporary Emotional Architectures",
-    body: [
-      `Structures built to hold a state and then be struck. Where the
-       infrastructure sketch asks what it would take to make affect permanent,
-       this one takes the opposite position — that some states are only honest
-       if the thing holding them is temporary.`,
-      `Duration becomes a material alongside light and volume. How long a
-       construction stands is part of what it says.`,
-    ],
   },
 ];
 
@@ -64,10 +35,7 @@ export default function AffectiveSculpturalSketchesPage() {
 
   const sketches = SKETCHES.map((sketch) => ({
     ...sketch,
-    plates: PLATE_SLOTS.map((n) => ({
-      key: `${sketch.base}-${n}`,
-      src: asset(`${sketch.base}-${n}`),
-    })).filter(({ src }) => src),
+    src: asset(sketch.base),
   }));
 
   return (
@@ -101,7 +69,38 @@ export default function AffectiveSculpturalSketchesPage() {
         </span>
       </div>
 
-      {/* ── Section 3: Editorial ── */}
+      {/* ── Section 3: The sketches — imagery first ── */}
+      <section className="container-page ss-sketches">
+        <div className="ss-plate-grid">
+          {sketches.map((sketch, i) => (
+            <figure key={sketch.base} className="ss-plate">
+              <div
+                className={`ss-plate-frame${sketch.src ? "" : " ss-plate-frame--empty"}`}
+              >
+                {sketch.src ? (
+                  <FallbackImg
+                    src={sketch.src}
+                    alt={sketch.title}
+                    className="ss-plate-img"
+                  />
+                ) : (
+                  <span className="t-mono ss-plate-tk">
+                    TK: {sketch.title.toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <figcaption className="ss-plate-caption">
+                <span className="t-mono ss-plate-idx">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <span className="ss-plate-title">{sketch.title}</span>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Section 4: Editorial ── */}
       <section className="container-page ss-editorial">
         {/* Block A — PREMISE */}
         <div className="ss-block">
@@ -143,56 +142,6 @@ export default function AffectiveSculpturalSketchesPage() {
             out to be private to the person who built them.
           </p>
         </div>
-      </section>
-
-      {/* ── Section 4: The sketches ── */}
-      <section className="container-page ss-sketches">
-        <p className="t-mono ss-section-label">SKETCHES</p>
-        {sketches.map((sketch) => (
-          <article key={sketch.base} className="ss-sketch">
-            <div className="ss-sketch-head">
-              <p className="t-mono ss-sketch-idx">{sketch.index}</p>
-              <div className="ss-sketch-text">
-                <h3 className="t-h2 ss-sketch-title">{sketch.title}</h3>
-                {sketch.body.map((para, i) => (
-                  <p key={i} className="t-body ss-block-body">
-                    {para}
-                  </p>
-                ))}
-              </div>
-            </div>
-
-            <div className="ss-plate-grid">
-              {sketch.plates.length > 0 ? (
-                sketch.plates.map(({ key, src }, i) => (
-                  <figure key={key} className="ss-plate">
-                    <div className="ss-plate-frame">
-                      <FallbackImg
-                        src={src}
-                        alt={`${sketch.title}, plate ${i + 1}`}
-                        className="ss-plate-img"
-                      />
-                    </div>
-                    <figcaption className="t-mono ss-plate-caption">
-                      PLATE / {String(i + 1).padStart(2, "0")}
-                    </figcaption>
-                  </figure>
-                ))
-              ) : (
-                <figure className="ss-plate">
-                  <div className="ss-plate-frame ss-plate-frame--empty">
-                    <span className="t-mono ss-plate-tk">
-                      TK: {sketch.title.toUpperCase()}
-                    </span>
-                  </div>
-                  <figcaption className="t-mono ss-plate-caption">
-                    PLATE / 01
-                  </figcaption>
-                </figure>
-              )}
-            </div>
-          </article>
-        ))}
       </section>
 
       {/* ── Section 5: Related projects ── */}
@@ -315,41 +264,15 @@ export default function AffectiveSculpturalSketchesPage() {
           letter-spacing: 0.12em;
         }
 
-        /* ── Sketches ── */
+        /* ── Sketches — three across, stacked on mobile ── */
         .ss-sketches { padding-top: 0; padding-bottom: 96px; }
-        .ss-sketch {
-          padding-top: 48px;
-          border-top: 0.5px solid var(--hairline-strong);
-        }
-        .ss-sketch + .ss-sketch { margin-top: 96px; }
-        .ss-sketch-head {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 16px;
-          margin-bottom: 40px;
-        }
-        @media (min-width: 900px) {
-          .ss-sketch-head { grid-template-columns: 80px 1fr; gap: 32px; }
-        }
-        .ss-sketch-idx {
-          opacity: 0.45;
-          margin: 0;
-          font-size: 10px;
-          letter-spacing: 0.14em;
-        }
-        .ss-sketch-title { margin: 0 0 24px; max-width: 24ch; }
-
-        /* ── Plates — 4:5, matching the study-image standard ── */
         .ss-plate-grid {
           display: grid;
           grid-template-columns: 1fr;
-          gap: 24px;
-        }
-        @media (min-width: 600px) {
-          .ss-plate-grid { grid-template-columns: repeat(2, 1fr); }
+          gap: 32px;
         }
         @media (min-width: 900px) {
-          .ss-plate-grid { grid-template-columns: repeat(4, 1fr); }
+          .ss-plate-grid { grid-template-columns: repeat(3, 1fr); gap: 28px; }
         }
         .ss-plate { margin: 0; }
         .ss-plate-frame {
@@ -381,10 +304,23 @@ export default function AffectiveSculpturalSketchesPage() {
           letter-spacing: 0.12em;
         }
         .ss-plate-caption {
-          margin: 12px 0 0;
+          display: flex;
+          gap: 12px;
+          margin: 16px 0 0;
+          align-items: baseline;
+        }
+        .ss-plate-idx {
           font-size: 9px;
           opacity: 0.45;
           letter-spacing: 0.1em;
+          flex-shrink: 0;
+        }
+        .ss-plate-title {
+          font-family: var(--font-inter), sans-serif;
+          font-weight: 500;
+          font-size: 13px;
+          line-height: 1.4;
+          letter-spacing: 0.02em;
         }
 
         /* ── Related ── */

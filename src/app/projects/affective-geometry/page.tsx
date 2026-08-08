@@ -21,7 +21,6 @@ const PLATES: { base: string; caption: string }[] = [
 
 export default function AffectiveGeometryPage() {
   const asset = (base: string) => findImage("affective-geometry", base);
-  const heroSrc = asset("hero");
   const premiseSrc = asset("premise");
   const contactSrc = asset("contact-sheet");
 
@@ -55,20 +54,8 @@ export default function AffectiveGeometryPage() {
         </span>
       </div>
 
-      {/* ── Section 3: Hero visual ── */}
-      <section className="ag-visual" aria-label="Affective Geometry hero visual">
-        <div className="ag-visual-bg" aria-hidden />
-        {heroSrc && <FallbackImg src={heroSrc} alt="" className="ag-visual-img" />}
-        {!heroSrc && (
-          <div className="ag-visual-fallback" aria-hidden>
-            <span className="t-mono" style={{ opacity: 0.3 }}>
-              TK: HERO VISUAL
-            </span>
-          </div>
-        )}
-      </section>
 
-      {/* ── Section 4: Premise ── */}
+      {/* ── Section 3: Premise ── */}
       <section className="container-page ag-editorial">
         <div className="ag-block">
           <div className="ag-block-text">
@@ -103,7 +90,7 @@ export default function AffectiveGeometryPage() {
         </div>
       </section>
 
-      {/* ── Section 5: Contact sheet + plates ── */}
+      {/* ── Section 4: Contact sheet + plates ── */}
       <section className="container-page ag-plates">
         <p className="t-mono ag-plates-label">FIELD · CONTACT SHEET</p>
         <figure className="ag-contact">
@@ -142,7 +129,7 @@ export default function AffectiveGeometryPage() {
         </div>
       </section>
 
-      {/* ── Section 6: Links ── */}
+      {/* ── Section 5: Links ── */}
       <section className="container-page ag-links">
         {[
           { label: "READ THE PAPER", href: "/research/emotion-as-system", note: "/research/emotion-as-system" },
@@ -161,7 +148,7 @@ export default function AffectiveGeometryPage() {
         ))}
       </section>
 
-      {/* ── Section 7: Footer line ── */}
+      {/* ── Section 6: Footer line ── */}
       <section className="container-page ag-footer">
         <p className="t-mono ag-mono-line">
           169-COLOUR FIELD GAMUT · EMOTION IS A SHAPE, A FIELD
@@ -204,26 +191,6 @@ export default function AffectiveGeometryPage() {
         }
 
         /* ── Hero visual ── */
-        .ag-visual {
-          min-height: 100vh;
-          position: relative;
-          overflow: hidden;
-          background: var(--graphite);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .ag-visual-bg { position: absolute; inset: 0; background: var(--graphite); }
-        .ag-visual-img {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-        }
-        .ag-visual-fallback { position: relative; z-index: 1; }
-
         /* ── Premise ── */
         .ag-editorial { padding-top: 96px; padding-bottom: 96px; }
         .ag-block {
