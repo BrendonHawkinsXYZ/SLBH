@@ -37,6 +37,19 @@ const SKETCHES = [
        has.`,
     ],
   },
+  {
+    index: "03",
+    base: "temporary-emotional-architectures",
+    title: "Temporary Emotional Architectures",
+    body: [
+      `Structures built to hold a state and then be struck. Where the
+       infrastructure sketch asks what it would take to make affect permanent,
+       this one takes the opposite position — that some states are only honest
+       if the thing holding them is temporary.`,
+      `Duration becomes a material alongside light and volume. How long a
+       construction stands is part of what it says.`,
+    ],
+  },
 ];
 
 export default function AffectiveSculpturalSketchesPage() {
@@ -84,7 +97,7 @@ export default function AffectiveSculpturalSketchesPage() {
           AFFECT · SYSTEMS · DATA · TIME
         </span>
         <span className="t-mono" style={{ opacity: 0.55, textAlign: "right" }}>
-          STATUS: ACTIVE · 02 SKETCHES
+          STATUS: ACTIVE · 03 SKETCHES
         </span>
       </div>
 
