@@ -35,6 +35,7 @@ export function BuildingInPublicNotice() {
     window.addEventListener("keydown", onKey);
 
     const prevOverflow = document.body.style.overflow;
+    const trigger = triggerRef.current;
     document.body.style.overflow = "hidden";
 
     closeRef.current?.focus();
@@ -48,7 +49,7 @@ export function BuildingInPublicNotice() {
     return () => {
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = prevOverflow;
-      triggerRef.current?.focus();
+      trigger?.focus();
     };
   }, [open]);
 

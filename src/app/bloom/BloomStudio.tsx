@@ -125,7 +125,6 @@ export function BloomStudio() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setSeed((s) => ({ ...s, palette: makePalette() }));
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setBloom((s) => ({ ...s, palette: makePalette() }));
   }, []);
 

@@ -3,7 +3,21 @@ import path from "path";
 import matter from "gray-matter";
 import { findAsset } from "./assets";
 
-export type ProjectStatus = "active" | "paused" | "complete";
+export type ProjectStatus =
+  | "flagship"
+  | "active"
+  | "seasonal"
+  | "complete"
+  | "archived"
+  | "in-development";
+
+export type ProjectType =
+  | "Product"
+  | "Instrument"
+  | "Installation"
+  | "Study"
+  | "Research"
+  | "Archive";
 
 export type ProjectLink = {
   label: string;
@@ -17,6 +31,7 @@ export type Project = {
   index: string;
   discipline: string[];
   status: ProjectStatus;
+  type: ProjectType;
   summary: string;
   related: string[];
   links: ProjectLink[];
@@ -55,6 +70,7 @@ export function getAllProjects(): Project[] {
         d.toUpperCase()
       ),
       status: (data.status ?? "active") as ProjectStatus,
+      type: (data.type ?? "Research") as ProjectType,
       summary: data.summary ?? "",
       related: (data.related ?? []) as string[],
       links: (data.links ?? []) as ProjectLink[],

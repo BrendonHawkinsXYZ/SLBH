@@ -22,7 +22,6 @@ export function EmotionalRenderingRelativity() {
   const VB_W = 400;
   const VB_H = 500;
   const cols = 4;
-  const rows = 3;
   const gridX = 40;
   const gridY = 90;
   const gridW = VB_W - gridX * 2;

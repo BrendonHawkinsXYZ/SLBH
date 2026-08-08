@@ -1,32 +1,31 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FieldMark } from "./FieldMark";
-
-const STICKY_OFFSET = 72;
 
 const LINKS = [
   { href: "/research", label: "Research" },
   { href: "/projects", label: "Projects" },
-  { href: "/product/chroma", label: "Chroma" },
   { href: "/studio", label: "Studio" },
 ];
 
 export function Nav() {
-  const [sticky, setSticky] = useState(false);
+  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setSticky(window.scrollY > STICKY_OFFSET);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+    document.querySelector<HTMLElement>("[data-site-scroll]")?.scrollTo(0, 0);
+  }, [pathname]);
 
   useEffect(() => {
-    document.body.style.overflow = menuOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    if (!menuOpen) return;
+    const scrollRoot = document.querySelector<HTMLElement>("[data-site-scroll]");
+    const target = scrollRoot ?? document.body;
+    const previousOverflow = target.style.overflowY;
+    target.style.overflowY = "hidden";
+    return () => { target.style.overflowY = previousOverflow; };
   }, [menuOpen]);
 
   const close = () => setMenuOpen(false);
@@ -35,21 +34,17 @@ export function Nav() {
     <>
       <nav
         style={{
-          position: "sticky",
+          position: "fixed",
           top: 0,
+          right: 0,
+          left: 0,
           zIndex: 40,
           height: 64,
           display: "flex",
           alignItems: "center",
           padding: "0 var(--pad-x-mobile)",
-          background: sticky ? "rgba(243, 242, 242, 0.95)" : "transparent",
-          backdropFilter: sticky ? "saturate(1.2) blur(6px)" : undefined,
-          WebkitBackdropFilter: sticky ? "saturate(1.2) blur(6px)" : undefined,
-          borderBottom: sticky
-            ? "0.5px solid var(--hairline-strong)"
-            : "0.5px solid transparent",
-          transition:
-            "background var(--d-fast) var(--ease-out), border-color var(--d-fast) var(--ease-out)",
+          background: "var(--paper)",
+          borderBottom: "0.5px solid var(--hairline-strong)",
         }}
         className="nav-root"
       >

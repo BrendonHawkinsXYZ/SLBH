@@ -16,7 +16,7 @@ const INSTRUMENTS: Instrument[] = [
     title: "Chroma",
     description:
       "A computational pipeline for mapping collective affect across public data sources. Field states, deltas, and divergences rendered as luminous coordinates.",
-    href: "/product/chroma",
+    href: "/#chroma",
     vignette: "chroma",
   },
   {

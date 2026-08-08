@@ -1,15 +1,32 @@
-import { getAllProjects } from "@/lib/projects";
+import { getAllProjects, type ProjectStatus } from "@/lib/projects";
 import { ProjectIndex } from "@/components/projects/ProjectIndex";
 import { BuildingInPublicNotice } from "@/components/projects/BuildingInPublicNotice";
 
 export default function ProjectsPage() {
   const projects = getAllProjects();
   const total = projects.length;
-  const active = projects.filter((p) => p.status === "active").length;
-  const paused = projects.filter((p) => p.status === "paused").length;
-  const complete = projects.filter((p) => p.status === "complete").length;
-
   const pad = (n: number) => String(n).padStart(2, "0");
+  const labels: Record<ProjectStatus, string> = {
+    flagship: "FLAGSHIP",
+    active: "ACTIVE",
+    seasonal: "SEASONAL",
+    complete: "COMPLETE",
+    archived: "ARCHIVED",
+    "in-development": "IN DEVELOPMENT",
+  };
+  const order: ProjectStatus[] = [
+    "flagship",
+    "active",
+    "seasonal",
+    "in-development",
+    "complete",
+    "archived",
+  ];
+  const statusReadout = order
+    .map((status) => ({ status, count: projects.filter((p) => p.status === status).length }))
+    .filter(({ count }) => count > 0)
+    .map(({ status, count }) => `${pad(count)} ${labels[status]}`)
+    .join(" · ");
 
   return (
     <>
@@ -30,7 +47,7 @@ export default function ProjectsPage() {
           className="t-mono"
           style={{ opacity: 0.55, textAlign: "right" }}
         >
-          {pad(total)} TOTAL · {pad(active)} ACTIVE · {pad(paused)} PAUSED · {pad(complete)} COMPLETE
+          {pad(total)} TOTAL · {statusReadout}
         </span>
       </div>
 

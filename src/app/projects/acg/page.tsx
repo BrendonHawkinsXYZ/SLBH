@@ -32,7 +32,7 @@ export default function ACGPage() {
       {/* ── Section 1: Header ── */}
       <section className="acg-hero">
         <div className="container-page acg-hero-inner">
-          <p className="t-mono acg-kicker">PROJECT 02 / 2026 / ACTIVE / NYC</p>
+          <p className="t-mono acg-kicker">PROJECT 02 / 2026 / FLAGSHIP / NYC</p>
           <h1 className="t-display acg-title">ACG by SLBH</h1>
           <p className="acg-summary">
             ACG by SLBH is an ongoing applied research series that turns
@@ -57,7 +57,7 @@ export default function ACGPage() {
           AFFECT · SYSTEMS · DATA · LIGHT · PRESENCE
         </span>
         <span className="t-mono" style={{ opacity: 0.55, textAlign: "right" }}>
-          STATUS: ACTIVE · 2026 · APPLIED RESEARCH
+          STATUS: FLAGSHIP · 2026 · APPLIED RESEARCH
         </span>
       </div>
 
@@ -355,7 +355,7 @@ export default function ACGPage() {
               label: "FORMAT",
               value: "LIGHT INSTALLATION / PUBLIC PROMPT / SENSORY ACTIVATION",
             },
-            { label: "STATUS", value: "ACTIVE SERIES" },
+            { label: "STATUS", value: "FLAGSHIP SERIES" },
             { label: "NEXT ACTIVATION", value: "TBD" },
           ].map((row, i) => (
             <div

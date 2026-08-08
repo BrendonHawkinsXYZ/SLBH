@@ -3,16 +3,19 @@
 import Link from "next/link";
 import { useState, useRef, useCallback } from "react";
 import { motion, useMotionValue, useSpring } from "motion/react";
-import type { Project } from "@/lib/projects";
+import type { Project, ProjectStatus } from "@/lib/projects";
 
 const SPRING = { stiffness: 380, damping: 30, mass: 0.4 };
 const CARD_W = 320;
 const CARD_H = 400;
 
-const STATUS_LABEL: Record<string, string> = {
+const STATUS_LABEL: Record<ProjectStatus, string> = {
+  flagship: "FLAGSHIP",
   active: "ACTIVE",
-  paused: "PAUSED",
+  seasonal: "SEASONAL",
   complete: "COMPLETE",
+  archived: "ARCHIVED",
+  "in-development": "IN DEVELOPMENT",
 };
 
 export function ProjectIndex({ projects }: { projects: Project[] }) {
@@ -109,7 +112,7 @@ export function ProjectIndex({ projects }: { projects: Project[] }) {
                 {p.year}
               </span>
               <span className="proj-col-disc t-label" style={{ opacity: 0.72 }}>
-                {p.discipline.join(", ")}
+                {p.type.toUpperCase()} · {p.discipline.join(", ")}
               </span>
               <span className="proj-col-status t-label">
                 {STATUS_LABEL[p.status] ?? p.status}

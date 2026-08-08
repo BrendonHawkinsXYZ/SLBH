@@ -103,6 +103,24 @@ body {
   font-variant-emoji: text;
 }
 
+/* The navigation and document are separate planes. Nothing in the page scroll
+   can enter the nav's fixed 64/72px band. */
+.site-scroll-plane {
+  position: fixed;
+  z-index: 0;
+  inset: 64px 0 0;
+  display: flex;
+  flex-direction: column;
+  overflow-x: clip;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  background: var(--paper);
+}
+
+@media (min-width: 768px) {
+  .site-scroll-plane { inset-block-start: 72px; }
+}
+
 ::selection {
   background: rgba(10, 10, 10, 0.08);
 }
