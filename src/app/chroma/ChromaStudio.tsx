@@ -357,6 +357,9 @@ export function ChromaStudio() {
 
   // Fresh palettes per visit — after mount, so SSR and hydration agree.
   useEffect(() => {
+    // This post-hydration reroll is deliberate: the server-safe initial palette
+    // must be replaced only after the client owns the canvas state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSlots((prev) => prev.map((s) => ({ ...s, palette: makePalette() })));
   }, []);
 

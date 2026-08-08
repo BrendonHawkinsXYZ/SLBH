@@ -28,16 +28,8 @@ const DISCIPLINES = [
 
 const FOCUS_AREAS = [
   {
-    label: "AFFECTIVE COMPUTATIONAL GEOMETRY",
-    body: "Affective Computational Geometry is the lab’s core research thesis: emotion has geometry, geometry can be computed, and computation can be perceived. The work develops models for understanding affect as a field with direction, intensity, structure, and transformation over time.",
-  },
-  {
-    label: "COLLECTIVE FIELD DYNAMICS",
-    body: "Collective Field Dynamics studies how emotion moves across populations, platforms, and environments. It treats collective affect as a measurable system shaped by signals, feedback loops, memory, velocity, and drift.",
-  },
-  {
-    label: "EMOTION AS FIELD",
-    body: "Emotion as Field treats emotion as a spatial and relational condition rather than a fixed internal state. The work studies how affect gathers, moves, intensifies, dissipates, and reorganizes across bodies, environments, platforms, and time.",
+    label: "CHROMA — LAUNCHING SEPTEMBER 2026",
+    body: "Chroma is the lab’s first personal affect instrument: a private place to give feeling a form, preserve it over time, and see the patterns that individual moments can hide. It translates the lab’s research into an everyday product.",
   },
 ];
 
@@ -383,7 +375,25 @@ export default function StudioPage() {
           </div>
         </div>
 
-        {/* Disciplines */}
+        {/* Current focus */}
+        <div className="container-page st-focus">
+          <h3 className="t-h3 st-focus-header">CURRENT FOCUS</h3>
+          <div className="st-focus-list">
+            {FOCUS_AREAS.map((f) => (
+              <div key={f.label} className="st-focus-item">
+                <p className="t-label st-focus-label">{f.label}</p>
+                <p className="t-body st-focus-body">{f.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Method */}
+        <div className="container-page st-method-heading">
+          <h3 className="t-h3">METHOD</h3>
+        </div>
+
+        {/* Practice disciplines */}
         <div className="container-page st-disciplines-wrap">
           <ul className="st-disciplines">
             {DISCIPLINES.map((d) => (
@@ -400,17 +410,17 @@ export default function StudioPage() {
           <CompassDiagram />
         </div>
 
-        {/* Current focus */}
-        <div className="container-page st-focus">
-          <h3 className="t-h3 st-focus-header">CURRENT FOCUS</h3>
-          <div className="st-focus-list">
-            {FOCUS_AREAS.map((f) => (
-              <div key={f.label} className="st-focus-item">
-                <p className="t-label st-focus-label">{f.label}</p>
-                <p className="t-body st-focus-body">{f.body}</p>
-              </div>
+        {/* Method tenets */}
+        <div className="container-page st-tenets">
+          <ul className="st-tenets-grid">
+            {TENETS.map((t) => (
+              <li key={t.n} className="st-tenet">
+                <span className="st-tenet-number">{t.n}</span>
+                <p className="st-tenet-title">{t.title}</p>
+                <p className="st-tenet-body">{t.body}</p>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       </section>
 
@@ -424,6 +434,7 @@ export default function StudioPage() {
             BRENDON HAWKINS / FOUNDER
           </span>
           <span className="st-section-avatar" aria-hidden>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/studio/brendon-avatar.png"
               alt=""
@@ -437,6 +448,7 @@ export default function StudioPage() {
           <div className="st-intro-portrait-wrap">
             <div className="st-intro-portrait-frame">
               <div className="st-intro-portrait-bg" aria-hidden />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/studio/brendon-portrait.png"
                 alt="Brendon Hawkins"
@@ -467,19 +479,6 @@ export default function StudioPage() {
           </div>
         </div>
 
-        {/* Practice tenets */}
-        <div className="container-page st-tenets">
-          <ul className="st-tenets-grid">
-            {TENETS.map((t) => (
-              <li key={t.n} className="st-tenet">
-                <span className="st-tenet-number">{t.n}</span>
-                <p className="st-tenet-title">{t.title}</p>
-                <p className="st-tenet-body">{t.body}</p>
-              </li>
-            ))}
-          </ul>
-        </div>
-
         {/* Affiliations */}
         <div className="container-page st-affil">
           <h3 className="t-h3 st-affil-header">CURRENT AFFILIATIONS</h3>
@@ -494,27 +493,32 @@ export default function StudioPage() {
         </div>
 
         {/* Curriculum Vitae */}
-        <div className="container-page st-cv">
-          <h3 className="t-h3 st-cv-header">CURRICULUM VITAE</h3>
-          {CV.map((category) => (
-            <section key={category.label} className="st-cv-category">
-              <h4 className="t-label st-cv-category-label">{category.label}</h4>
-              <ul className="st-cv-list">
-                {category.entries.map((entry, i) => (
-                  <li key={`${category.label}-${i}`} className="st-cv-row">
-                    <span className="t-mono st-cv-year">{entry.year ?? ""}</span>
-                    <div className="st-cv-content">
-                      <span className="st-cv-title">{entry.title}</span>
-                      {entry.detail && (
-                        <span className="st-cv-detail">{entry.detail}</span>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))}
-        </div>
+        <details className="container-page st-cv">
+          <summary className="t-h3 st-cv-header">
+            <span>CURRICULUM VITAE</span>
+            <span className="t-mono st-cv-toggle">OPEN ARCHIVE</span>
+          </summary>
+          <div className="st-cv-archive">
+            {CV.map((category) => (
+              <section key={category.label} className="st-cv-category">
+                <h4 className="t-label st-cv-category-label">{category.label}</h4>
+                <ul className="st-cv-list">
+                  {category.entries.map((entry, i) => (
+                    <li key={`${category.label}-${i}`} className="st-cv-row">
+                      <span className="t-mono st-cv-year">{entry.year ?? ""}</span>
+                      <div className="st-cv-content">
+                        <span className="st-cv-title">{entry.title}</span>
+                        {entry.detail && (
+                          <span className="st-cv-detail">{entry.detail}</span>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </div>
+        </details>
 
         {/* Contact */}
         <div className="container-page st-contact">
@@ -669,6 +673,11 @@ export default function StudioPage() {
           padding-top: 0;
           padding-bottom: 96px;
         }
+        .st-method-heading {
+          padding-top: 0;
+          padding-bottom: 32px;
+        }
+        .st-method-heading h3 { margin: 0; opacity: 0.72; }
         .st-disciplines {
           list-style: none;
           padding: 0;
@@ -900,9 +909,22 @@ export default function StudioPage() {
           padding-bottom: 96px;
         }
         .st-cv-header {
-          margin: 0 0 48px;
+          margin: 0;
+          padding: 24px 0;
           opacity: 0.72;
+          border-top: 0.5px solid var(--hairline);
+          border-bottom: 0.5px solid var(--hairline);
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 24px;
+          list-style: none;
         }
+        .st-cv-header::-webkit-details-marker { display: none; }
+        .st-cv-toggle { font-size: 10px; }
+        .st-cv[open] .st-cv-toggle::after { content: " / CLOSE"; }
+        .st-cv-archive { padding-top: 48px; }
         .st-cv-category {
           margin-bottom: 56px;
         }

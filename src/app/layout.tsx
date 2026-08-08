@@ -43,12 +43,14 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${orbitron.variable} ${inter.variable} ${plexMono.variable}`}
-        style={{ minHeight: "100dvh", display: "flex", flexDirection: "column" }}
+        style={{ height: "100dvh", overflow: "hidden" }}
       >
         <StatusBar />
         <Nav />
-        <main style={{ flex: 1, display: "flex", flexDirection: "column" }}>{children}</main>
-        <Footer />
+        <div className="site-scroll-plane" data-site-scroll>
+          <main style={{ flex: 1, display: "flex", flexDirection: "column" }}>{children}</main>
+          <Footer />
+        </div>
       </body>
     </html>
   );

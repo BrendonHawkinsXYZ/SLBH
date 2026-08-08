@@ -150,7 +150,7 @@ export default function AffectiveGeometryPage() {
       <section className="container-page ag-links">
         {[
           { label: "READ THE PAPER", href: "/research/emotion-as-system", note: "/research/emotion-as-system" },
-          { label: "CHROMA", href: "/product/chroma", note: "/product/chroma" },
+          { label: "CHROMA", href: "/#chroma", note: "LAUNCHING SEPTEMBER 2026" },
         ].map(({ label, href, note }, i) => (
           <div
             key={label}
