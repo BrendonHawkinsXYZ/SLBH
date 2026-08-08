@@ -92,6 +92,7 @@ const CV: CVCategory[] = [
     entries: [
       { year: "2018", title: "Guest of Honor", detail: "Carnegie Museum of Art" },
       { year: "2018", title: "#ShowUpMF", detail: "Mattress Factory" },
+      { year: "2018", title: "Polaroids", detail: "Pittsburgh Photo Fair" },
     ],
   },
   {
