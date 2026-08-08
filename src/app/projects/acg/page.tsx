@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getAllProjects, findImage } from "@/lib/projects";
 import { FallbackImg } from "@/components/projects/acg/FallbackImg";
 import { FlowDiagram } from "@/components/projects/acg/FlowDiagram";
+import { Plate } from "@/components/projects/acg/Plate";
 
 export const metadata = {
   title: "ACG by SLBH — SLBH",
@@ -17,14 +18,16 @@ export default function ACGPage() {
     .filter(Boolean) as (typeof allProjects)[0][];
 
   const asset = (base: string) => findImage("acg", base);
-  const heroSrc = asset("hero");
   const conceptSrc = asset("concept");
   const storefrontSrc = asset("installation-storefront");
   const array01Src = asset("installation-array-01");
   const array02Src = asset("installation-array-02");
+  const portalSrc = asset("portal");
+  const outputSrc = asset("user-output");
   const promptSrc = asset("activation-prompt");
   const roomSrc = asset("activation-room");
   const alignmentSrc = asset("activation-alignment");
+  const footerSrc = asset("footer");
 
   return (
     <>
@@ -57,20 +60,10 @@ export default function ACGPage() {
         </span>
       </div>
 
-      {/* ── Section 3: Hero visual ── */}
-      <section className="acg-visual">
-        <div className="acg-visual-bg" aria-hidden />
-        {heroSrc && (
-          <FallbackImg src={heroSrc} alt="" className="acg-visual-img" />
-        )}
-        <div className="acg-visual-fallback" aria-hidden>
-          <span className="t-mono" style={{ opacity: 0.3 }}>
-            TK: HERO VISUAL
-          </span>
-        </div>
-      </section>
-
-      {/* ── Section 4: Editorial ── */}
+      {/* ── Section 3: Editorial ──
+          Text and imagery alternate down the page: every prose block is
+          followed by a plate or a flow strip, so no run of copy goes more than
+          one block without something to look at. */}
       <section className="container-page acg-editorial">
         {/* Block A — CONCEPT */}
         <div className="acg-block acg-block--text-left">
@@ -95,23 +88,21 @@ export default function ACGPage() {
             </p>
           </div>
           <div className="acg-block-visual">
-            <div className="acg-img-wrap">
-              <div className="acg-img-frame">
-                <div className="acg-img-bg" />
-                {conceptSrc && (
-                  <FallbackImg
-                    src={conceptSrc}
-                    alt="ACG storefront concept render"
-                    className="acg-img-fill"
-                  />
-                )}
-              </div>
-              <p className="t-mono acg-img-caption">
-                STOREFRONT CONCEPT — RENDER
-              </p>
-            </div>
+            <Plate
+              src={conceptSrc}
+              alt="ACG storefront concept render"
+              caption="STOREFRONT CONCEPT — RENDER"
+            />
           </div>
         </div>
+
+        {/* Plate — the built storefront, wide, on its own */}
+        <Plate
+          src={storefrontSrc}
+          alt="ACG storefront installation, exterior at night"
+          caption="INSTALLATION / STOREFRONT — EXTERIOR, NIGHT"
+          ratio="wide"
+        />
 
         {/* Block B — METHOD */}
         <div className="acg-block acg-block--diagram-left">
@@ -173,30 +164,36 @@ export default function ACGPage() {
               physical public system.
             </p>
           </div>
-          <div className="acg-block-visual acg-flow-wrap">
-            <FlowDiagram
-              ariaLabel="Field One: American Emotions → collective field state → color translation → light array 01"
-              stages={[
-                { primary: "AMERICAN", secondary: "EMOTIONS" },
-                { primary: "COLLECTIVE", secondary: "FIELD STATE" },
-                { primary: "COLOR", secondary: "TRANSLATION" },
-                { primary: "LIGHT", secondary: "ARRAY 01" },
-              ]}
+          <div className="acg-block-visual">
+            <Plate
+              src={array01Src}
+              alt="Light Array 01, the collective field rendered as light"
+              caption="LIGHT ARRAY 01 / COLLECTIVE FIELD"
             />
           </div>
         </div>
 
+        {/* Flow — field one, full width between the two field blocks */}
+        <div className="acg-flow-strip">
+          <FlowDiagram
+            ariaLabel="Field One: American Emotions → collective field state → color translation → light array 01"
+            stages={[
+              { primary: "AMERICAN", secondary: "EMOTIONS" },
+              { primary: "COLLECTIVE", secondary: "FIELD STATE" },
+              { primary: "COLOR", secondary: "TRANSLATION" },
+              { primary: "LIGHT", secondary: "ARRAY 01" },
+            ]}
+          />
+        </div>
+
         {/* Block D — FIELD TWO */}
         <div className="acg-block acg-block--diagram-left">
-          <div className="acg-block-visual acg-flow-wrap">
-            <FlowDiagram
-              ariaLabel="Field Two: visitor prompt → emotion scoring → local field state → light array 02"
-              stages={[
-                { primary: "VISITOR", secondary: "PROMPT" },
-                { primary: "EMOTION", secondary: "SCORING" },
-                { primary: "LOCAL", secondary: "FIELD STATE" },
-                { primary: "LIGHT", secondary: "ARRAY 02" },
-              ]}
+          <div className="acg-block-visual">
+            <Plate
+              src={portalSrc}
+              alt="The ACG web portal, where visitors answer the affective prompt"
+              caption="WEBSITE PORTAL / VISITOR RESPONSE"
+              ratio="square"
             />
           </div>
           <div className="acg-block-text">
@@ -219,127 +216,76 @@ export default function ACGPage() {
           </div>
         </div>
 
+        {/* Flow — field two, full width */}
+        <div className="acg-flow-strip">
+          <FlowDiagram
+            ariaLabel="Field Two: visitor prompt → emotion scoring → local field state → light array 02"
+            stages={[
+              { primary: "VISITOR", secondary: "PROMPT" },
+              { primary: "EMOTION", secondary: "SCORING" },
+              { primary: "LOCAL", secondary: "FIELD STATE" },
+              { primary: "LIGHT", secondary: "ARRAY 02" },
+            ]}
+          />
+        </div>
+
+        {/* Plate pair — what a visitor answers, and what comes back */}
+        <div className="acg-plate-row acg-plate-row--io">
+          <Plate
+            src={promptSrc}
+            alt="The affective prompt as shown in the room"
+            caption="ACTIVATION / PROMPT — IN ROOM"
+          />
+          <Plate
+            src={outputSrc}
+            alt="A visitor's returned output, their response rendered as a field"
+            caption="USER OUTPUT / PERSONAL FIELD"
+            ratio="tall"
+          />
+        </div>
+
         {/* Block E — READING */}
-        <div className="acg-block acg-block--full">
-          <p className="t-mono acg-block-kicker">05 / READING</p>
-          <h2 className="t-h2 acg-block-headline">
-            Two fields in the same space.
-          </h2>
-          <p className="t-body acg-block-body acg-block-body--wide">
-            The storefront version of ACG places two affective fields in the
-            same room: the collective field of American Emotions and the local
-            field of visitor response.
-          </p>
-          <p className="t-body acg-block-body acg-block-body--wide">
-            They are almost never the same color. When they are, something has
-            happened: a moment of alignment between the emotional atmosphere
-            outside the room and the emotional presence inside it.
-          </p>
-          <p className="t-body acg-block-body acg-block-body--wide">
-            The installation is a reading instrument. It does not ask visitors
-            only to look at light. It asks them to encounter affect as something
-            with shape, scale, color, and duration.
-          </p>
+        <div className="acg-block acg-block--text-left">
+          <div className="acg-block-text">
+            <p className="t-mono acg-block-kicker">05 / READING</p>
+            <h2 className="t-h2 acg-block-headline">
+              Two fields in the same space.
+            </h2>
+            <p className="t-body acg-block-body">
+              The storefront version of ACG places two affective fields in the
+              same room: the collective field of American Emotions and the local
+              field of visitor response.
+            </p>
+            <p className="t-body acg-block-body">
+              They are almost never the same color. When they are, something has
+              happened: a moment of alignment between the emotional atmosphere
+              outside the room and the emotional presence inside it.
+            </p>
+            <p className="t-body acg-block-body">
+              The installation is a reading instrument. It does not ask visitors
+              only to look at light. It asks them to encounter affect as
+              something with shape, scale, color, and duration.
+            </p>
+          </div>
+          <div className="acg-block-visual">
+            <Plate
+              src={array02Src}
+              alt="Light Array 02, the local field rendered as light"
+              caption="LIGHT ARRAY 02 / LOCAL FIELD"
+            />
+          </div>
         </div>
+
+        {/* Plate — the room, wide, closing the editorial run */}
+        <Plate
+          src={roomSrc}
+          alt="Visitors inside the activation"
+          caption="ACTIVATION / ROOM"
+          ratio="wide"
+        />
       </section>
 
-      {/* ── Section 4b: Documentation strip ── */}
-      <section className="container-page acg-doc-strip">
-        <div className="acg-doc-grid">
-          <figure className="acg-doc-cell acg-doc-cell--wide">
-            <div className="acg-doc-frame">
-              <div className="acg-doc-bg" />
-              {storefrontSrc && (
-                <FallbackImg
-                  src={storefrontSrc}
-                  alt="ACG storefront installation, exterior at night"
-                  className="acg-img-fill"
-                />
-              )}
-            </div>
-            <figcaption className="t-mono acg-doc-caption">
-              INSTALLATION / STOREFRONT
-            </figcaption>
-          </figure>
-          <figure className="acg-doc-cell">
-            <div className="acg-doc-frame">
-              <div className="acg-doc-bg" />
-              {array01Src && (
-                <FallbackImg
-                  src={array01Src}
-                  alt="Light Array 01, collective field"
-                  className="acg-img-fill"
-                />
-              )}
-            </div>
-            <figcaption className="t-mono acg-doc-caption">
-              LIGHT ARRAY 01 / COLLECTIVE
-            </figcaption>
-          </figure>
-          <figure className="acg-doc-cell">
-            <div className="acg-doc-frame">
-              <div className="acg-doc-bg" />
-              {array02Src && (
-                <FallbackImg
-                  src={array02Src}
-                  alt="Light Array 02, local field"
-                  className="acg-img-fill"
-                />
-              )}
-            </div>
-            <figcaption className="t-mono acg-doc-caption">
-              LIGHT ARRAY 02 / LOCAL
-            </figcaption>
-          </figure>
-          <figure className="acg-doc-cell">
-            <div className="acg-doc-frame">
-              <div className="acg-doc-bg" />
-              {promptSrc && (
-                <FallbackImg
-                  src={promptSrc}
-                  alt="Visitor prompt interface"
-                  className="acg-img-fill"
-                />
-              )}
-            </div>
-            <figcaption className="t-mono acg-doc-caption">
-              ACTIVATION / PROMPT
-            </figcaption>
-          </figure>
-          <figure className="acg-doc-cell">
-            <div className="acg-doc-frame">
-              <div className="acg-doc-bg" />
-              {roomSrc && (
-                <FallbackImg
-                  src={roomSrc}
-                  alt="Visitors inside the activation"
-                  className="acg-img-fill"
-                />
-              )}
-            </div>
-            <figcaption className="t-mono acg-doc-caption">
-              ACTIVATION / ROOM
-            </figcaption>
-          </figure>
-          <figure className="acg-doc-cell acg-doc-cell--wide">
-            <div className="acg-doc-frame">
-              <div className="acg-doc-bg" />
-              {alignmentSrc && (
-                <FallbackImg
-                  src={alignmentSrc}
-                  alt="Moment of alignment between collective and local fields"
-                  className="acg-img-fill"
-                />
-              )}
-            </div>
-            <figcaption className="t-mono acg-doc-caption">
-              ALIGNMENT / TWO FIELDS, ONE COLOR
-            </figcaption>
-          </figure>
-        </div>
-      </section>
-
-      {/* ── Section 5: Activation / Visit ── */}
+      {/* ── Section 4: Activation / Visit ── */}
       <section className="container-page acg-visit">
         <p className="t-mono acg-visit-label">ACTIVATION</p>
         <div className="acg-visit-rows">
@@ -364,6 +310,18 @@ export default function ACGPage() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* ── Section 5: Alignment plate ──
+          The one image that is about both fields at once, so it sits alone
+          between the activation details and the system notes. */}
+      <section className="container-page acg-alignment">
+        <Plate
+          src={alignmentSrc}
+          alt="Moment of alignment between the collective and local fields"
+          caption="ALIGNMENT / TWO FIELDS, ONE COLOR"
+          ratio="wide"
+        />
       </section>
 
       {/* ── Section 6: System Notes ── */}
@@ -518,6 +476,13 @@ export default function ACGPage() {
 
       {/* ── Section 9: Footer ── */}
       <section className="container-page acg-footer">
+        <Plate
+          src={footerSrc}
+          alt="ACG light field, closing plate"
+          caption="ACG BY SLBH / ONGOING"
+          ratio="band"
+          className="acg-footer-plate"
+        />
         <p className="t-body acg-footer-body">
           ACG by SLBH is an ongoing applied research series. Future activations
           will continue testing how affective computation can be rendered
@@ -570,38 +535,9 @@ export default function ACGPage() {
           .acg-readout-mid { display: block; }
         }
 
-        /* ── Hero visual ── */
-        .acg-visual {
-          min-height: 100vh;
-          position: relative;
-          overflow: hidden;
-          background: var(--graphite);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .acg-visual-bg {
-          position: absolute;
-          inset: 0;
-          background: var(--graphite);
-        }
-        .acg-visual-img {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-        }
-        .acg-visual-fallback {
-          position: relative;
-          z-index: 1;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
         /* ── Editorial ── */
+        /* No hero on this page: 96px under the readout strip matches the
+           section rhythm the other hero-less project pages open with. */
         .acg-editorial {
           padding-top: 96px;
           padding-bottom: 96px;
@@ -622,11 +558,6 @@ export default function ACGPage() {
           .acg-block { grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
           .acg-block--diagram-left .acg-block-visual { order: -1; }
         }
-        .acg-block--full {
-          display: block;
-          max-width: 640px;
-        }
-
         .acg-block-kicker {
           opacity: 0.45;
           margin: 0 0 16px;
@@ -647,19 +578,43 @@ export default function ACGPage() {
         }
         .acg-block-body:last-child { margin-bottom: 0; }
 
-        /* Image frame, used by concept image and doc strip */
-        .acg-img-wrap { width: 100%; }
-        .acg-img-frame {
+        /* ── Plates ──
+           One frame shape, five proportions. Every image on the page — inside a
+           two-column block, in a pair, or full width — uses the same frame, so
+           the plates read as one set however they are placed. */
+        .acg-plate { margin: 0; width: 100%; }
+        .acg-plate-frame {
           position: relative;
-          aspect-ratio: 4/3;
           width: 100%;
           border: 0.5px solid var(--hairline-strong);
           overflow: hidden;
         }
-        .acg-img-bg {
+        .acg-plate--four-three .acg-plate-frame { aspect-ratio: 4/3; }
+        .acg-plate--wide .acg-plate-frame { aspect-ratio: 16/9; }
+        .acg-plate--square .acg-plate-frame { aspect-ratio: 1/1; }
+        .acg-plate--tall .acg-plate-frame { aspect-ratio: 9/16; }
+        /* Matches the 3200×1316 closing export rather than cropping it. */
+        .acg-plate--band .acg-plate-frame { aspect-ratio: 800/329; }
+        /* A 9:16 frame at half the page would run past 900px tall. */
+        .acg-plate--tall { max-width: 380px; }
+        .acg-plate-bg {
           position: absolute;
           inset: 0;
           background: var(--graphite);
+        }
+        /* A frame whose export has not landed yet names what belongs in it. */
+        .acg-plate-frame--empty {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 16px;
+          text-align: center;
+        }
+        .acg-plate-tk {
+          position: relative;
+          color: rgba(243, 242, 242, 0.4);
+          font-size: 9px;
+          letter-spacing: 0.12em;
         }
         .acg-img-fill {
           position: absolute;
@@ -669,58 +624,51 @@ export default function ACGPage() {
           object-fit: cover;
           display: block;
         }
-        .acg-img-caption {
+        .acg-plate-caption {
           margin: 12px 0 0;
           font-size: 9px;
           opacity: 0.45;
           letter-spacing: 0.1em;
         }
 
+        /* Two plates side by side. --io pairs a landscape frame with the
+           portrait one, so the wide plate keeps the bulk of the width. */
+        .acg-plate-row {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 32px;
+        }
+        @media (min-width: 900px) {
+          .acg-plate-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px; }
+          .acg-plate-row--io {
+            grid-template-columns: minmax(0, 1fr) minmax(0, 380px);
+            align-items: start;
+          }
+        }
+
         /* Flow diagrams */
+        /* Beside a column of text: centered on it rather than hanging off the
+           top of the block. */
         .acg-flow-wrap {
           display: flex;
           align-items: center;
           padding: 32px 0;
         }
+        @media (min-width: 900px) {
+          .acg-flow-wrap { align-self: center; }
+        }
+        /* A flow that sits between blocks rather than beside text, ruled off
+           the way the system shell is. */
+        .acg-flow-strip {
+          padding: 40px 0;
+          border-top: 0.5px solid var(--hairline);
+          border-bottom: 0.5px solid var(--hairline);
+        }
 
-        /* ── Documentation strip ── */
-        .acg-doc-strip {
+        /* ── Alignment plate ── */
+        .acg-alignment {
           padding-top: 0;
           padding-bottom: 96px;
-        }
-        .acg-doc-grid {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 32px;
-        }
-        @media (min-width: 768px) {
-          .acg-doc-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 32px;
-          }
-          .acg-doc-cell--wide { grid-column: span 2; }
-        }
-        .acg-doc-cell { margin: 0; }
-        .acg-doc-frame {
-          position: relative;
-          aspect-ratio: 4/3;
-          width: 100%;
-          border: 0.5px solid var(--hairline-strong);
-          overflow: hidden;
-        }
-        .acg-doc-cell--wide .acg-doc-frame {
-          aspect-ratio: 16/9;
-        }
-        .acg-doc-bg {
-          position: absolute;
-          inset: 0;
-          background: var(--graphite);
-        }
-        .acg-doc-caption {
-          margin: 12px 0 0;
-          font-size: 9px;
-          opacity: 0.45;
-          letter-spacing: 0.1em;
         }
 
         /* ── Visit / Activation ── */
@@ -867,6 +815,7 @@ export default function ACGPage() {
           padding-bottom: 120px;
           max-width: var(--max-w);
         }
+        .acg-footer-plate { margin-bottom: 56px; }
         .acg-footer-body {
           max-width: 640px;
           line-height: 1.7;
