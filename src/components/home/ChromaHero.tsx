@@ -25,11 +25,11 @@ const ease = (t: number) => {
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
 function buildScene(w: number, h: number, mobile: boolean): Scene {
-  const maxPhoneWForHeight = Math.max(180, (h - 28) * (320 / 660));
+  const maxPhoneWForHeight = Math.max(180, (h - 28) * (415 / 843));
   const phoneW = mobile
     ? Math.min(330, w * 0.78, maxPhoneWForHeight)
     : Math.min(390, w * 0.285, maxPhoneWForHeight);
-  const phoneH = phoneW * (660 / 320);
+  const phoneH = phoneW * (843 / 415);
   const phoneY = Math.max(14, (h - phoneH) / 2 - (mobile ? 2 : 16));
   // Density scales with the actual browser width: phones and laptop-sized
   // screens gain 30%, while large external displays double the original field.
@@ -75,7 +75,6 @@ export function ChromaHero() {
   const sectionRef = useRef<HTMLElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const phoneRef = useRef<HTMLDivElement>(null);
-  const phoneFrameRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<Scene | null>(null);
   const rafRef = useRef<number | null>(null);
   const resolvedRef = useRef(false);
@@ -85,8 +84,7 @@ export function ChromaHero() {
     const section = sectionRef.current;
     const canvas = canvasRef.current;
     const phone = phoneRef.current;
-    const phoneFrame = phoneFrameRef.current;
-    if (!section || !canvas || !phone || !phoneFrame) return;
+    if (!section || !canvas || !phone) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
@@ -156,9 +154,6 @@ export function ChromaHero() {
       phone.style.width = `${scene.phoneW}px`;
       phone.style.height = `${scene.phoneH}px`;
       phone.style.transform = `translate3d(-50%, ${y}px, 0)`;
-      phoneFrame.style.width = `${scene.phoneW}px`;
-      phoneFrame.style.height = `${scene.phoneH}px`;
-      phoneFrame.style.transform = `translate3d(-50%, ${y}px, 0)`;
 
       // The verbal turn belongs to the bouquet, not the finished grid. Change
       // the message as soon as every independent bloom has finished stacking.
@@ -221,25 +216,8 @@ export function ChromaHero() {
       <div className="chroma-hero-sticky">
         <canvas ref={canvasRef} className="chroma-hero-canvas" aria-hidden />
 
-        <div ref={phoneRef} className="chroma-phone chroma-phone-base" aria-hidden>
-          <div className="chroma-phone-screen" />
-        </div>
-        <div ref={phoneFrameRef} className="chroma-phone chroma-phone-frame-wrap" aria-hidden>
-          <svg viewBox="0 0 320 660" role="presentation" className="chroma-phone-frame">
-            <defs>
-              <mask id="chroma-phone-cutout">
-                <rect width="320" height="660" fill="white" />
-                <rect x="15" y="15" width="290" height="630" rx="38" fill="black" />
-              </mask>
-            </defs>
-            <rect width="320" height="660" rx="48" fill="#242428" mask="url(#chroma-phone-cutout)" />
-            <rect x="1" y="1" width="318" height="658" rx="47" fill="none" stroke="#7b7b83" strokeWidth="2" />
-            <rect x="15" y="15" width="290" height="630" rx="38" fill="none" stroke="#4b4b51" strokeWidth="1.5" />
-            <rect x="124" y="25" width="72" height="22" rx="11" fill="#171719" />
-            <rect x="-3" y="118" width="5" height="42" rx="2.5" fill="#8b8b94" />
-            <rect x="-3" y="182" width="5" height="70" rx="2.5" fill="#8b8b94" />
-            <rect x="318" y="164" width="5" height="92" rx="2.5" fill="#8b8b94" />
-          </svg>
+        <div ref={phoneRef} className="chroma-phone chroma-phone-frame-wrap" aria-hidden>
+          <div className="chroma-phone-frame" />
         </div>
 
         <h1
@@ -288,20 +266,13 @@ export function ChromaHero() {
           opacity: 0;
         }
         .chroma-hero[data-atlas-built="true"] .chroma-phone { opacity: 1; }
-        .chroma-phone-base { z-index: 0; }
-        .chroma-phone-frame-wrap { z-index: 2; pointer-events: none; }
-        .chroma-phone-screen {
-          position: absolute;
-          inset: 2.3%;
-          border-radius: 11.5%;
-          background: #343436;
-        }
+        .chroma-phone-frame-wrap { z-index: 0; pointer-events: none; }
         .chroma-phone-frame {
           position: absolute;
           inset: 0;
           width: 100%;
           height: 100%;
-          overflow: visible;
+          background: url("/chroma/iphone-frame.svg") center / 100% 100% no-repeat;
           filter: drop-shadow(0 32px 80px rgba(0, 0, 0, 0.55));
         }
         .chroma-hero-copy {
