@@ -31,7 +31,7 @@ export default function ACGPage() {
       {/* ── Section 1: Header ── */}
       <section className="acg-hero">
         <div className="container-page acg-hero-inner">
-          <p className="t-mono acg-kicker">PROJECT 02 / 2026 / FLAGSHIP / NYC</p>
+          <p className="t-mono acg-kicker">PROJECT 01 / 2026 / FLAGSHIP / NYC</p>
           <h1 className="t-display acg-title">ACG by SLBH</h1>
           <p className="acg-summary">
             ACG by SLBH is an ongoing applied research series that turns
@@ -532,7 +532,7 @@ export default function ACGPage() {
         }
         .acg-hero-inner {
           padding-top: 56px;
-          padding-bottom: 144px;
+          padding-bottom: 64px;
         }
         .acg-kicker {
           opacity: 0.55;

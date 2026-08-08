@@ -35,12 +35,6 @@ export default function ConvergentGrammarPage() {
     .map((base) => ({ base, src: asset(base) }))
     .filter(({ src }) => src);
 
-  // The widening set: other genres now, other data sources next.
-  const expansion = [
-    { src: asset("landscape"), caption: "LANDSCAPES", alt: "Landscape compositional study" },
-    { src: asset("custom"), caption: "CUSTOM IMAGES", alt: "Custom image compositional study" },
-    { src: asset("interior"), caption: "INTERIOR PAINTINGS", alt: "Interior painting compositional study" },
-  ];
 
   return (
     <>
@@ -236,31 +230,6 @@ export default function ConvergentGrammarPage() {
         </div>
       </section>
 
-      {/* ── Section 4.6: Adjacent genres — the widening set ── */}
-      <section className="container-page cg-gallery cg-gallery--secondary">
-        <p className="t-mono cg-gallery-label">ADJACENT GENRES</p>
-        <p className="t-body cg-gallery-intro">
-          The same extraction, run against genres that answer different spatial
-          problems. These are the control against which portrait grammar is
-          measured — where it converges, and where it breaks.
-        </p>
-        <div className="cg-gallery-grid">
-          {expansion.map(({ src, caption, alt }) => (
-            <figure key={caption} className="cg-gallery-item">
-              <div
-                className={`cg-gallery-frame${src ? "" : " cg-gallery-frame--empty"}`}
-              >
-                {src ? (
-                  <FallbackImg src={src} alt={alt} className="cg-gallery-img" />
-                ) : (
-                  <span className="t-mono cg-gallery-tk">TK</span>
-                )}
-              </div>
-              <figcaption className="t-mono cg-gallery-caption">{caption}</figcaption>
-            </figure>
-          ))}
-        </div>
-      </section>
 
       {/* ── Section 5: Links ── */}
       <section className="container-page cg-links">
@@ -354,7 +323,7 @@ export default function ConvergentGrammarPage() {
         }
         .cg-hero-inner {
           padding-top: 56px;
-          padding-bottom: 144px;
+          padding-bottom: 64px;
         }
         .cg-kicker {
           opacity: 0.55;
@@ -574,9 +543,6 @@ export default function ConvergentGrammarPage() {
           padding-top: 0;
           padding-bottom: 96px;
         }
-        /* The adjacent-genre set reads as a footnote to the portraits above it,
-           so it sits tighter and slightly quieter. */
-        .cg-gallery--secondary .cg-gallery-item { opacity: 0.88; }
         .cg-gallery-label {
           opacity: 0.45;
           margin: 0 0 16px;

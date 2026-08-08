@@ -36,7 +36,7 @@ export default function GlobalEmotionsPage() {
       {/* ── Section 1: Header ── */}
       <section className="ge-hero">
         <div className="container-page ge-hero-inner">
-          <p className="t-mono ge-kicker">PROJECT 01 / 2026 / SEASONAL / GLOBAL</p>
+          <p className="t-mono ge-kicker">PROJECT 05 / 2026 / SEASONAL / GLOBAL</p>
           <h1 className="t-display ge-title">Global Emotions</h1>
           <p className="ge-summary">
             Global Emotions is a public emotional observatory — a daily
@@ -325,7 +325,7 @@ export default function GlobalEmotionsPage() {
         .ge-hero { position: relative; }
         .ge-hero-inner {
           padding-top: 56px;
-          padding-bottom: 144px;
+          padding-bottom: 64px;
         }
         .ge-kicker { opacity: 0.55; margin: 0 0 20px; }
         .ge-title { margin: 0 0 28px; }

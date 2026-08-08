@@ -26,7 +26,7 @@ export default function AmericanEmotionsPage() {
       <section className="ae-hero">
         <div className="container-page ae-hero-inner">
           <p className="t-mono ae-kicker">
-            PROJECT 04 / 2024 — ACTIVE / NYC
+            PROJECT 03 / 2024 — ACTIVE / NYC
           </p>
           <h1 className="t-display ae-title">American Emotions</h1>
           <p className="ae-summary">
@@ -268,7 +268,7 @@ export default function AmericanEmotionsPage() {
         }
         .ae-hero-inner {
           padding-top: 56px;
-          padding-bottom: 144px;
+          padding-bottom: 64px;
         }
         .ae-kicker {
           opacity: 0.55;
