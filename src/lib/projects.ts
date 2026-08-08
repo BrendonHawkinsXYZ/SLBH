@@ -19,6 +19,22 @@ export type ProjectType =
   | "Research"
   | "Archive";
 
+/**
+ * Display order for the index: current work first, finished work last. Shared by
+ * the sort in getAllProjects() and the readout strip on /projects, so the order
+ * a visitor reads and the order the counts are tallied in can never drift.
+ */
+export const STATUS_ORDER: ProjectStatus[] = [
+  "flagship",
+  "active",
+  "seasonal",
+  "in-development",
+  "complete",
+  "archived",
+];
+
+const STATUS_RANK = new Map(STATUS_ORDER.map((status, i) => [status, i]));
+
 export type ProjectLink = {
   label: string;
   url: string;
@@ -80,5 +96,11 @@ export function getAllProjects(): Project[] {
     };
   });
 
-  return projects.sort((a, b) => a.index.localeCompare(b.index));
+  // Status first, then the authored index within each status band. An unknown
+  // status sorts to the end rather than silently jumping the queue.
+  return projects.sort((a, b) => {
+    const ra = STATUS_RANK.get(a.status) ?? STATUS_ORDER.length;
+    const rb = STATUS_RANK.get(b.status) ?? STATUS_ORDER.length;
+    return ra !== rb ? ra - rb : a.index.localeCompare(b.index);
+  });
 }

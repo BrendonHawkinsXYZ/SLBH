@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { getAllProjects, findImage } from "@/lib/projects";
-import { TrunkLine } from "@/components/TrunkLine";
 import { PipelineDiagram } from "@/components/projects/american-emotions/PipelineDiagram";
 import { IterationTimeline } from "@/components/projects/american-emotions/IterationTimeline";
 import { FallbackImg } from "@/components/projects/american-emotions/FallbackImg";
@@ -34,9 +33,6 @@ export default function AmericanEmotionsPage() {
             A living instrument that renders collective affect as color, using
             public attention as the signal.
           </p>
-        </div>
-        <div className="ae-trunkline">
-          <TrunkLine length={110} nodePosition="top" />
         </div>
       </section>
 
@@ -290,13 +286,6 @@ export default function AmericanEmotionsPage() {
           opacity: 0.82;
           margin: 0;
         }
-        .ae-trunkline {
-          position: absolute;
-          bottom: 0;
-          left: 50%;
-          transform: translateX(-50%);
-        }
-
         /* ── Readout strip ── */
         .ae-readout {
           display: flex;

@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { getAllProjects, findImage } from "@/lib/projects";
-import { TrunkLine } from "@/components/TrunkLine";
 import { FallbackImg } from "@/components/projects/tihif-nyc/FallbackImg";
 import { FlowDiagram } from "@/components/projects/tihif-nyc/FlowDiagram";
 
@@ -34,9 +33,6 @@ export default function TihifNycPage() {
             A site-specific installation that streamed one person&rsquo;s daily
             emotion into three windows as colored light.
           </p>
-        </div>
-        <div className="tihif-trunkline">
-          <TrunkLine length={110} nodePosition="top" />
         </div>
       </section>
 
@@ -273,13 +269,6 @@ export default function TihifNycPage() {
           opacity: 0.82;
           margin: 0;
         }
-        .tihif-trunkline {
-          position: absolute;
-          bottom: 0;
-          left: 50%;
-          transform: translateX(-50%);
-        }
-
         /* ── Readout strip ── */
         .tihif-readout {
           display: flex;

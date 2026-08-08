@@ -1,30 +1,10 @@
 import { FieldMark } from "@/components/FieldMark";
-import { TrunkLine } from "@/components/TrunkLine";
 
 export const metadata = {
   title: "Studio — SLBH",
   description:
     "Studio Lab BH is a systems research lab building computational models, instruments, and environments to understand and shape invisible human systems.",
 };
-
-const DISCIPLINES = [
-  {
-    label: "FIELDS",
-    body: "Continuous systems, invisible forces, emergent behavior.",
-  },
-  {
-    label: "FLOW",
-    body: "Direction, velocity, attractor, repulsion, transformation.",
-  },
-  {
-    label: "LAYERS",
-    body: "Temporal depth, superposition, uncertainty.",
-  },
-  {
-    label: "MEASUREMENT",
-    body: "Axes, scales, calibration, evidence.",
-  },
-];
 
 const FOCUS_AREAS = [
   {
@@ -192,7 +172,6 @@ const CV: CVCategory[] = [
     label: "SELECT PROFESSIONAL EXPERIENCE",
     entries: [
       {
-        year: "Present",
         title: "Hearst Television · Technical Product Manager",
         detail: "Emerging Technology — AI, rapid prototyping, research",
       },
@@ -247,53 +226,6 @@ const CV: CVCategory[] = [
   },
 ];
 
-// Deterministic pseudo-random for the compass point field
-function seeded(i: number): number {
-  const x = Math.sin(i * 9301 + 49297) * 233280;
-  return x - Math.floor(x);
-}
-
-const COMPASS_POINTS = Array.from({ length: 90 }, (_, i) => {
-  const angle = seeded(i) * Math.PI * 2;
-  // bias radius toward center via squaring [0, 1]
-  const r = Math.pow(seeded(i + 313), 2.2) * 150;
-  return {
-    cx: 240 + Math.cos(angle) * r,
-    cy: 240 + Math.sin(angle) * r,
-    r: 0.8 + seeded(i + 777) * 0.8,
-  };
-});
-
-function CompassDiagram() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 480 480"
-      className="st-compass"
-      aria-hidden
-    >
-      {/* axes */}
-      <line x1="240" y1="40" x2="240" y2="440" stroke="var(--ground)" strokeOpacity="0.16" strokeWidth="0.5" />
-      <line x1="40" y1="240" x2="440" y2="240" stroke="var(--ground)" strokeOpacity="0.16" strokeWidth="0.5" />
-
-      {/* concentric reference rings */}
-      <circle cx="240" cy="240" r="60" fill="none" stroke="var(--ground)" strokeOpacity="0.08" strokeWidth="0.5" />
-      <circle cx="240" cy="240" r="120" fill="none" stroke="var(--ground)" strokeOpacity="0.06" strokeWidth="0.5" />
-
-      {/* dense point field */}
-      {COMPASS_POINTS.map((p, i) => (
-        <circle key={i} cx={p.cx} cy={p.cy} r={p.r} fill="var(--ground)" fillOpacity={0.6} />
-      ))}
-
-      {/* axis labels */}
-      <text x="240" y="28" textAnchor="middle" className="st-compass-label">RESEARCH</text>
-      <text x="452" y="244" textAnchor="end" className="st-compass-label">DESIGN</text>
-      <text x="240" y="460" textAnchor="middle" className="st-compass-label">ENGINEERING</text>
-      <text x="28" y="244" textAnchor="start" className="st-compass-label">THEORY</text>
-    </svg>
-  );
-}
-
 export default function StudioPage() {
   return (
     <>
@@ -310,9 +242,6 @@ export default function StudioPage() {
             also the research practice of Brendon Hawkins, whose work moves
             across art, computation, product, and social theory.
           </p>
-        </div>
-        <div className="st-header-trunk">
-          <TrunkLine length={110} nodePosition="bottom" />
         </div>
       </section>
 
@@ -391,23 +320,6 @@ export default function StudioPage() {
         {/* Method */}
         <div className="container-page st-method-heading">
           <h3 className="t-h3">METHOD</h3>
-        </div>
-
-        {/* Practice disciplines */}
-        <div className="container-page st-disciplines-wrap">
-          <ul className="st-disciplines">
-            {DISCIPLINES.map((d) => (
-              <li key={d.label} className="st-discipline">
-                <span className="t-label st-discipline-label">{d.label}</span>
-                <span className="t-body-sm st-discipline-body">{d.body}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Methodology compass */}
-        <div className="container-page st-compass-wrap">
-          <CompassDiagram />
         </div>
 
         {/* Method tenets */}
@@ -575,13 +487,6 @@ export default function StudioPage() {
           opacity: 0.72;
           margin: 0;
         }
-        .st-header-trunk {
-          position: absolute;
-          bottom: 0;
-          left: 50%;
-          transform: translateX(-50%);
-        }
-
         /* ── §10.2 Readout strip ── */
         .st-readout {
           display: flex;
@@ -668,76 +573,12 @@ export default function StudioPage() {
           opacity: 0.85;
         }
 
-        /* ── §10.3 Disciplines grid ── */
-        .st-disciplines-wrap {
-          padding-top: 0;
-          padding-bottom: 96px;
-        }
+        /* ── §10.3 Method ── */
         .st-method-heading {
           padding-top: 0;
           padding-bottom: 32px;
         }
         .st-method-heading h3 { margin: 0; opacity: 0.72; }
-        .st-disciplines {
-          list-style: none;
-          padding: 0;
-          margin: 0;
-          display: grid;
-          grid-template-columns: 1fr;
-          border-top: 0.5px solid var(--hairline);
-        }
-        @media (min-width: 720px) {
-          .st-disciplines { grid-template-columns: 1fr 1fr; }
-        }
-        @media (min-width: 1024px) {
-          .st-disciplines { grid-template-columns: repeat(4, 1fr); }
-        }
-        .st-discipline {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-          padding: 32px 24px;
-          border-bottom: 0.5px solid var(--hairline);
-          border-right: 0.5px solid var(--hairline);
-        }
-        @media (min-width: 720px) {
-          .st-discipline:nth-child(2n) { border-right: none; }
-        }
-        @media (min-width: 1024px) {
-          .st-discipline:nth-child(2n) { border-right: 0.5px solid var(--hairline); }
-          .st-discipline:nth-child(4n) { border-right: none; }
-        }
-        .st-discipline-label {
-          font-size: 12px;
-          letter-spacing: 0.14em;
-        }
-        .st-discipline-body {
-          font-size: 14px;
-          opacity: 0.75;
-          line-height: 1.5;
-          margin: 0;
-        }
-
-        /* ── §10.3 Compass ── */
-        .st-compass-wrap {
-          padding-top: 0;
-          padding-bottom: 96px;
-          display: flex;
-          justify-content: center;
-        }
-        .st-compass {
-          width: min(480px, 100%);
-          height: auto;
-          aspect-ratio: 1 / 1;
-        }
-        .st-compass-label {
-          font-family: var(--font-inter), sans-serif;
-          font-weight: 500;
-          font-size: 11px;
-          letter-spacing: 0.14em;
-          fill: var(--ground);
-          opacity: 0.72;
-        }
 
         /* ── §10.3 Current focus ── */
         .st-focus {
