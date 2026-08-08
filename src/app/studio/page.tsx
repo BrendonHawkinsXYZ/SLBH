@@ -145,7 +145,7 @@ const CV: CVCategory[] = [
   {
     label: "PUBLIC SPEAKING",
     entries: [
-      { year: "2025", title: "Queer Tech Stories Across Generations", detail: "PayPal HQ" },
+      { year: "2025", title: "Tech Stories Across Generations", detail: "PayPal HQ" },
       { year: "2025", title: "Building Products in the Age of AI", detail: "Hearst" },
       {
         year: "2024",
