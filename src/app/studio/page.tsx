@@ -111,6 +111,17 @@ const CV: CVCategory[] = [
     ],
   },
   {
+    label: "WORKSHOPS",
+    entries: [
+      {
+        year: "2026",
+        title:
+          "Making AI Make Sense Together: Designing a Critical AI Research Commons with NYC Open Data",
+        detail: "School of Data: Data Week",
+      },
+    ],
+  },
+  {
     label: "PUBLISHED WORK",
     entries: [
       { year: "2020", title: "Worst Title Ever", detail: "Cover Artist · Aaron Jones" },
@@ -129,17 +140,6 @@ const CV: CVCategory[] = [
         detail: "Andy Warhol Museum",
       },
       { year: "2018", title: "My People Queer Art", detail: "KST Alloy" },
-    ],
-  },
-  {
-    label: "WORKSHOPS",
-    entries: [
-      {
-        year: "2026",
-        title:
-          "Making AI Make Sense Together: Designing a Critical AI Research Commons with NYC Open Data",
-        detail: "School of Data: Data Week",
-      },
     ],
   },
   {
