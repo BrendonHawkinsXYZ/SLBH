@@ -31,9 +31,9 @@ function buildScene(w: number, h: number, mobile: boolean): Scene {
     : Math.min(390, w * 0.285, maxPhoneWForHeight);
   const phoneH = phoneW * (843 / 415);
   const phoneY = Math.max(14, (h - phoneH) / 2 - (mobile ? 2 : 16));
-  // Density scales with the actual browser width: phones and laptop-sized
-  // screens gain 30%, while large external displays double the original field.
-  const count = w >= 1600 ? 600 : mobile ? 195 : 390;
+  // Mobile needs its own overloaded field: a narrow viewport otherwise causes
+  // the phone-clearance region to consume both side rails.
+  const count = w >= 1600 ? 600 : mobile ? 320 : 390;
   // One atlas entry per instance keeps every landing shape independent. The
   // source canvases still exceed their maximum display size, so they stay crisp.
   const atlas = makeAtlas(count, mobile ? 160 : 260);
