@@ -18,6 +18,9 @@ export type GridPoint = {
 };
 
 export type BloomInstance = {
+  /** Which size tier of the atlas this bloom draws from. */
+  tier: number;
+  /** Index of the sprite within that tier. */
   spriteIndex: number;
   x: number;
   y: number;
@@ -31,6 +34,7 @@ export type BloomInstance = {
 };
 
 export type BloomFrame = {
+  tier: number;
   spriteIndex: number;
   x: number;
   y: number;
@@ -79,19 +83,38 @@ function randomShape() {
     wobbleFreq: Math.round(random(3, 14)),
   };
 
-  return resolveShape(familyId, values, modifiers);
+  // Blooms stretch hard — as far as 0.52 — which squeezes the mosaic lattice
+  // under the dot width and melts the shape into a smooth airbrushed blob. Shrink
+  // the dot by the same factor so a squashed bloom keeps its pixels, without
+  // narrowing the stretch range and inflating how much of the field it covers.
+  const shape = resolveShape(familyId, values, modifiers);
+  return {
+    ...shape,
+    dotScale: Math.min(1, Math.sqrt(modifiers.stretchX * modifiers.stretchY)),
+  };
 }
 
-/** Build one atomic shape with the canonical Field renderer. */
-export function makeBloomSprite(size: number, pixelScale = 1.35): HTMLCanvasElement {
+/**
+ * Build one atomic shape with the canonical Field renderer.
+ *
+ * `cssSize` is the largest size the sprite will ever be drawn at, in CSS px, and
+ * sets the mosaic density — so the grain reads the same whatever the device. The
+ * backing store is `cssSize × dpr`, matching the DPR-scaled context the sprite is
+ * blitted into, so a bloom is never magnified past the pixels it was drawn with.
+ */
+export function makeBloomSprite(
+  cssSize: number,
+  dpr = 1,
+  pixelScale = 1.35,
+): HTMLCanvasElement {
   const sprite = document.createElement("canvas");
-  sprite.width = sprite.height = size;
+  sprite.width = sprite.height = Math.max(1, Math.round(cssSize * dpr));
   const ctx = sprite.getContext("2d");
   if (!ctx) return sprite;
-  ctx.imageSmoothingEnabled = false;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   renderShapeField(
     ctx,
-    size,
+    cssSize,
     makePalette(),
     randomShape(),
     "transparent",
@@ -100,8 +123,8 @@ export function makeBloomSprite(size: number, pixelScale = 1.35): HTMLCanvasElem
   return sprite;
 }
 
-export function makeAtlas(n: number, size: number): HTMLCanvasElement[] {
-  return Array.from({ length: n }, () => makeBloomSprite(size));
+export function makeAtlas(n: number, cssSize: number, dpr = 1): HTMLCanvasElement[] {
+  return Array.from({ length: n }, () => makeBloomSprite(cssSize, dpr));
 }
 
 /**
@@ -113,7 +136,6 @@ export function archLayout(
   h: number,
   count: number,
   gapRect: Rect,
-  atlasSize = 10,
 ): BloomInstance[] {
   const out: BloomInstance[] = [];
   const mobile = w < 640;
@@ -202,9 +224,10 @@ export function archLayout(
     if (!mobile && inOpening) continue;
 
     out.push({
-      // When the atlas and instance counts match, every visible object owns a
-      // unique generated shape instead of reusing a composite bloom tile.
-      spriteIndex: out.length % Math.max(1, atlasSize),
+      // Placeholders. Sprites are pooled by draw size, so the caller assigns the
+      // tier and index once every instance's final scale is known.
+      tier: 0,
+      spriteIndex: 0,
       x,
       y,
       scale,
@@ -253,6 +276,7 @@ export function solveFrame(instances: BloomInstance[], p: number): BloomFrame[] 
   if (progress < 0.42) {
     const t = ease(progress / 0.42);
     return instances.map((item) => ({
+      tier: item.tier,
       spriteIndex: item.spriteIndex,
       x: lerp(item.x, item.collapseX, t),
       y: lerp(item.y, item.collapseY, t),
@@ -264,6 +288,7 @@ export function solveFrame(instances: BloomInstance[], p: number): BloomFrame[] 
   }
 
   const collapsed: BloomFrame[] = instances.map((item) => ({
+    tier: item.tier,
     spriteIndex: item.spriteIndex,
     x: item.collapseX,
     y: item.collapseY,
@@ -279,6 +304,7 @@ export function solveFrame(instances: BloomInstance[], p: number): BloomFrame[] 
   const grid = instances
     .filter((item) => item.grid)
     .map((item): BloomFrame => ({
+      tier: item.tier,
       spriteIndex: item.spriteIndex,
       x: item.grid!.x,
       y: item.grid!.y,

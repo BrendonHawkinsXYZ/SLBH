@@ -336,6 +336,13 @@ export type RenderShape = {
   hole?: number;
   sx?: number;
   sy?: number;
+  /**
+   * Mosaic dot size, ×the lattice default. Stretch compresses the lattice along
+   * an axis without shrinking the dots, so a hard squeeze fuses them into a
+   * smooth gradient and the shape loses its pixels. Callers that stretch hard can
+   * pass the compression back here to hold the dot-to-gap ratio. Default 1.
+   */
+  dotScale?: number;
 };
 
 /** Bake a family + params + modifiers into the unit/hole/stretch the renderer needs. */
@@ -459,7 +466,7 @@ function emitShapeField(
   // chunkier mosaic). Clamped so it can't run away into a million dots.
   const scale = Math.min(6, Math.max(0.5, pixelScale));
   const cell = Math.max(BASE_CELL, Math.sqrt((size * size) / MAX_DOTS)) * scale;
-  const dotSize = cell * DOT_RATIO;
+  const dotSize = cell * DOT_RATIO * (shape.dotScale ?? 1);
   const half = dotSize / 2;
   const edgeNoise = cell * EDGE_NOISE_RATIO;
 

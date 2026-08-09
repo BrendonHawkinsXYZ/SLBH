@@ -9,28 +9,54 @@ import {
   type BloomInstance,
 } from "@/lib/bloomAtlas";
 
+/** One pool of same-sized sprites. `cssSize` is the largest draw it serves. */
+type Tier = {
+  cssSize: number;
+  sprites: Array<HTMLCanvasElement | null>;
+};
+
 type Scene = {
-  atlas: Array<HTMLCanvasElement | null>;
-  spriteSize: number;
+  tiers: Tier[];
   instances: BloomInstance[];
+  dpr: number;
   phoneW: number;
   phoneH: number;
   phoneY: number;
 };
 
-// Preserve generated sprites across client-side visits. Each breakpoint has a
-// stable atlas, so returning home does not repeat the expensive shape render.
-let atlasCache: {
-  key: string;
-  sprites: Array<HTMLCanvasElement | null>;
-} | null = null;
+// Sprites are pooled by size rather than owned one-per-bloom. Rendering every
+// bloom at device resolution *and* giving each its own sprite would cost ~324MB
+// of backing store on a retina laptop, so the field trades unique silhouettes
+// for sharpness: each tier holds an equal share of the blooms, and no bloom is
+// ever drawn larger than the sprite behind it. Random per-instance rotation and
+// scale hide the reuse; the magnification it replaces could not be hidden.
+const TIERS = 4;
+// 40 holds the atlas at or under the old one-sprite-per-bloom footprint on every
+// breakpoint, mobile included, where the old atlas was already the largest thing
+// the page allocated.
+const SPRITES_PER_TIER = 40;
 
-function cachedAtlas(count: number, size: number) {
-  const key = `${count}:${size}`;
-  if (atlasCache?.key === key) return atlasCache.sprites;
-  const sprites = Array.from<HTMLCanvasElement | null>({ length: count }).fill(null);
-  atlasCache = { key, sprites };
-  return sprites;
+// Preserve generated sprites across client-side visits. The key covers every
+// input to the atlas, so returning home does not repeat the shape render.
+let atlasCache: { key: string; tiers: Tier[] } | null = null;
+
+function cachedTiers(key: string, sizes: number[]): Tier[] {
+  if (atlasCache?.key === key) return atlasCache.tiers;
+  // Zero the outgoing canvases. Mobile Safari reclaims canvas backing stores far
+  // more promptly when they are emptied than when the references are just dropped.
+  atlasCache?.tiers.forEach((tier) =>
+    tier.sprites.forEach((sprite) => {
+      if (sprite) sprite.width = sprite.height = 0;
+    }),
+  );
+  const tiers = sizes.map((cssSize) => ({
+    cssSize,
+    sprites: Array.from<HTMLCanvasElement | null>({
+      length: SPRITES_PER_TIER,
+    }).fill(null),
+  }));
+  atlasCache = { key, tiers };
+  return tiers;
 }
 
 const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
@@ -40,7 +66,7 @@ const ease = (t: number) => {
 };
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
-function buildScene(w: number, h: number, mobile: boolean): Scene {
+function buildScene(w: number, h: number, mobile: boolean, dpr: number): Scene {
   const maxPhoneWForHeight = Math.max(180, (h - 28) * (415 / 843));
   const phoneW = mobile
     ? Math.min(330, w * 0.78, maxPhoneWForHeight)
@@ -50,10 +76,6 @@ function buildScene(w: number, h: number, mobile: boolean): Scene {
   // Mobile needs its own overloaded field: a narrow viewport otherwise causes
   // the phone-clearance region to consume both side rails.
   const count = w >= 1600 ? 600 : mobile ? 320 : 390;
-  // Reserve one independent sprite per bloom without rendering all of them in
-  // one blocking burst. Drawing lazily fills this cached atlas as blooms enter.
-  const spriteSize = mobile ? 160 : 260;
-  const atlas = cachedAtlas(count, spriteSize);
   const gapWidth = phoneW * 1.35;
   const gap = {
     x: (w - gapWidth) / 2,
@@ -67,7 +89,7 @@ function buildScene(w: number, h: number, mobile: boolean): Scene {
     width: phoneW * 0.81,
     height: phoneH * 0.85,
   };
-  const instances = archLayout(w, h, count, gap, atlas.length);
+  const instances = archLayout(w, h, count, gap);
   const targets = gridLayout(screen, 3, 3);
   const collapseX = screen.x + screen.width / 2;
   const collapseY = screen.y + screen.height * 0.47;
@@ -85,7 +107,31 @@ function buildScene(w: number, h: number, mobile: boolean): Scene {
     if (index < targets.length) item.grid = targets[index];
   });
 
-  return { atlas, spriteSize, instances, phoneW, phoneH, phoneY };
+  // Size the tiers to the field's own distribution. The arch beat and the grid
+  // beat are both candidates for a bloom's largest draw; every other beat
+  // (collapse, intro ramp) is strictly smaller, so this bounds the whole scroll.
+  const drawn = instances.map((item) => Math.max(item.scale, item.grid?.scale ?? 0));
+  const ascending = [...drawn].sort((a, b) => a - b);
+  // Rounding up to 16px keeps the atlas key — and so the cache — stable while a
+  // window is being dragged, at the cost of a few unused pixels per sprite.
+  const quantise = (n: number) => Math.ceil(n / 16) * 16;
+  const sizes: number[] = [];
+  for (let tier = 1; tier <= TIERS; tier++) {
+    const at = Math.ceil((tier / TIERS) * ascending.length) - 1;
+    const size = quantise(ascending[Math.min(ascending.length - 1, Math.max(0, at))]);
+    if (sizes[sizes.length - 1] !== size) sizes.push(size);
+  }
+  const tiers = cachedTiers(`${dpr}:${sizes.join(",")}`, sizes);
+
+  // Spread each tier's blooms evenly over its pool so no one sprite clusters.
+  const cursors = sizes.map(() => 0);
+  instances.forEach((item, index) => {
+    const tier = sizes.findIndex((size) => size >= drawn[index]);
+    item.tier = tier < 0 ? sizes.length - 1 : tier;
+    item.spriteIndex = cursors[item.tier]++ % SPRITES_PER_TIER;
+  });
+
+  return { tiers, instances, dpr, phoneW, phoneH, phoneY };
 }
 
 export function ChromaHero() {
@@ -124,8 +170,12 @@ export function ChromaHero() {
       canvas.style.width = `${w}px`;
       canvas.style.height = `${h}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.imageSmoothingEnabled = false;
-      sceneRef.current = buildScene(w, h, w < 640);
+      // Sprites are sized to the largest draw they serve, so every blit is a
+      // downscale. Filtering averages the mosaic down; nearest-neighbour would
+      // drop whole rows of dots — which the collapse beat, at roughly 0.1×,
+      // would turn into moiré.
+      ctx.imageSmoothingEnabled = true;
+      sceneRef.current = buildScene(w, h, w < 640, dpr);
       section.dataset.atlasBuilt = "true";
       draw();
     };
@@ -159,11 +209,14 @@ export function ChromaHero() {
         ctx.save();
         ctx.globalAlpha = frame.alpha * reveal;
         ctx.translate(frame.x, frame.y);
-        const spriteIndex = frame.spriteIndex % scene.atlas.length;
-        let sprite = scene.atlas[spriteIndex];
+        const tier = scene.tiers[frame.tier] ?? scene.tiers[scene.tiers.length - 1];
+        // Built on first sight rather than up front. The intro reveals blooms in
+        // index order, which spreads the atlas render across its 2.8s instead of
+        // one blocking burst.
+        let sprite = tier.sprites[frame.spriteIndex];
         if (!sprite) {
-          sprite = makeBloomSprite(scene.spriteSize);
-          scene.atlas[spriteIndex] = sprite;
+          sprite = makeBloomSprite(tier.cssSize, scene.dpr);
+          tier.sprites[frame.spriteIndex] = sprite;
         }
         ctx.rotate((frame.rotation * Math.PI) / 180);
         const scale = frame.scale * (0.2 + reveal * 0.8);
