@@ -64,39 +64,13 @@ type CVCategory = { label: string; entries: CVEntry[] };
 
 const CV: CVCategory[] = [
   {
-    label: "SOLO EXHIBITIONS",
-    entries: [
-      { year: "2026", title: "ACG By Studio Lab BH", detail: "The Space, New York, NY" },
-      { year: "2024", title: "Three Degrees", detail: "Industrious, Pittsburgh, PA" },
-      { year: "2019", title: "#ShowUp", detail: "Mattress Factory, Pittsburgh, PA" },
-      { year: "2018", title: "Untitled", detail: "Bunker Projects, Pittsburgh, PA" },
-    ],
-  },
-  {
-    label: "GROUP EXHIBITIONS",
-    entries: [
-      { year: "2025", title: "PIT Lab × Beta NYC Pop-Up", detail: "The Oculus, New York, NY" },
-      { year: "2020", title: "Seeking Truth", detail: "Brew House, Pittsburgh, PA" },
-      { year: "2020", title: "Channel", detail: "Pittsburgh Children’s Museum, Pittsburgh, PA" },
-      {
-        year: "2019",
-        title: "The Self, Realized: Queering the Art of Self-Portraiture",
-        detail: "Brewhouse, Pittsburgh, PA",
-      },
-      { year: "2018", title: "The House We Build", detail: "Imagebox Gallery, Pittsburgh, PA" },
-      { year: "2017", title: "Welcome Home", detail: "Future Tenant, Pittsburgh, PA" },
-    ],
-  },
-  {
-    label: "COMMISSIONS",
-    entries: [
-      { year: "2018", title: "Guest of Honor", detail: "Carnegie Museum of Art" },
-      { year: "2018", title: "#ShowUpMF", detail: "Mattress Factory" },
-    ],
-  },
-  {
     label: "RESIDENCIES & FELLOWSHIPS",
     entries: [
+      {
+        year: "2026",
+        title: "Public Interest Technology Research Fellow",
+        detail: "CUNY, New York, NY",
+      },
       { year: "2020–21", title: "FINE Residency", detail: "Children’s Museum of Pittsburgh" },
       { year: "2020", title: "Field Work Gallery" },
       {
@@ -107,27 +81,6 @@ const CV: CVCategory[] = [
       { year: "2019", title: "Distillery", detail: "Brew House Association" },
       { year: "2019", title: "Visiting Artist", detail: "Legacy Arts Project" },
       { year: "2018", title: "Bunker Projects" },
-    ],
-  },
-  {
-    label: "PUBLISHED WORK",
-    entries: [
-      { year: "2020", title: "Worst Title Ever", detail: "Cover Artist · Aaron Jones" },
-      { year: "2018", title: "Cali Cod", detail: "Photo Editor · The Tenth Magazine" },
-      { year: "2017", title: "Hidden Flame", detail: "Editorial Photographer · NeuNeu Magazine" },
-      { year: "2017", title: "Wonderland", detail: "Editorial Photographer · Fucking Young" },
-    ],
-  },
-  {
-    label: "PERFORMANCES",
-    entries: [
-      { year: "2019", title: "Stone Wall: 50th Anniversary", detail: "Andy Warhol Museum" },
-      {
-        year: "2018",
-        title: "The Warhol Shop Talk: Black Joy, Masculinity, & Barbershops",
-        detail: "Andy Warhol Museum",
-      },
-      { year: "2018", title: "My People Queer Art", detail: "KST Alloy" },
     ],
   },
   {
@@ -159,6 +112,58 @@ const CV: CVCategory[] = [
         title: "The Illusion Of The Queer Black American",
         detail: "Artist Image Resource",
       },
+    ],
+  },
+  {
+    label: "SOLO EXHIBITIONS",
+    entries: [
+      { year: "2026", title: "ACG By Studio Lab BH", detail: "The Space, New York, NY" },
+      { year: "2024", title: "Three Degrees", detail: "Industrious, Pittsburgh, PA" },
+      { year: "2019", title: "#ShowUp", detail: "Mattress Factory, Pittsburgh, PA" },
+      { year: "2018", title: "Untitled", detail: "Bunker Projects, Pittsburgh, PA" },
+    ],
+  },
+  {
+    label: "GROUP EXHIBITIONS",
+    entries: [
+      { year: "2025", title: "PIT Lab × Beta NYC Pop-Up", detail: "The Oculus, New York, NY" },
+      { year: "2020", title: "Seeking Truth", detail: "Brew House, Pittsburgh, PA" },
+      { year: "2020", title: "Channel", detail: "Pittsburgh Children’s Museum, Pittsburgh, PA" },
+      {
+        year: "2019",
+        title: "The Self, Realized: Queering the Art of Self-Portraiture",
+        detail: "Brewhouse, Pittsburgh, PA",
+      },
+      { year: "2018", title: "The House We Build", detail: "Imagebox Gallery, Pittsburgh, PA" },
+      { year: "2017", title: "Welcome Home", detail: "Future Tenant, Pittsburgh, PA" },
+    ],
+  },
+  {
+    label: "COMMISSIONS",
+    entries: [
+      { year: "2018", title: "Guest of Honor", detail: "Carnegie Museum of Art" },
+      { year: "2018", title: "#ShowUpMF", detail: "Mattress Factory" },
+    ],
+  },
+  {
+    label: "PUBLISHED WORK",
+    entries: [
+      { year: "2020", title: "Worst Title Ever", detail: "Cover Artist · Aaron Jones" },
+      { year: "2018", title: "Cali Cod", detail: "Photo Editor · The Tenth Magazine" },
+      { year: "2017", title: "Hidden Flame", detail: "Editorial Photographer · NeuNeu Magazine" },
+      { year: "2017", title: "Wonderland", detail: "Editorial Photographer · Fucking Young" },
+    ],
+  },
+  {
+    label: "PERFORMANCES",
+    entries: [
+      { year: "2019", title: "Stone Wall: 50th Anniversary", detail: "Andy Warhol Museum" },
+      {
+        year: "2018",
+        title: "The Warhol Shop Talk: Black Joy, Masculinity, & Barbershops",
+        detail: "Andy Warhol Museum",
+      },
+      { year: "2018", title: "My People Queer Art", detail: "KST Alloy" },
     ],
   },
   {
