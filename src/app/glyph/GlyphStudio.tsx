@@ -12,20 +12,22 @@ import {
   createGlyph,
   filledCount,
   flipGlyph,
+  DENSE_GRID,
+  exportUnit,
   glyphCode,
   glyphSlug,
+  glyphStamp,
   glyphToSvg,
   invertGlyph,
   isEmpty,
   nudgeGlyph,
-  hasTransparency,
+  drawGlyphCells,
+  gridBox,
+  paintGround,
   renderGlyph,
   resizeGlyph,
   rotateGlyph,
-  traceImageToGlyph,
   withCells,
-  type ReadMode,
-  type TraceOptions,
 } from "@/lib/glyphGrid";
 import {
   SourceError,
@@ -66,13 +68,25 @@ const ACTUAL_SIZES = [16, 24, 32];
 const MAX_HISTORY = 60;
 const MAX_SAVED = 12;
 
-// One SVG cell = one grid pixel; this is only the document's width/height.
-const EXPORT_UNIT = 32;
+/** Share of the grid inked — a decimal below one percent, where 256² lives. */
+function inkedPercent(count: number, size: number): string {
+  const pct = (count / (size * size)) * 100;
+  return pct > 0 && pct < 1 ? pct.toFixed(1) : pct.toFixed(0);
+}
 
-const READS: { id: ReadMode; label: string }[] = [
-  { id: "silhouette", label: "Silhouette" },
-  { id: "darkness", label: "Darkness" },
-];
+/** Lattice rhythm: the heavier line every N cells, widening as the grid does. */
+function guideStep(n: number): number {
+  if (n <= 32) return 4;
+  if (n <= 64) return 8;
+  if (n <= 128) return 16;
+  return 32;
+}
+
+const LAYERS = [
+  { id: "under", label: "Under" },
+  { id: "over", label: "Over" },
+] as const;
+type Layer = (typeof LAYERS)[number]["id"];
 
 /** Every cell a single stroke touches once the mirror is applied. */
 function mirroredCells(x: number, y: number, n: number, mirror: Mirror): [number, number][] {
@@ -139,7 +153,7 @@ function FilePick({ label, onPick }: { label: string; onPick: (file: File) => vo
   );
 }
 
-/** The pasted artwork, small — proof of what the trace is reading from. */
+/** The pasted artwork, small — proof of what is riding on the grid. */
 function SourceThumb({ source }: { source: LoadedSource }) {
   const ref = useRef<HTMLCanvasElement | null>(null);
 
@@ -148,21 +162,17 @@ function SourceThumb({ source }: { source: LoadedSource }) {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    const { image } = source;
+    const art = source.canvas;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const box = Math.round(56 * dpr);
     canvas.width = box;
     canvas.height = box;
-    const scale = Math.min(box / image.width, box / image.height);
-    const w = Math.max(1, Math.round(image.width * scale));
-    const h = Math.max(1, Math.round(image.height * scale));
-    const tmp = document.createElement("canvas");
-    tmp.width = image.width;
-    tmp.height = image.height;
-    tmp.getContext("2d")?.putImageData(image, 0, 0);
+    const scale = Math.min(box / art.width, box / art.height);
+    const w = Math.max(1, Math.round(art.width * scale));
+    const h = Math.max(1, Math.round(art.height * scale));
     ctx.clearRect(0, 0, box, box);
     ctx.imageSmoothingQuality = "high";
-    ctx.drawImage(tmp, Math.round((box - w) / 2), Math.round((box - h) / 2), w, h);
+    ctx.drawImage(art, Math.round((box - w) / 2), Math.round((box - h) / 2), w, h);
   }, [source]);
 
   return <canvas ref={ref} className="gly-source-canvas" aria-hidden />;
@@ -257,12 +267,12 @@ export function GlyphStudio() {
   const [keyed, setKeyed] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // ── Traced source: a pasted or dropped image, and how it is read. ──
+  // ── Reference layer: a pasted or dropped image to trace over by hand. ──
   const [source, setSource] = useState<LoadedSource | null>(null);
-  const [read, setRead] = useState<ReadMode>("silhouette");
-  const [threshold, setThreshold] = useState(0.45);
+  const [overlay, setOverlay] = useState(true);
+  const [opacity, setOpacity] = useState(0.4);
+  const [layer, setLayer] = useState<Layer>("under");
   const [trim, setTrim] = useState(true);
-  const [traceInvert, setTraceInvert] = useState(false);
   const [dropping, setDropping] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -281,13 +291,12 @@ export function GlyphStudio() {
     pushed: boolean;
   } | null>(null);
 
-  // Identity of the last traced glyph: while the drawing still IS the trace,
-  // a grid change can re-trace at the new resolution instead of re-sampling
-  // the bitmap. Once a cell is touched by hand, that hand work wins.
-  const tracedRef = useRef<Glyph | null>(null);
-
   const count = filledCount(glyph);
-  const code = useMemo(() => glyphCode(glyph), [glyph]);
+  // A 256 grid packs to 16,384 hex characters — past DENSE_GRID, show the stamp.
+  const code = useMemo(
+    () => (glyph.size <= DENSE_GRID ? glyphCode(glyph) : `${glyph.size}² · ${glyphStamp(glyph).toUpperCase()}`),
+    [glyph]
+  );
   const empty = count === 0;
 
   /** Single source of truth for an edit: records history, moves the glyph. */
@@ -350,23 +359,52 @@ export function GlyphStudio() {
       const w = canvas.width;
       const h = canvas.height;
       const n = glyph.size;
-      renderGlyph(ctx, w, h, glyph, ink, background);
+      const { cell, ox, oy, side } = gridBox(w, h, n);
 
-      const cell = Math.min(w, h) / n;
+      // Tracing paper: contain-fitted into the grid square, either beneath the
+      // ink or laid over it, and never touching a cell.
+      const drawGuide = () => {
+        if (!source || !overlay) return;
+        const art = trim ? source.bounds : { x: 0, y: 0, w: source.canvas.width, h: source.canvas.height };
+        const scale = Math.min(side / art.w, side / art.h);
+        const dw = art.w * scale;
+        const dh = art.h * scale;
+        ctx.save();
+        ctx.globalAlpha = opacity;
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(source.canvas, art.x, art.y, art.w, art.h, ox + (side - dw) / 2, oy + (side - dh) / 2, dw, dh);
+        ctx.restore();
+      };
+
+      paintGround(ctx, w, h, background);
+      if (layer === "under") drawGuide();
+      drawGlyphCells(ctx, w, h, glyph, ink);
+      if (layer === "over") drawGuide();
+
       const at = (i: number) => Math.round(i * cell) + 0.5;
       const dark = background === "black" || (background === "transparent" && ink === "white");
       const line = dark ? "rgba(245, 245, 243, 0.15)" : "rgba(10, 10, 10, 0.11)";
       const guide = dark ? "rgba(245, 245, 243, 0.42)" : "rgba(10, 10, 10, 0.40)";
 
+      // Below about four CSS pixels a cell, the per-cell lattice stops reading
+      // as a grid and starts reading as grey — so at that density only the
+      // guides are drawn, on a rhythm that widens with the grid. The measure is
+      // CSS pixels, not device: the grid should look the same on a retina
+      // screen as on a plain one, not gain a rule the other display lacks.
+      const step = guideStep(n);
+      const fine = cell / dpr >= 4;
+      const span = Math.round(n * cell);
       ctx.lineWidth = 1;
       for (let i = 0; i <= n; i++) {
-        const strong = guides && (i % 4 === 0 || i === n / 2);
-        ctx.strokeStyle = strong ? guide : line;
+        const border = i === 0 || i === n;
+        const rhythm = i % step === 0 || i === n / 2;
+        if (!fine && !border && !(guides && rhythm)) continue;
+        ctx.strokeStyle = guides && (rhythm || border) ? guide : line;
         ctx.beginPath();
         ctx.moveTo(at(i), 0);
-        ctx.lineTo(at(i), Math.round(n * cell));
+        ctx.lineTo(at(i), span);
         ctx.moveTo(0, at(i));
-        ctx.lineTo(Math.round(n * cell), at(i));
+        ctx.lineTo(span, at(i));
         ctx.stroke();
       }
 
@@ -375,7 +413,10 @@ export function GlyphStudio() {
         const [cx, cy] = mark;
         ctx.strokeStyle = dark ? "#F5F5F3" : "#0A0A0A";
         ctx.lineWidth = keyed ? 3 : 2;
-        ctx.strokeRect(at(cx), at(cy), Math.round(cell), Math.round(cell));
+        // On a dense grid a one-cell box is thinner than its own outline, so
+        // the marker keeps a floor and stays findable.
+        const box = Math.max(Math.round(cell), 6);
+        ctx.strokeRect(at(cx), at(cy), box, box);
       }
     };
     const schedule = () => {
@@ -389,7 +430,7 @@ export function GlyphStudio() {
       if (raf) cancelAnimationFrame(raf);
       ro.disconnect();
     };
-  }, [glyph, ink, background, guides, hover, cursor, keyed]);
+  }, [glyph, ink, background, guides, hover, cursor, keyed, source, overlay, opacity, layer, trim]);
 
   const cellFromEvent = useCallback(
     (e: { clientX: number; clientY: number }): [number, number] | null => {
@@ -482,47 +523,18 @@ export function GlyphStudio() {
     [cursor, commit, mirror]
   );
 
-  /** Re-run the trace. Overrides let a control apply before its state lands. */
-  const trace = useCallback(
-    (over?: Partial<TraceOptions> & { source?: LoadedSource }) => {
-      const from = over?.source ?? source;
-      if (!from) return;
-      const next = traceImageToGlyph(from.image, {
-        size: over?.size ?? glyphRef.current.size,
-        read: over?.read ?? read,
-        threshold: over?.threshold ?? threshold,
-        trim: over?.trim ?? trim,
-        invert: over?.invert ?? traceInvert,
-      });
-      tracedRef.current = next;
-      commit(next);
-      setNotice(
-        isEmpty(next) ? "Nothing lands at this setting — try the other read, or a lower threshold." : null
-      );
-      return next;
-    },
-    [source, read, threshold, trim, traceInvert, commit]
-  );
-
-  /** Take an image in — clipboard, drop, or file picker — and trace it once. */
-  const takeSource = useCallback(
-    async (input: Blob | string, name: string) => {
-      setNotice(null);
-      try {
-        const loaded = await loadSource(input, name);
-        // A cut-out reads by silhouette; anything on a solid ground by darkness.
-        const nextRead: ReadMode = hasTransparency(loaded.image) ? "silhouette" : "darkness";
-        setSource(loaded);
-        setRead(nextRead);
-        setTraceInvert(false);
-        trace({ source: loaded, read: nextRead, invert: false });
-      } catch (err) {
-        setSource(null);
-        setNotice(err instanceof SourceError ? err.message : "That could not be read as an image.");
-      }
-    },
-    [trace]
-  );
+  /** Take an image in — clipboard, drop, or file picker — as the reference. */
+  const takeSource = useCallback(async (input: Blob | string, name: string) => {
+    setNotice(null);
+    try {
+      const loaded = await loadSource(input, name);
+      setSource(loaded);
+      setOverlay(true);
+    } catch (err) {
+      setSource(null);
+      setNotice(err instanceof SourceError ? err.message : "That could not be read as an image.");
+    }
+  }, []);
 
   // Paste anywhere on the page: an image off the clipboard, or SVG markup
   // copied straight out of a design tool.
@@ -558,18 +570,15 @@ export function GlyphStudio() {
   const clearSource = useCallback(() => {
     setSource(null);
     setNotice(null);
-    tracedRef.current = null;
   }, []);
 
   const pickSize = useCallback(
     (size: number) => {
       if (size === glyphRef.current.size) return;
-      // Untouched since the trace? Re-trace — it beats upscaling the bitmap.
-      if (source && tracedRef.current === glyphRef.current) trace({ size });
-      else commit(resizeGlyph(glyphRef.current, size));
+      commit(resizeGlyph(glyphRef.current, size));
       setCursor(([x, y]) => [Math.min(size - 1, x), Math.min(size - 1, y)]);
     },
-    [commit, source, trace]
+    [commit]
   );
 
   const saveGlyph = useCallback(() => {
@@ -589,13 +598,13 @@ export function GlyphStudio() {
   }, []);
 
   const exportSvg = useCallback(() => {
-    const svg = glyphToSvg(glyph, ink, background, EXPORT_UNIT);
+    const svg = glyphToSvg(glyph, ink, background, exportUnit(glyph.size));
     download(new Blob([svg], { type: "image/svg+xml" }), `slbh-glyph-${glyphSlug(glyph)}.svg`);
   }, [glyph, ink, background, download]);
 
   const copySvg = useCallback(async () => {
     try {
-      await navigator.clipboard.writeText(glyphToSvg(glyph, ink, background, EXPORT_UNIT));
+      await navigator.clipboard.writeText(glyphToSvg(glyph, ink, background, exportUnit(glyph.size)));
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1600);
     } catch {
@@ -612,16 +621,20 @@ export function GlyphStudio() {
           Shigetaka Kurita drew the first emoji set on a 12 × 12 monochrome grid
           — a hundred and forty-four squares to carry weather, feeling, and
           intent at the size of a thumbnail. Same constraint here: choose the
-          pixel count, fill the cells by hand — or paste an SVG or a PNG and
-          let it drop onto the grid — and let the shape do the work. The export
-          traces the boundary between ink and ground into one clean vector
-          path, so the glyph scales without a seam.
+          pixel count and fill the cells by hand. Paste an SVG or a PNG and it
+          rides under the grid as tracing paper — a guide to work from, never a
+          shortcut that fills the squares for you. The export traces the
+          boundary between ink and ground into one clean vector path, so the
+          glyph scales without a seam.
         </p>
       </div>
 
       <div className="container-page gly-grid">
         {/* ── The grid ── */}
-        <div className="gly-stage">
+        <div
+          className="gly-stage"
+          style={{ ["--gly-stage-w" as string]: glyph.size > DENSE_GRID ? "640px" : "480px" }}
+        >
           <div
             className={`gly-frame gly-bg-${background}`}
             data-dropping={dropping}
@@ -655,7 +668,7 @@ export function GlyphStudio() {
                 {glyph.size} × {glyph.size} · {glyph.size * glyph.size} CELLS
               </span>
               <span className="gly-meta-line">
-                {count} FILLED · {((count / (glyph.size * glyph.size)) * 100).toFixed(0)}% INKED
+                {count} FILLED · {inkedPercent(count, glyph.size)}% INKED
               </span>
               <span className="gly-meta-line">
                 {tool.toUpperCase()} · MIRROR {mirror.toUpperCase()}
@@ -696,7 +709,7 @@ export function GlyphStudio() {
         <div className="gly-controls">
           <fieldset className="gly-field">
             <legend className="t-label gly-legend">Grid</legend>
-            <div className="gly-seg gly-seg-4">
+            <div className="gly-seg gly-seg-5">
               {GRID_SIZES.map((size) => (
                 <button
                   key={size}
@@ -738,82 +751,68 @@ export function GlyphStudio() {
                   </button>
                   <span className="gly-source-hint">or paste / drop another</span>
                 </div>
-                <span className="t-mono gly-sub">Read</span>
-                <div className="gly-chips" role="group" aria-label="Read">
-                  {READS.map((r) => (
+                <span className="t-mono gly-sub">Guide</span>
+                <div className="gly-chips" role="group" aria-label="Guide">
+                  {LAYERS.map((l) => (
                     <button
-                      key={r.id}
+                      key={l.id}
                       type="button"
                       className="gly-chip"
-                      data-active={r.id === read}
-                      aria-pressed={r.id === read}
-                      onClick={() => {
-                        setRead(r.id);
-                        trace({ read: r.id });
-                      }}
+                      data-active={l.id === layer}
+                      aria-pressed={l.id === layer}
+                      onClick={() => setLayer(l.id)}
                     >
-                      {r.label}
+                      {l.label}
                     </button>
                   ))}
-                </div>
-                <span className="t-mono gly-sub">Adjust</span>
-                <div className="gly-chips" role="group" aria-label="Adjust">
                   <button
                     type="button"
                     className="gly-chip"
                     data-active={trim}
                     aria-pressed={trim}
-                    onClick={() => {
-                      setTrim(!trim);
-                      trace({ trim: !trim });
-                    }}
+                    onClick={() => setTrim(!trim)}
                   >
                     Trim
                   </button>
                   <button
                     type="button"
                     className="gly-chip"
-                    data-active={traceInvert}
-                    aria-pressed={traceInvert}
-                    onClick={() => {
-                      setTraceInvert(!traceInvert);
-                      trace({ invert: !traceInvert });
-                    }}
+                    data-active={overlay}
+                    aria-pressed={overlay}
+                    onClick={() => setOverlay(!overlay)}
                   >
-                    Negative
+                    {overlay ? "Showing" : "Hidden"}
                   </button>
                 </div>
-                <div className="gly-threshold">
+                <div className="gly-dial-block">
                   <Dial
-                    label="Threshold"
-                    value={threshold}
+                    label="Opacity"
+                    value={opacity}
                     min={0.05}
-                    max={0.95}
-                    step={0.01}
+                    max={1}
+                    step={0.05}
                     format={(v) => `${Math.round(v * 100)}%`}
-                    onChange={(v) => {
-                      setThreshold(v);
-                      trace({ threshold: v });
-                    }}
+                    onChange={setOpacity}
                   />
                 </div>
                 <p className="gly-note">
-                  How much of a cell must be inked before it lands. Drop it to keep hairlines, raise it to
-                  burn off the fuzz. Silhouette reads the transparency, darkness reads the tones — every
-                  change here re-traces from the original, so hand edits after this are yours to redo.
+                  The artwork sits on the grid as tracing paper — under the ink or over it, trimmed to its
+                  own edges or whole. It fills nothing in for you and never reaches the export: every cell
+                  is yours to place.
                 </p>
               </>
             ) : (
               <>
                 <div className="gly-drop">
                   <p className="gly-drop-line">
-                    Paste an SVG or a PNG anywhere on this page — ⌘V — or drop one on the grid.
+                    Paste an SVG or a PNG anywhere on this page — ⌘V — or drop one on the grid to trace
+                    over.
                   </p>
                   <FilePick label="Choose a file" onPick={(file) => void takeSource(file, file.name)} />
                 </div>
                 <p className="gly-note">
-                  Artwork lands on the grid contain-fitted and centred, resampled cell by cell — a starting
-                  point to clean up by hand, not a finished glyph.
+                  Artwork lands on the grid as a guide to trace over — contain-fitted, centred, and never
+                  drawn into cells. Nothing is filled in for you.
                 </p>
               </>
             )}
@@ -969,7 +968,8 @@ export function GlyphStudio() {
               </button>
             </div>
             <p className="t-mono gly-export-note">
-              {glyph.size * EXPORT_UNIT} × {glyph.size * EXPORT_UNIT} · ONE PATH · {ink.toUpperCase()} INK ·{" "}
+              {glyph.size * exportUnit(glyph.size)} × {glyph.size * exportUnit(glyph.size)} · ONE PATH ·{" "}
+              {ink.toUpperCase()} INK ·{" "}
               {background === "transparent" ? "NO GROUND" : `${background.toUpperCase()} GROUND`}
             </p>
           </fieldset>
@@ -1026,7 +1026,7 @@ export function GlyphStudio() {
         .gly-frame {
           position: relative;
           width: 100%;
-          max-width: 480px;
+          max-width: var(--gly-stage-w, 480px);
           aspect-ratio: 1 / 1;
           border: 0.5px solid var(--hairline-strong);
           overflow: hidden;
@@ -1065,7 +1065,7 @@ export function GlyphStudio() {
           align-items: flex-start;
           justify-content: space-between;
           gap: 16px;
-          max-width: 480px;
+          max-width: var(--gly-stage-w, 480px);
         }
         .gly-meta-text { opacity: 0.6; }
         .gly-meta-line { display: block; line-height: 1.7; }
@@ -1095,14 +1095,14 @@ export function GlyphStudio() {
 
         .gly-code {
           display: block;
-          max-width: 480px;
+          max-width: var(--gly-stage-w, 480px);
           opacity: 0.35;
           letter-spacing: 0.06em;
           word-break: break-all;
           line-height: 1.6;
         }
 
-        .gly-saved-block { max-width: 480px; }
+        .gly-saved-block { max-width: var(--gly-stage-w, 480px); }
         .gly-saved-legend { display: block; margin-bottom: 12px; }
         .gly-saved { display: flex; flex-wrap: wrap; gap: 6px; }
         .gly-saved-item {
@@ -1165,7 +1165,10 @@ export function GlyphStudio() {
         }
         .gly-seg-2 { grid-template-columns: repeat(2, 1fr); }
         .gly-seg-3 { grid-template-columns: repeat(3, 1fr); }
-        .gly-seg-4 { grid-template-columns: repeat(4, 1fr); }
+        .gly-seg-5 { grid-template-columns: repeat(5, 1fr); }
+        .gly-seg-5 .gly-seg-btn { padding: 13px 4px; letter-spacing: 0.06em; }
+        .gly-seg-5 .gly-seg-btn:nth-child(5n) { border-right: none; }
+        .gly-seg-5 .gly-seg-btn:nth-child(n + 6) { border-top: 0.5px solid var(--hairline-strong); }
         .gly-seg-btn {
           font-family: var(--font-inter), sans-serif;
           font-weight: 500;
@@ -1212,7 +1215,7 @@ export function GlyphStudio() {
           line-height: 1.6;
         }
 
-        /* ── Source: the pasted artwork and its trace dials ── */
+        /* ── Source: the pasted artwork and its guide dials ── */
         .gly-source {
           display: flex;
           align-items: center;
@@ -1289,7 +1292,7 @@ export function GlyphStudio() {
           line-height: 1.6;
         }
 
-        .gly-threshold { margin-top: 18px; }
+        .gly-dial-block { margin-top: 18px; }
         .gly-dial { display: flex; flex-direction: column; gap: 7px; }
         .gly-dial-head {
           display: flex;

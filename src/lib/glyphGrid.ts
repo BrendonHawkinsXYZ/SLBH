@@ -20,7 +20,9 @@
  * recording empty steps.
  */
 
-export const GRID_SIZES = [12, 16, 24, 32] as const;
+// Kurita's 12 at one end, a 256 canvas at the other, doubling-ish in between
+// so every step is a clean re-sample of the one before it.
+export const GRID_SIZES = [12, 16, 24, 32, 48, 64, 96, 128, 192, 256] as const;
 export type GridSize = (typeof GRID_SIZES)[number];
 
 export const DEFAULT_SIZE: GridSize = 16;
@@ -205,13 +207,26 @@ export function glyphCode(g: Glyph): string {
   return `${g.size}·${hex.toUpperCase()}`;
 }
 
+/** Folded checksum of the bitmap — eight hex characters, read off the bytes. */
+export function glyphStamp(g: Glyph): string {
+  let sum = 2166136261;
+  for (let i = 0; i < g.cells.length; i++) {
+    sum = ((sum ^ g.cells[i]) * 16777619) >>> 0;
+  }
+  return sum.toString(16).padStart(8, "0");
+}
+
 export function glyphSlug(g: Glyph): string {
-  const code = glyphCode(g);
-  const hex = code.slice(code.indexOf("·") + 1).toLowerCase();
-  // Short, stable stamp: grid size plus a folded checksum of the bitmap.
-  let sum = 0;
-  for (let i = 0; i < hex.length; i++) sum = (sum * 31 + hex.charCodeAt(i)) >>> 0;
-  return `${g.size}x${g.size}-${sum.toString(16).padStart(8, "0")}`;
+  return `${g.size}x${g.size}-${glyphStamp(g)}`;
+}
+
+/**
+ * Pixels per cell for the exported document, so every grid lands near a
+ * 1024 px square. The path is in cell units either way — this only sets the
+ * width and height an editor opens the file at.
+ */
+export function exportUnit(size: number): number {
+  return Math.max(2, Math.round(1024 / size));
 }
 
 // ── Contour trace ───────────────────────────────────────────────────────────
@@ -341,10 +356,117 @@ export function glyphToSvg(g: Glyph, ink: Ink, background: Background, unit = 32
   );
 }
 
+/** The grid's square inside a canvas box: cell size and the centring offset. */
+export function gridBox(w: number, h: number, n: number): { cell: number; ox: number; oy: number; side: number } {
+  const cell = Math.min(w, h) / n;
+  const side = cell * n;
+  return { cell, ox: (w - side) / 2, oy: (h - side) / 2, side };
+}
+
+/** Clear the box and lay the ground down. */
+export function paintGround(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  background: Background
+): void {
+  ctx.clearRect(0, 0, w, h);
+  if (background === "transparent") return;
+  ctx.fillStyle = background === "white" ? "#FFFFFF" : "#000000";
+  ctx.fillRect(0, 0, w, h);
+}
+
 /**
- * Draw a glyph into a canvas box — the square is centred and cells land on
- * whole device pixels, so the preview and the thumbnails stay crisp.
+ * Draw the filled cells only, no ground — split out from `renderGlyph` so the
+ * studio can slide a reference image between the ground and the ink. Cells land
+ * on whole device pixels, so the preview and the thumbnails stay crisp.
  */
+/**
+ * Past this many cells a grid counts as dense: the studio widens its stage,
+ * thins the lattice, and stops printing the bitmap as hex.
+ */
+export const DENSE_GRID = 64;
+
+// One n × n bitmap per glyph, kept as long as the glyph is. Glyphs are
+// immutable, so the cache can never go stale — only unused, and the WeakMap
+// lets those fall away with the glyph itself.
+const bitmaps = new WeakMap<Glyph, { ink: Ink; canvas: HTMLCanvasElement }>();
+
+function glyphBitmap(g: Glyph, ink: Ink): HTMLCanvasElement {
+  const held = bitmaps.get(g);
+  if (held && held.ink === ink) return held.canvas;
+
+  const n = g.size;
+  const canvas = held?.canvas ?? document.createElement("canvas");
+  canvas.width = n;
+  canvas.height = n;
+  const ctx = canvas.getContext("2d");
+  if (ctx) {
+    const img = ctx.createImageData(n, n);
+    const data = img.data;
+    const level = ink === "black" ? 0 : 255;
+    for (let i = 0, p = 0; i < g.cells.length; i++, p += 4) {
+      if (!g.cells[i]) continue;
+      data[p] = level;
+      data[p + 1] = level;
+      data[p + 2] = level;
+      data[p + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+  bitmaps.set(g, { ink, canvas });
+  return canvas;
+}
+
+export function drawGlyphCells(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  g: Glyph,
+  ink: Ink
+): void {
+  const n = g.size;
+  const { cell, ox, oy, side } = gridBox(w, h, n);
+
+  // A dense grid goes through one bitmap blit instead of a fill per run: at 256
+  // across, a checkerboard is 32,768 separate rectangles a frame, which is the
+  // one pattern that pushes past a frame's budget. Blitting is flat in the
+  // pattern — only the cell count matters. Smoothing follows the direction:
+  // hard edges going up in scale, averaged coming down so a thumbnail of a
+  // dense glyph reads as tone rather than aliased specks.
+  if (n > DENSE_GRID) {
+    ctx.save();
+    ctx.imageSmoothingEnabled = cell < 1;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(glyphBitmap(g, ink), ox, oy, side, side);
+    ctx.restore();
+    return;
+  }
+
+  const edge = (i: number, o: number) => Math.round(o + i * cell);
+  ctx.fillStyle = INK_HEX[ink];
+  for (let y = 0; y < n; y++) {
+    const y0 = edge(y, oy);
+    const rowH = edge(y + 1, oy) - y0;
+    const row = y * n;
+    let x = 0;
+    while (x < n) {
+      if (!g.cells[row + x]) {
+        x++;
+        continue;
+      }
+      // One fill per run of neighbouring cells — at 256 across, the difference
+      // between a few hundred calls a frame and sixty-five thousand.
+      let end = x + 1;
+      while (end < n && g.cells[row + end]) end++;
+      const x0 = edge(x, ox);
+      ctx.fillRect(x0, y0, edge(end, ox) - x0, rowH);
+      x = end;
+    }
+  }
+}
+
+/** Ground plus ink — the whole glyph, for thumbnails and proofs. */
 export function renderGlyph(
   ctx: CanvasRenderingContext2D,
   w: number,
@@ -353,155 +475,6 @@ export function renderGlyph(
   ink: Ink,
   background: Background
 ): void {
-  ctx.clearRect(0, 0, w, h);
-  if (background !== "transparent") {
-    ctx.fillStyle = background === "white" ? "#FFFFFF" : "#000000";
-    ctx.fillRect(0, 0, w, h);
-  }
-  const n = g.size;
-  const cell = Math.min(w, h) / n;
-  const ox = (w - cell * n) / 2;
-  const oy = (h - cell * n) / 2;
-  ctx.fillStyle = INK_HEX[ink];
-  for (let y = 0; y < n; y++) {
-    for (let x = 0; x < n; x++) {
-      if (!g.cells[y * n + x]) continue;
-      const x0 = Math.round(ox + x * cell);
-      const y0 = Math.round(oy + y * cell);
-      ctx.fillRect(x0, y0, Math.round(ox + (x + 1) * cell) - x0, Math.round(oy + (y + 1) * cell) - y0);
-    }
-  }
-}
-
-// ── Image → grid ────────────────────────────────────────────────────────────
-
-/**
- * How a source image is read into ink.
- *
- * `silhouette` takes the alpha channel — anything opaque is ink, whatever
- * colour it is. That is the right read for a cut-out icon or a pasted SVG on a
- * transparent ground. `darkness` composites over white and reads luminance, the
- * right call for a scan, a screenshot, or anything drawn on a solid ground.
- */
-export type ReadMode = "silhouette" | "darkness";
-
-export type TraceOptions = {
-  size: number;
-  read: ReadMode;
-  /** Fraction of a cell that must be inked for the cell to land — 0…1. */
-  threshold: number;
-  /** Crop to the artwork's own bounds before fitting, ignoring dead margin. */
-  trim: boolean;
-  invert: boolean;
-};
-
-/** Anything meaningfully see-through? Picks the read mode on import. */
-export function hasTransparency(src: ImageData): boolean {
-  const { data } = src;
-  for (let p = 3; p < data.length; p += 4) {
-    if (data[p] < 250) return true;
-  }
-  return false;
-}
-
-/** Per-source-pixel ink coverage in 0…1, under the chosen read. */
-function inkCoverage(src: ImageData, read: ReadMode): Float32Array {
-  const { data } = src;
-  const cov = new Float32Array(src.width * src.height);
-  for (let i = 0, p = 0; i < cov.length; i++, p += 4) {
-    const a = data[p + 3] / 255;
-    if (a === 0) continue;
-    if (read === "silhouette") {
-      cov[i] = a;
-    } else {
-      // Rec. 709 luma, composited over white so a clear ground reads as paper.
-      const luma = (0.2126 * data[p] + 0.7152 * data[p + 1] + 0.0722 * data[p + 2]) / 255;
-      cov[i] = a * (1 - luma);
-    }
-  }
-  return cov;
-}
-
-/**
- * Resample an image onto the glyph grid.
- *
- * Every cell takes the mean coverage of the source pixels under it — a box
- * filter, not a point sample, so a hairline stroke still registers as partial
- * ink instead of disappearing between two samples — and lands when that mean
- * clears the threshold. The artwork is contain-fitted into the square and
- * centred, so a wide image keeps its proportions rather than stretching.
- */
-export function traceImageToGlyph(src: ImageData, o: TraceOptions): Glyph {
-  const n = o.size;
-  const out = createGlyph(n);
-  const { width: w, height: h } = src;
-  if (w === 0 || h === 0) return out;
-
-  const cov = inkCoverage(src, o.read);
-
-  // Bounds of the artwork itself — anything above a whisker of ink counts.
-  let x0 = 0;
-  let y0 = 0;
-  let x1 = w;
-  let y1 = h;
-  if (o.trim) {
-    x0 = w;
-    y0 = h;
-    x1 = -1;
-    y1 = -1;
-    for (let y = 0; y < h; y++) {
-      for (let x = 0; x < w; x++) {
-        if (cov[y * w + x] <= 0.04) continue;
-        if (x < x0) x0 = x;
-        if (x > x1) x1 = x;
-        if (y < y0) y0 = y;
-        if (y > y1) y1 = y;
-      }
-    }
-    if (x1 < 0) return o.invert ? invertGlyph(out) : out; // nothing to trace
-    x1 += 1;
-    y1 += 1;
-  }
-
-  const bw = x1 - x0;
-  const bh = y1 - y0;
-  const scale = Math.min(n / bw, n / bh); // contain fit, in cells per source px
-  const ox = (n - bw * scale) / 2;
-  const oy = (n - bh * scale) / 2;
-
-  for (let cy = 0; cy < n; cy++) {
-    // The cell's span back in source pixels, clamped to the cropped box.
-    const sy0 = y0 + (cy - oy) / scale;
-    const sy1 = y0 + (cy + 1 - oy) / scale;
-    const ry0 = Math.max(y0, Math.floor(sy0));
-    const ry1 = Math.min(y1, Math.ceil(sy1));
-    for (let cx = 0; cx < n; cx++) {
-      const sx0 = x0 + (cx - ox) / scale;
-      const sx1 = x0 + (cx + 1 - ox) / scale;
-      const rx0 = Math.max(x0, Math.floor(sx0));
-      const rx1 = Math.min(x1, Math.ceil(sx1));
-
-      let sum = 0;
-      let count = 0;
-      if (rx1 > rx0 && ry1 > ry0) {
-        for (let y = ry0; y < ry1; y++) {
-          for (let x = rx0; x < rx1; x++) {
-            sum += cov[y * w + x];
-            count++;
-          }
-        }
-      } else if (sx1 > x0 && sx0 < x1 && sy1 > y0 && sy0 < y1) {
-        // Cell narrower than a source pixel — take the nearest one.
-        const x = Math.min(x1 - 1, Math.max(x0, Math.floor((sx0 + sx1) / 2)));
-        const y = Math.min(y1 - 1, Math.max(y0, Math.floor((sy0 + sy1) / 2)));
-        sum = cov[y * w + x];
-        count = 1;
-      }
-
-      const mean = count > 0 ? sum / count : 0;
-      if ((mean >= o.threshold) !== o.invert) out.cells[cy * n + cx] = 1;
-    }
-  }
-
-  return out;
+  paintGround(ctx, w, h, background);
+  drawGlyphCells(ctx, w, h, g, ink);
 }

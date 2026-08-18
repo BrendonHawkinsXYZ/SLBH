@@ -1,9 +1,10 @@
 /**
- * glyphSource — turning something pasted into pixels the glyph tracer can read.
+ * glyphSource — turning something pasted into a reference layer for the grid.
  *
  * Browser-side only. Takes a file, a clipboard blob, or a lump of SVG markup
- * and hands back one ImageData at a workable resolution; `traceImageToGlyph`
- * in glyphGrid does the rest.
+ * and hands back a drawable canvas at a workable resolution, plus the bounds of
+ * the artwork inside it. The studio lays that under the grid as tracing paper;
+ * nothing is filled in automatically — the cells are the maker's to place.
  *
  * SVG needs the extra care. Markup copied out of Figma or Illustrator often
  * carries no intrinsic width and height — only a viewBox — and an <img> given
@@ -17,12 +18,18 @@
 /** Long side the rasteriser works at — fine for a 32-cell grid, cheap to filter. */
 export const SOURCE_LONG_SIDE = 512;
 
+/** A rectangle inside the rasterised canvas, in its pixels. */
+export type Bounds = { x: number; y: number; w: number; h: number };
+
 export type LoadedSource = {
-  image: ImageData;
+  /** The rasterised artwork, ready to draw straight into the grid canvas. */
+  canvas: HTMLCanvasElement;
   name: string;
   /** The source's own pixel dimensions, for the readout. */
   width: number;
   height: number;
+  /** Where the artwork actually sits, ignoring dead margin. */
+  bounds: Bounds;
 };
 
 export class SourceError extends Error {}
@@ -83,7 +90,59 @@ function loadImage(url: string): Promise<HTMLImageElement> {
   });
 }
 
-/** Rasterise a file, blob, or SVG string into ImageData for the tracer. */
+/**
+ * Where the artwork sits inside its own frame.
+ *
+ * Transparency makes this easy — the opaque pixels are the artwork. Failing
+ * that, the four corners vote on a ground colour and anything far enough from
+ * it counts, which catches both a white scan and a dark screenshot. A frame
+ * that reads as entirely ground (a flat fill, say) keeps its full rectangle
+ * rather than collapsing to nothing.
+ */
+function artworkBounds(img: ImageData): Bounds {
+  const { data, width: w, height: h } = img;
+  const at = (x: number, y: number) => (y * w + x) * 4;
+  let transparent = false;
+  for (let p = 3; p < data.length; p += 4) {
+    if (data[p] < 250) {
+      transparent = true;
+      break;
+    }
+  }
+
+  // Ground colour: the median of the four corners, channel by channel.
+  const corners = [at(0, 0), at(w - 1, 0), at(0, h - 1), at(w - 1, h - 1)];
+  const ground = [0, 1, 2].map((c) => {
+    const vals = corners.map((p) => data[p + c]).sort((a, b) => a - b);
+    return (vals[1] + vals[2]) / 2;
+  });
+
+  let x0 = w;
+  let y0 = h;
+  let x1 = -1;
+  let y1 = -1;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const p = at(x, y);
+      const alpha = data[p + 3];
+      const marks = transparent
+        ? alpha > 8
+        : Math.abs(data[p] - ground[0]) +
+            Math.abs(data[p + 1] - ground[1]) +
+            Math.abs(data[p + 2] - ground[2]) >
+          24;
+      if (!marks) continue;
+      if (x < x0) x0 = x;
+      if (x > x1) x1 = x;
+      if (y < y0) y0 = y;
+      if (y > y1) y1 = y;
+    }
+  }
+  if (x1 < 0) return { x: 0, y: 0, w, h };
+  return { x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1 };
+}
+
+/** Rasterise a file, blob, or SVG string into a canvas for the overlay. */
 export async function loadSource(input: Blob | string, name: string): Promise<LoadedSource> {
   let markup: string | null = null;
   if (typeof input === "string") markup = input;
@@ -111,12 +170,15 @@ export async function loadSource(input: Blob | string, name: string): Promise<Lo
     if (!ctx) throw new SourceError("This browser would not give up a canvas.");
     ctx.drawImage(img, 0, 0, w, h);
 
+    let bounds: Bounds;
     try {
-      return { image: ctx.getImageData(0, 0, w, h), name, width: sw, height: sh };
+      bounds = artworkBounds(ctx.getImageData(0, 0, w, h));
     } catch {
-      // Only reachable if the source pulled in something cross-origin.
-      throw new SourceError("That image is locked by its origin and cannot be read.");
+      // Only reachable if the source pulled in something cross-origin; the
+      // overlay still works, it just cannot be trimmed to its own edges.
+      bounds = { x: 0, y: 0, w, h };
     }
+    return { canvas, name, width: sw, height: sh, bounds };
   } finally {
     URL.revokeObjectURL(url);
   }
