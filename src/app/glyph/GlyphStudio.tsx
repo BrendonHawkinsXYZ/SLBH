@@ -12,8 +12,11 @@ import {
   createGlyph,
   filledCount,
   flipGlyph,
+  DENSE_GRID,
+  exportUnit,
   glyphCode,
   glyphSlug,
+  glyphStamp,
   glyphToSvg,
   invertGlyph,
   isEmpty,
@@ -65,8 +68,19 @@ const ACTUAL_SIZES = [16, 24, 32];
 const MAX_HISTORY = 60;
 const MAX_SAVED = 12;
 
-// One SVG cell = one grid pixel; this is only the document's width/height.
-const EXPORT_UNIT = 32;
+/** Share of the grid inked — a decimal below one percent, where 256² lives. */
+function inkedPercent(count: number, size: number): string {
+  const pct = (count / (size * size)) * 100;
+  return pct > 0 && pct < 1 ? pct.toFixed(1) : pct.toFixed(0);
+}
+
+/** Lattice rhythm: the heavier line every N cells, widening as the grid does. */
+function guideStep(n: number): number {
+  if (n <= 32) return 4;
+  if (n <= 64) return 8;
+  if (n <= 128) return 16;
+  return 32;
+}
 
 const LAYERS = [
   { id: "under", label: "Under" },
@@ -278,7 +292,11 @@ export function GlyphStudio() {
   } | null>(null);
 
   const count = filledCount(glyph);
-  const code = useMemo(() => glyphCode(glyph), [glyph]);
+  // A 256 grid packs to 16,384 hex characters — past DENSE_GRID, show the stamp.
+  const code = useMemo(
+    () => (glyph.size <= DENSE_GRID ? glyphCode(glyph) : `${glyph.size}² · ${glyphStamp(glyph).toUpperCase()}`),
+    [glyph]
+  );
   const empty = count === 0;
 
   /** Single source of truth for an edit: records history, moves the glyph. */
@@ -368,15 +386,25 @@ export function GlyphStudio() {
       const line = dark ? "rgba(245, 245, 243, 0.15)" : "rgba(10, 10, 10, 0.11)";
       const guide = dark ? "rgba(245, 245, 243, 0.42)" : "rgba(10, 10, 10, 0.40)";
 
+      // Below about four CSS pixels a cell, the per-cell lattice stops reading
+      // as a grid and starts reading as grey — so at that density only the
+      // guides are drawn, on a rhythm that widens with the grid. The measure is
+      // CSS pixels, not device: the grid should look the same on a retina
+      // screen as on a plain one, not gain a rule the other display lacks.
+      const step = guideStep(n);
+      const fine = cell / dpr >= 4;
+      const span = Math.round(n * cell);
       ctx.lineWidth = 1;
       for (let i = 0; i <= n; i++) {
-        const strong = guides && (i % 4 === 0 || i === n / 2);
-        ctx.strokeStyle = strong ? guide : line;
+        const border = i === 0 || i === n;
+        const rhythm = i % step === 0 || i === n / 2;
+        if (!fine && !border && !(guides && rhythm)) continue;
+        ctx.strokeStyle = guides && (rhythm || border) ? guide : line;
         ctx.beginPath();
         ctx.moveTo(at(i), 0);
-        ctx.lineTo(at(i), Math.round(n * cell));
+        ctx.lineTo(at(i), span);
         ctx.moveTo(0, at(i));
-        ctx.lineTo(Math.round(n * cell), at(i));
+        ctx.lineTo(span, at(i));
         ctx.stroke();
       }
 
@@ -385,7 +413,10 @@ export function GlyphStudio() {
         const [cx, cy] = mark;
         ctx.strokeStyle = dark ? "#F5F5F3" : "#0A0A0A";
         ctx.lineWidth = keyed ? 3 : 2;
-        ctx.strokeRect(at(cx), at(cy), Math.round(cell), Math.round(cell));
+        // On a dense grid a one-cell box is thinner than its own outline, so
+        // the marker keeps a floor and stays findable.
+        const box = Math.max(Math.round(cell), 6);
+        ctx.strokeRect(at(cx), at(cy), box, box);
       }
     };
     const schedule = () => {
@@ -567,13 +598,13 @@ export function GlyphStudio() {
   }, []);
 
   const exportSvg = useCallback(() => {
-    const svg = glyphToSvg(glyph, ink, background, EXPORT_UNIT);
+    const svg = glyphToSvg(glyph, ink, background, exportUnit(glyph.size));
     download(new Blob([svg], { type: "image/svg+xml" }), `slbh-glyph-${glyphSlug(glyph)}.svg`);
   }, [glyph, ink, background, download]);
 
   const copySvg = useCallback(async () => {
     try {
-      await navigator.clipboard.writeText(glyphToSvg(glyph, ink, background, EXPORT_UNIT));
+      await navigator.clipboard.writeText(glyphToSvg(glyph, ink, background, exportUnit(glyph.size)));
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1600);
     } catch {
@@ -600,7 +631,10 @@ export function GlyphStudio() {
 
       <div className="container-page gly-grid">
         {/* ── The grid ── */}
-        <div className="gly-stage">
+        <div
+          className="gly-stage"
+          style={{ ["--gly-stage-w" as string]: glyph.size > DENSE_GRID ? "640px" : "480px" }}
+        >
           <div
             className={`gly-frame gly-bg-${background}`}
             data-dropping={dropping}
@@ -634,7 +668,7 @@ export function GlyphStudio() {
                 {glyph.size} × {glyph.size} · {glyph.size * glyph.size} CELLS
               </span>
               <span className="gly-meta-line">
-                {count} FILLED · {((count / (glyph.size * glyph.size)) * 100).toFixed(0)}% INKED
+                {count} FILLED · {inkedPercent(count, glyph.size)}% INKED
               </span>
               <span className="gly-meta-line">
                 {tool.toUpperCase()} · MIRROR {mirror.toUpperCase()}
@@ -675,7 +709,7 @@ export function GlyphStudio() {
         <div className="gly-controls">
           <fieldset className="gly-field">
             <legend className="t-label gly-legend">Grid</legend>
-            <div className="gly-seg gly-seg-4">
+            <div className="gly-seg gly-seg-5">
               {GRID_SIZES.map((size) => (
                 <button
                   key={size}
@@ -934,7 +968,8 @@ export function GlyphStudio() {
               </button>
             </div>
             <p className="t-mono gly-export-note">
-              {glyph.size * EXPORT_UNIT} × {glyph.size * EXPORT_UNIT} · ONE PATH · {ink.toUpperCase()} INK ·{" "}
+              {glyph.size * exportUnit(glyph.size)} × {glyph.size * exportUnit(glyph.size)} · ONE PATH ·{" "}
+              {ink.toUpperCase()} INK ·{" "}
               {background === "transparent" ? "NO GROUND" : `${background.toUpperCase()} GROUND`}
             </p>
           </fieldset>
@@ -991,7 +1026,7 @@ export function GlyphStudio() {
         .gly-frame {
           position: relative;
           width: 100%;
-          max-width: 480px;
+          max-width: var(--gly-stage-w, 480px);
           aspect-ratio: 1 / 1;
           border: 0.5px solid var(--hairline-strong);
           overflow: hidden;
@@ -1030,7 +1065,7 @@ export function GlyphStudio() {
           align-items: flex-start;
           justify-content: space-between;
           gap: 16px;
-          max-width: 480px;
+          max-width: var(--gly-stage-w, 480px);
         }
         .gly-meta-text { opacity: 0.6; }
         .gly-meta-line { display: block; line-height: 1.7; }
@@ -1060,14 +1095,14 @@ export function GlyphStudio() {
 
         .gly-code {
           display: block;
-          max-width: 480px;
+          max-width: var(--gly-stage-w, 480px);
           opacity: 0.35;
           letter-spacing: 0.06em;
           word-break: break-all;
           line-height: 1.6;
         }
 
-        .gly-saved-block { max-width: 480px; }
+        .gly-saved-block { max-width: var(--gly-stage-w, 480px); }
         .gly-saved-legend { display: block; margin-bottom: 12px; }
         .gly-saved { display: flex; flex-wrap: wrap; gap: 6px; }
         .gly-saved-item {
@@ -1130,7 +1165,10 @@ export function GlyphStudio() {
         }
         .gly-seg-2 { grid-template-columns: repeat(2, 1fr); }
         .gly-seg-3 { grid-template-columns: repeat(3, 1fr); }
-        .gly-seg-4 { grid-template-columns: repeat(4, 1fr); }
+        .gly-seg-5 { grid-template-columns: repeat(5, 1fr); }
+        .gly-seg-5 .gly-seg-btn { padding: 13px 4px; letter-spacing: 0.06em; }
+        .gly-seg-5 .gly-seg-btn:nth-child(5n) { border-right: none; }
+        .gly-seg-5 .gly-seg-btn:nth-child(n + 6) { border-top: 0.5px solid var(--hairline-strong); }
         .gly-seg-btn {
           font-family: var(--font-inter), sans-serif;
           font-weight: 500;

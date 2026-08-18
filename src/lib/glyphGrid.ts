@@ -20,7 +20,9 @@
  * recording empty steps.
  */
 
-export const GRID_SIZES = [12, 16, 24, 32] as const;
+// Kurita's 12 at one end, a 256 canvas at the other, doubling-ish in between
+// so every step is a clean re-sample of the one before it.
+export const GRID_SIZES = [12, 16, 24, 32, 48, 64, 96, 128, 192, 256] as const;
 export type GridSize = (typeof GRID_SIZES)[number];
 
 export const DEFAULT_SIZE: GridSize = 16;
@@ -205,13 +207,26 @@ export function glyphCode(g: Glyph): string {
   return `${g.size}·${hex.toUpperCase()}`;
 }
 
+/** Folded checksum of the bitmap — eight hex characters, read off the bytes. */
+export function glyphStamp(g: Glyph): string {
+  let sum = 2166136261;
+  for (let i = 0; i < g.cells.length; i++) {
+    sum = ((sum ^ g.cells[i]) * 16777619) >>> 0;
+  }
+  return sum.toString(16).padStart(8, "0");
+}
+
 export function glyphSlug(g: Glyph): string {
-  const code = glyphCode(g);
-  const hex = code.slice(code.indexOf("·") + 1).toLowerCase();
-  // Short, stable stamp: grid size plus a folded checksum of the bitmap.
-  let sum = 0;
-  for (let i = 0; i < hex.length; i++) sum = (sum * 31 + hex.charCodeAt(i)) >>> 0;
-  return `${g.size}x${g.size}-${sum.toString(16).padStart(8, "0")}`;
+  return `${g.size}x${g.size}-${glyphStamp(g)}`;
+}
+
+/**
+ * Pixels per cell for the exported document, so every grid lands near a
+ * 1024 px square. The path is in cell units either way — this only sets the
+ * width and height an editor opens the file at.
+ */
+export function exportUnit(size: number): number {
+  return Math.max(2, Math.round(1024 / size));
 }
 
 // ── Contour trace ───────────────────────────────────────────────────────────
@@ -366,6 +381,43 @@ export function paintGround(
  * studio can slide a reference image between the ground and the ink. Cells land
  * on whole device pixels, so the preview and the thumbnails stay crisp.
  */
+/**
+ * Past this many cells a grid counts as dense: the studio widens its stage,
+ * thins the lattice, and stops printing the bitmap as hex.
+ */
+export const DENSE_GRID = 64;
+
+// One n × n bitmap per glyph, kept as long as the glyph is. Glyphs are
+// immutable, so the cache can never go stale — only unused, and the WeakMap
+// lets those fall away with the glyph itself.
+const bitmaps = new WeakMap<Glyph, { ink: Ink; canvas: HTMLCanvasElement }>();
+
+function glyphBitmap(g: Glyph, ink: Ink): HTMLCanvasElement {
+  const held = bitmaps.get(g);
+  if (held && held.ink === ink) return held.canvas;
+
+  const n = g.size;
+  const canvas = held?.canvas ?? document.createElement("canvas");
+  canvas.width = n;
+  canvas.height = n;
+  const ctx = canvas.getContext("2d");
+  if (ctx) {
+    const img = ctx.createImageData(n, n);
+    const data = img.data;
+    const level = ink === "black" ? 0 : 255;
+    for (let i = 0, p = 0; i < g.cells.length; i++, p += 4) {
+      if (!g.cells[i]) continue;
+      data[p] = level;
+      data[p + 1] = level;
+      data[p + 2] = level;
+      data[p + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+  bitmaps.set(g, { ink, canvas });
+  return canvas;
+}
+
 export function drawGlyphCells(
   ctx: CanvasRenderingContext2D,
   w: number,
@@ -374,14 +426,42 @@ export function drawGlyphCells(
   ink: Ink
 ): void {
   const n = g.size;
-  const { cell, ox, oy } = gridBox(w, h, n);
+  const { cell, ox, oy, side } = gridBox(w, h, n);
+
+  // A dense grid goes through one bitmap blit instead of a fill per run: at 256
+  // across, a checkerboard is 32,768 separate rectangles a frame, which is the
+  // one pattern that pushes past a frame's budget. Blitting is flat in the
+  // pattern — only the cell count matters. Smoothing follows the direction:
+  // hard edges going up in scale, averaged coming down so a thumbnail of a
+  // dense glyph reads as tone rather than aliased specks.
+  if (n > DENSE_GRID) {
+    ctx.save();
+    ctx.imageSmoothingEnabled = cell < 1;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(glyphBitmap(g, ink), ox, oy, side, side);
+    ctx.restore();
+    return;
+  }
+
+  const edge = (i: number, o: number) => Math.round(o + i * cell);
   ctx.fillStyle = INK_HEX[ink];
   for (let y = 0; y < n; y++) {
-    for (let x = 0; x < n; x++) {
-      if (!g.cells[y * n + x]) continue;
-      const x0 = Math.round(ox + x * cell);
-      const y0 = Math.round(oy + y * cell);
-      ctx.fillRect(x0, y0, Math.round(ox + (x + 1) * cell) - x0, Math.round(oy + (y + 1) * cell) - y0);
+    const y0 = edge(y, oy);
+    const rowH = edge(y + 1, oy) - y0;
+    const row = y * n;
+    let x = 0;
+    while (x < n) {
+      if (!g.cells[row + x]) {
+        x++;
+        continue;
+      }
+      // One fill per run of neighbouring cells — at 256 across, the difference
+      // between a few hundred calls a frame and sixty-five thousand.
+      let end = x + 1;
+      while (end < n && g.cells[row + end]) end++;
+      const x0 = edge(x, ox);
+      ctx.fillRect(x0, y0, edge(end, ox) - x0, rowH);
+      x = end;
     }
   }
 }
