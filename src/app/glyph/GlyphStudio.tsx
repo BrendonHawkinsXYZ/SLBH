@@ -27,13 +27,17 @@ import {
   renderGlyph,
   resizeGlyph,
   rotateGlyph,
+  traceImageToGlyph,
   withCells,
+  type ReadMode,
+  type TraceOptions,
 } from "@/lib/glyphGrid";
 import {
   SourceError,
   imageFileFrom,
   loadSource,
   looksLikeSvg,
+  sourcePixels,
   type LoadedSource,
 } from "@/lib/glyphSource";
 
@@ -87,6 +91,11 @@ const LAYERS = [
   { id: "over", label: "Over" },
 ] as const;
 type Layer = (typeof LAYERS)[number]["id"];
+
+const READS: { id: ReadMode; label: string }[] = [
+  { id: "silhouette", label: "Silhouette" },
+  { id: "darkness", label: "Darkness" },
+];
 
 /** Every cell a single stroke touches once the mirror is applied. */
 function mirroredCells(x: number, y: number, n: number, mirror: Mirror): [number, number][] {
@@ -276,6 +285,16 @@ export function GlyphStudio() {
   const [dropping, setDropping] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
+  // ── Auto-trace: the same guide, filled in for you on request. ──
+  const [read, setRead] = useState<ReadMode>("silhouette");
+  const [threshold, setThreshold] = useState(0.45);
+  const [traceInvert, setTraceInvert] = useState(false);
+  // The last auto-traced glyph. While the grid still holds exactly this, the
+  // trace dials re-run live and a grid change re-traces at the new resolution.
+  // The moment a cell is touched by hand, that hand work wins and nothing
+  // re-traces without another press of the button.
+  const [tracedGlyph, setTracedGlyph] = useState<Glyph | null>(null);
+
   // The stroke path writes through this ref so a fast drag never reads stale
   // state between two pointer events in the same frame. Every edit sets it
   // alongside the state; the effect below is only the safety sync.
@@ -304,6 +323,14 @@ export function GlyphStudio() {
     const current = glyphRef.current;
     if (next === current) return;
     setPast((p) => [...p, current].slice(-MAX_HISTORY));
+    setFuture([]);
+    glyphRef.current = next;
+    setGlyph(next);
+  }, []);
+
+  /** Swap the glyph in place, no history step — used by a live re-trace. */
+  const replaceCurrent = useCallback((next: Glyph) => {
+    if (next === glyphRef.current) return;
     setFuture([]);
     glyphRef.current = next;
     setGlyph(next);
@@ -523,6 +550,55 @@ export function GlyphStudio() {
     [cursor, commit, mirror]
   );
 
+  /** The region of the source on show — what the guide draws, what a trace fits. */
+  const crop = useMemo(() => {
+    if (!source) return null;
+    return trim ? source.bounds : { x: 0, y: 0, w: source.canvas.width, h: source.canvas.height };
+  }, [source, trim]);
+
+  /**
+   * Fill the grid from the artwork. A discrete, undoable action — never
+   * something that happens to you on import.
+   */
+  const trace = useCallback(
+    (over?: Partial<TraceOptions> & { live?: boolean }) => {
+      if (!source || !crop) return;
+      const pixels = sourcePixels(source);
+      if (!pixels) {
+        setNotice("This image's pixels are locked by its origin — it can guide, but not be traced.");
+        return;
+      }
+      const next = traceImageToGlyph(pixels, {
+        size: over?.size ?? glyphRef.current.size,
+        read: over?.read ?? read,
+        threshold: over?.threshold ?? threshold,
+        crop: over?.crop ?? crop,
+        invert: over?.invert ?? traceInvert,
+      });
+      setTracedGlyph(next);
+      // A dial being dragged re-runs the trace dozens of times; those all
+      // belong to the one traced step, so only the first press records.
+      if (over?.live) replaceCurrent(next);
+      else commit(next);
+      setNotice(
+        isEmpty(next) ? "Nothing lands at this setting — try the other read, or a lower threshold." : null
+      );
+    },
+    [source, crop, read, threshold, traceInvert, commit, replaceCurrent]
+  );
+
+  const traced = tracedGlyph !== null;
+  /** True while the grid still holds exactly the last trace, hand work absent. */
+  const untouched = tracedGlyph === glyph;
+
+  /** A trace dial moved: re-run at once, but only over an untouched trace. */
+  const retrace = useCallback(
+    (over: Partial<TraceOptions>) => {
+      if (tracedGlyph && tracedGlyph === glyphRef.current) trace({ ...over, live: true });
+    },
+    [tracedGlyph, trace]
+  );
+
   /** Take an image in — clipboard, drop, or file picker — as the reference. */
   const takeSource = useCallback(async (input: Blob | string, name: string) => {
     setNotice(null);
@@ -530,6 +606,10 @@ export function GlyphStudio() {
       const loaded = await loadSource(input, name);
       setSource(loaded);
       setOverlay(true);
+      // A cut-out reads by silhouette; anything on a solid ground by darkness.
+      setRead(loaded.transparent ? "silhouette" : "darkness");
+      setTraceInvert(false);
+      setTracedGlyph(null);
     } catch (err) {
       setSource(null);
       setNotice(err instanceof SourceError ? err.message : "That could not be read as an image.");
@@ -570,15 +650,19 @@ export function GlyphStudio() {
   const clearSource = useCallback(() => {
     setSource(null);
     setNotice(null);
+    setTracedGlyph(null);
   }, []);
 
   const pickSize = useCallback(
     (size: number) => {
       if (size === glyphRef.current.size) return;
-      commit(resizeGlyph(glyphRef.current, size));
+      // Still holding an untouched trace? Re-trace — it beats upscaling the
+      // bitmap. Hand work is re-sampled instead, so nothing drawn is lost.
+      if (tracedGlyph && tracedGlyph === glyphRef.current) trace({ size });
+      else commit(resizeGlyph(glyphRef.current, size));
       setCursor(([x, y]) => [Math.min(size - 1, x), Math.min(size - 1, y)]);
     },
-    [commit]
+    [commit, tracedGlyph, trace]
   );
 
   const saveGlyph = useCallback(() => {
@@ -622,10 +706,10 @@ export function GlyphStudio() {
           — a hundred and forty-four squares to carry weather, feeling, and
           intent at the size of a thumbnail. Same constraint here: choose the
           pixel count and fill the cells by hand. Paste an SVG or a PNG and it
-          rides under the grid as tracing paper — a guide to work from, never a
-          shortcut that fills the squares for you. The export traces the
-          boundary between ink and ground into one clean vector path, so the
-          glyph scales without a seam.
+          rides under the grid as tracing paper — trace it yourself, or press
+          the button and have it traced for you, then clean up the cells that
+          matter. The export traces the boundary between ink and ground into
+          one clean vector path, so the glyph scales without a seam.
         </p>
       </div>
 
@@ -797,8 +881,78 @@ export function GlyphStudio() {
                 </div>
                 <p className="gly-note">
                   The artwork sits on the grid as tracing paper — under the ink or over it, trimmed to its
-                  own edges or whole. It fills nothing in for you and never reaches the export: every cell
-                  is yours to place.
+                  own edges or whole. It never reaches the export.
+                </p>
+
+                <span className="t-mono gly-sub">Trace</span>
+                <button
+                  type="button"
+                  className="gly-btn gly-btn-primary gly-trace-btn"
+                  onClick={() => trace()}
+                  disabled={!source.readable}
+                >
+                  {traced ? "Trace again" : "Trace it for me"}
+                </button>
+                <div className="gly-chips gly-trace-chips" role="group" aria-label="Trace">
+                  {READS.map((r) => (
+                    <button
+                      key={r.id}
+                      type="button"
+                      className="gly-chip"
+                      data-active={r.id === read}
+                      aria-pressed={r.id === read}
+                      disabled={!source.readable}
+                      onClick={() => {
+                        setRead(r.id);
+                        retrace({ read: r.id });
+                      }}
+                    >
+                      {r.label}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    className="gly-chip"
+                    data-active={traceInvert}
+                    aria-pressed={traceInvert}
+                    disabled={!source.readable}
+                    onClick={() => {
+                      setTraceInvert(!traceInvert);
+                      retrace({ invert: !traceInvert });
+                    }}
+                  >
+                    Negative
+                  </button>
+                </div>
+                <div className="gly-dial-block">
+                  <Dial
+                    label="Threshold"
+                    value={threshold}
+                    min={0.05}
+                    max={0.95}
+                    step={0.01}
+                    format={(v) => `${Math.round(v * 100)}%`}
+                    onChange={(v) => {
+                      setThreshold(v);
+                      retrace({ threshold: v });
+                    }}
+                  />
+                </div>
+                <p className="gly-note gly-trace-note">
+                  {source.readable ? (
+                    <>
+                      Tracing fills the grid from the artwork and replaces what is on it — undo brings your
+                      work back. Silhouette reads the transparency, darkness reads the tones; the threshold
+                      is how much of a cell must be inked before it lands.{" "}
+                      {traced
+                        ? untouched
+                          ? "These dials re-run the trace live while the grid still holds it."
+                          : "You have drawn since the last trace, so the dials wait for another press."
+                        : "Trim and the grid size apply to the trace as well, so it lands exactly where the guide sits."}
+                    </>
+                  ) : (
+                    "This image's pixels are locked by its origin, so it can guide the hand but not be traced."
+                  )}
                 </p>
               </>
             ) : (
@@ -811,8 +965,8 @@ export function GlyphStudio() {
                   <FilePick label="Choose a file" onPick={(file) => void takeSource(file, file.name)} />
                 </div>
                 <p className="gly-note">
-                  Artwork lands on the grid as a guide to trace over — contain-fitted, centred, and never
-                  drawn into cells. Nothing is filled in for you.
+                  Artwork lands on the grid as a guide to trace over — contain-fitted and centred. Nothing
+                  is filled in until you ask for it.
                 </p>
               </>
             )}
@@ -1293,6 +1447,8 @@ export function GlyphStudio() {
         }
 
         .gly-dial-block { margin-top: 18px; }
+        .gly-trace-btn { width: 100%; }
+        .gly-trace-chips { margin-top: 10px; }
         .gly-dial { display: flex; flex-direction: column; gap: 7px; }
         .gly-dial-head {
           display: flex;

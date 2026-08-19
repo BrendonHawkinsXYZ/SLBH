@@ -30,6 +30,14 @@ export type LoadedSource = {
   height: number;
   /** Where the artwork actually sits, ignoring dead margin. */
   bounds: Bounds;
+  /**
+   * Whether the pixels can be read back. False only when the artwork pulled in
+   * something cross-origin, which taints the canvas: it still draws as a guide,
+   * but it cannot be traced automatically.
+   */
+  readable: boolean;
+  /** Any meaningful transparency — decides how a trace reads the image. */
+  transparent: boolean;
 };
 
 export class SourceError extends Error {}
@@ -99,7 +107,7 @@ function loadImage(url: string): Promise<HTMLImageElement> {
  * that reads as entirely ground (a flat fill, say) keeps its full rectangle
  * rather than collapsing to nothing.
  */
-function artworkBounds(img: ImageData): Bounds {
+function artworkBounds(img: ImageData): { bounds: Bounds; transparent: boolean } {
   const { data, width: w, height: h } = img;
   const at = (x: number, y: number) => (y * w + x) * 4;
   let transparent = false;
@@ -138,8 +146,8 @@ function artworkBounds(img: ImageData): Bounds {
       if (y > y1) y1 = y;
     }
   }
-  if (x1 < 0) return { x: 0, y: 0, w, h };
-  return { x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1 };
+  const bounds = x1 < 0 ? { x: 0, y: 0, w, h } : { x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1 };
+  return { bounds, transparent };
 }
 
 /** Rasterise a file, blob, or SVG string into a canvas for the overlay. */
@@ -170,15 +178,19 @@ export async function loadSource(input: Blob | string, name: string): Promise<Lo
     if (!ctx) throw new SourceError("This browser would not give up a canvas.");
     ctx.drawImage(img, 0, 0, w, h);
 
-    let bounds: Bounds;
+    let bounds: Bounds = { x: 0, y: 0, w, h };
+    let transparent = false;
+    let readable = true;
     try {
-      bounds = artworkBounds(ctx.getImageData(0, 0, w, h));
+      const read = artworkBounds(ctx.getImageData(0, 0, w, h));
+      bounds = read.bounds;
+      transparent = read.transparent;
     } catch {
       // Only reachable if the source pulled in something cross-origin; the
-      // overlay still works, it just cannot be trimmed to its own edges.
-      bounds = { x: 0, y: 0, w, h };
+      // overlay still works, it just cannot be trimmed or traced.
+      readable = false;
     }
-    return { canvas, name, width: sw, height: sh, bounds };
+    return { canvas, name, width: sw, height: sh, bounds, readable, transparent };
   } finally {
     URL.revokeObjectURL(url);
   }
@@ -196,4 +208,16 @@ export function imageFileFrom(data: DataTransfer | null): File | null {
     if (file && (file.type.startsWith("image/") || /\.svg$/i.test(file.name))) return file;
   }
   return null;
+}
+
+/** The source's pixels, for the tracer. Null when the canvas is not readable. */
+export function sourcePixels(source: LoadedSource): ImageData | null {
+  if (!source.readable) return null;
+  const ctx = source.canvas.getContext("2d", { willReadFrequently: true });
+  if (!ctx) return null;
+  try {
+    return ctx.getImageData(0, 0, source.canvas.width, source.canvas.height);
+  } catch {
+    return null;
+  }
 }

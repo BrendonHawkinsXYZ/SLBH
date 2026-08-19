@@ -63,7 +63,7 @@ const TOOLS: Tool[] = [
     index: "07",
     title: "Glyph",
     href: "/glyph",
-    line: "Kurita’s grid — pick the pixel count, trace by hand over pasted art, out as one clean path.",
+    line: "Kurita’s grid, 12 to 256 — trace pasted art by hand or have it traced, out as one path.",
     out: "SVG",
   },
 ];

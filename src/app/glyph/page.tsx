@@ -4,7 +4,7 @@ import { GlyphStudio } from "./GlyphStudio";
 export const metadata = {
   title: "Glyph — SLBH",
   description:
-    "Pixel emoji instrument — choose a 12, 16, 24, or 32 square grid, lay a pasted SVG or PNG under it as a guide, fill the cells by hand, and export the glyph as a clean SVG.",
+    "Pixel emoji instrument — choose a grid from 12 to 256 squares, lay a pasted SVG or PNG under it as a guide, trace it by hand or have it traced for you, and export the glyph as a clean SVG.",
   robots: { index: false, follow: false },
 };
 
