@@ -478,3 +478,111 @@ export function renderGlyph(
   paintGround(ctx, w, h, background);
   drawGlyphCells(ctx, w, h, g, ink);
 }
+// ── Image → grid ────────────────────────────────────────────────────────────
+
+/**
+ * How a source image is read into ink.
+ *
+ * `silhouette` takes the alpha channel — anything opaque is ink, whatever
+ * colour it is. That is the right read for a cut-out icon or a pasted SVG on a
+ * transparent ground. `darkness` composites over white and reads luminance, the
+ * right call for a scan, a screenshot, or anything drawn on a solid ground.
+ */
+export type ReadMode = "silhouette" | "darkness";
+
+export type TraceOptions = {
+  size: number;
+  read: ReadMode;
+  /** Fraction of a cell that must be inked for the cell to land — 0…1. */
+  threshold: number;
+  /** The region of the source to fit — the same one the guide is drawing. */
+  crop: { x: number; y: number; w: number; h: number };
+  invert: boolean;
+};
+
+/** Per-source-pixel ink coverage in 0…1, under the chosen read. */
+function inkCoverage(src: ImageData, read: ReadMode): Float32Array {
+  const { data } = src;
+  const cov = new Float32Array(src.width * src.height);
+  for (let i = 0, p = 0; i < cov.length; i++, p += 4) {
+    const a = data[p + 3] / 255;
+    if (a === 0) continue;
+    if (read === "silhouette") {
+      cov[i] = a;
+    } else {
+      // Rec. 709 luma, composited over white so a clear ground reads as paper.
+      const luma = (0.2126 * data[p] + 0.7152 * data[p + 1] + 0.0722 * data[p + 2]) / 255;
+      cov[i] = a * (1 - luma);
+    }
+  }
+  return cov;
+}
+
+/**
+ * Resample an image onto the glyph grid.
+ *
+ * Every cell takes the mean coverage of the source pixels under it — a box
+ * filter, not a point sample, so a hairline stroke still registers as partial
+ * ink instead of disappearing between two samples — and lands when that mean
+ * clears the threshold. The artwork is contain-fitted into the square and
+ * centred, so a wide image keeps its proportions rather than stretching.
+ *
+ * `crop` is the region to fit, and it is the caller's job to pass the same one
+ * the guide overlay is drawing — that is what makes a trace land exactly where
+ * the artwork appeared to sit, rather than a few cells off it.
+ */
+export function traceImageToGlyph(src: ImageData, o: TraceOptions): Glyph {
+  const n = o.size;
+  const out = createGlyph(n);
+  const { width: w, height: h } = src;
+  if (w === 0 || h === 0) return out;
+
+  const cov = inkCoverage(src, o.read);
+
+  const x0 = Math.max(0, Math.min(w - 1, o.crop.x));
+  const y0 = Math.max(0, Math.min(h - 1, o.crop.y));
+  const x1 = Math.max(x0 + 1, Math.min(w, o.crop.x + o.crop.w));
+  const y1 = Math.max(y0 + 1, Math.min(h, o.crop.y + o.crop.h));
+
+  const bw = x1 - x0;
+  const bh = y1 - y0;
+  const scale = Math.min(n / bw, n / bh); // contain fit, in cells per source px
+  const ox = (n - bw * scale) / 2;
+  const oy = (n - bh * scale) / 2;
+
+  for (let cy = 0; cy < n; cy++) {
+    // The cell's span back in source pixels, clamped to the cropped box.
+    const sy0 = y0 + (cy - oy) / scale;
+    const sy1 = y0 + (cy + 1 - oy) / scale;
+    const ry0 = Math.max(y0, Math.floor(sy0));
+    const ry1 = Math.min(y1, Math.ceil(sy1));
+    for (let cx = 0; cx < n; cx++) {
+      const sx0 = x0 + (cx - ox) / scale;
+      const sx1 = x0 + (cx + 1 - ox) / scale;
+      const rx0 = Math.max(x0, Math.floor(sx0));
+      const rx1 = Math.min(x1, Math.ceil(sx1));
+
+      let sum = 0;
+      let count = 0;
+      if (rx1 > rx0 && ry1 > ry0) {
+        for (let y = ry0; y < ry1; y++) {
+          for (let x = rx0; x < rx1; x++) {
+            sum += cov[y * w + x];
+            count++;
+          }
+        }
+      } else if (sx1 > x0 && sx0 < x1 && sy1 > y0 && sy0 < y1) {
+        // Cell narrower than a source pixel — take the nearest one.
+        const x = Math.min(x1 - 1, Math.max(x0, Math.floor((sx0 + sx1) / 2)));
+        const y = Math.min(y1 - 1, Math.max(y0, Math.floor((sy0 + sy1) / 2)));
+        sum = cov[y * w + x];
+        count = 1;
+      }
+
+      const mean = count > 0 ? sum / count : 0;
+      if ((mean >= o.threshold) !== o.invert) out.cells[cy * n + cx] = 1;
+    }
+  }
+
+  return out;
+}
