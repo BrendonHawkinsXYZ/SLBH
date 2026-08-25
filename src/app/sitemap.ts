@@ -8,7 +8,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   // Top-level content pages. (/research redirects to the latest paper, so the
   // individual papers below stand in for it.)
-  const staticPaths = ["", "/projects", "/studio", "/chroma/privacy"];
+  const staticPaths = ["", "/projects", "/studio", "/chroma/privacy", "/chroma/terms"];
   const staticEntries: MetadataRoute.Sitemap = staticPaths.map((path) => ({
     url: `${SITE_URL}${path}`,
     lastModified: now,

@@ -6,10 +6,11 @@ import { useEffect, useState } from "react";
 import { FieldMark } from "./FieldMark";
 
 const LINKS = [
-  { href: "/research", label: "Research" },
-  { href: "/projects", label: "Projects" },
-  { href: "/studio", label: "Studio" },
-];
+  { href: "/research", label: "Research", external: false },
+  { href: "/projects", label: "Projects", external: false },
+  { href: "/studio", label: "Studio", external: false },
+  { href: "https://chroma.studiolabbh.xyz", label: "Chroma", external: true },
+] as const;
 
 export function Nav() {
   const pathname = usePathname();
@@ -79,6 +80,8 @@ export function Nav() {
             <li key={link.href}>
               <Link
                 href={link.href}
+                target={link.external ? "_blank" : undefined}
+                rel={link.external ? "noopener noreferrer" : undefined}
                 className="t-nav link-quiet"
                 style={{ color: "var(--ground)", textDecoration: "none" }}
               >
@@ -174,6 +177,8 @@ export function Nav() {
             <li key={link.href} style={{ borderBottom: "0.5px solid var(--hairline)" }}>
               <Link
                 href={link.href}
+                target={link.external ? "_blank" : undefined}
+                rel={link.external ? "noopener noreferrer" : undefined}
                 className="t-h3 link-quiet"
                 onClick={close}
                 style={{

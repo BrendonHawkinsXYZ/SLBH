@@ -47,15 +47,8 @@ export function Footer() {
           <Link href="/chroma/privacy" className="t-label link-quiet" style={FOOTER_LINK}>
             Privacy
           </Link>
-          {/* Chroma ships under Apple's Standard EULA; no custom agreement. */}
-          <Link
-            href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
-            target="_blank"
-            rel="noreferrer noopener"
-            className="t-label link-quiet"
-            style={FOOTER_LINK}
-          >
-            Terms of Use ↗︎
+          <Link href="/chroma/terms" className="t-label link-quiet" style={FOOTER_LINK}>
+            Terms
           </Link>
           <Link
             href="https://instagram.com/studiolabbh"
