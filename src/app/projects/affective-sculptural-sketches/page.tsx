@@ -39,12 +39,12 @@ export default function AffectiveSculpturalSketchesPage() {
   }));
 
   return (
-    <>
+    <article className="project-document">
       {/* ── Section 1: Header ── */}
       <section className="ss-hero">
         <div className="container-page ss-hero-inner">
-          <p className="t-mono ss-kicker">PROJECT 04 / 2026 — ONGOING / STUDY / NYC</p>
           <h1 className="t-display ss-title">Affective Sculptural Sketches</h1>
+          <p className="project-metadata">2026–ongoing · Active study · 3 sketches · New York</p>
           <p className="ss-summary">
             An ongoing study of light and space as sculptural material for
             affect — how a constructed environment produces a feeling, and
@@ -52,22 +52,6 @@ export default function AffectiveSculpturalSketchesPage() {
           </p>
         </div>
       </section>
-
-      {/* ── Section 2: Readout strip ── */}
-      <div className="hairline-t hairline-b ss-readout">
-        <span className="t-mono" style={{ opacity: 0.55 }}>
-          SLBH / v2.0 / PROJECTS / AFFECTIVE SCULPTURAL SKETCHES
-        </span>
-        <span
-          className="t-label ss-readout-mid"
-          style={{ opacity: 0.55, letterSpacing: "0.18em" }}
-        >
-          AFFECT · SYSTEMS · DATA · TIME
-        </span>
-        <span className="t-mono" style={{ opacity: 0.55, textAlign: "right" }}>
-          STATUS: ACTIVE · 03 SKETCHES
-        </span>
-      </div>
 
       {/* ── Section 3: The sketches — imagery first ── */}
       <section className="container-page ss-sketches">
@@ -104,7 +88,6 @@ export default function AffectiveSculpturalSketchesPage() {
       <section className="container-page ss-editorial">
         {/* Block A — PREMISE */}
         <div className="ss-block">
-          <p className="t-mono ss-block-kicker">01 / PREMISE</p>
           <h2 className="t-h2 ss-block-headline">
             Light and space are not neutral containers.
           </h2>
@@ -124,7 +107,6 @@ export default function AffectiveSculpturalSketchesPage() {
 
         {/* Block B — TRANSMISSION */}
         <div className="ss-block">
-          <p className="t-mono ss-block-kicker">02 / TRANSMISSION</p>
           <h2 className="t-h2 ss-block-headline">
             Authored on one end, undergone on the other.
           </h2>
@@ -147,7 +129,7 @@ export default function AffectiveSculpturalSketchesPage() {
       {/* ── Section 5: Related projects ── */}
       {related.length > 0 && (
         <section className="container-page ss-related">
-          <p className="t-mono ss-section-label">RELATED PROJECTS</p>
+          <h2 className="project-section-heading">Related projects</h2>
           <div className="ss-rel-grid">
             {related.map((p) => (
               <Link
@@ -171,7 +153,7 @@ export default function AffectiveSculpturalSketchesPage() {
                 </div>
                 <div className="ss-rel-meta">
                   <span className="ss-rel-title">{p.title}</span>
-                  <span className="t-mono" style={{ opacity: 0.55, fontSize: 10 }}>
+                  <span className="t-mono" style={{ opacity: 0.55, fontSize: 14 }}>
                     {p.year}
                   </span>
                 </div>
@@ -199,53 +181,26 @@ export default function AffectiveSculpturalSketchesPage() {
           padding-top: 56px;
           padding-bottom: 64px;
         }
-        .ss-kicker { opacity: 0.55; margin: 0 0 20px; }
         .ss-title { margin: 0 0 28px; }
         .ss-summary {
           font-family: var(--font-inter), sans-serif;
           font-weight: 300;
-          font-size: 24px;
+          font-size: 18px;
           line-height: 1.4;
           max-width: 680px;
           opacity: 0.82;
           margin: 0;
         }
-        /* ── Readout strip ── */
-        .ss-readout {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 16px;
-          padding: 20px var(--pad-x-mobile);
-          max-width: var(--max-w);
-          margin-inline: auto;
-          width: 100%;
-          box-sizing: border-box;
-        }
-        @media (min-width: 768px) {
-          .ss-readout { padding: 20px var(--pad-x); }
-        }
-        .ss-readout-mid { display: none; }
-        @media (min-width: 768px) {
-          .ss-readout-mid { display: block; }
-        }
-
         /* ── Editorial ── */
         .ss-editorial {
-          padding-top: 96px;
-          padding-bottom: 96px;
+          padding-top: 56px;
+          padding-bottom: 56px;
           display: grid;
           grid-template-columns: 1fr;
           gap: 64px;
         }
         @media (min-width: 900px) {
-          .ss-editorial { grid-template-columns: 1fr 1fr; gap: 80px; }
-        }
-        .ss-block-kicker {
-          opacity: 0.45;
-          margin: 0 0 16px;
-          font-size: 10px;
-          letter-spacing: 0.12em;
+          .ss-editorial { grid-template-columns: 1fr 1fr; gap: 48px; }
         }
         .ss-block-headline { margin: 0 0 28px; max-width: 20ch; }
         .ss-block-body {
@@ -258,16 +213,14 @@ export default function AffectiveSculpturalSketchesPage() {
 
         /* ── Section labels ── */
         .ss-section-label {
-          opacity: 0.45;
+          opacity: 0.72;
           margin: 0 0 32px;
-          font-size: 10px;
-          letter-spacing: 0.12em;
+          font-size: 14px;
+          letter-spacing: 0em;
         }
 
         /* ── Sketches — three across, stacked on mobile ── */
-        /* First section under the readout strip — 96px matches the section
-           rhythm the rest of the site uses. */
-        .ss-sketches { padding-top: 96px; padding-bottom: 96px; }
+        .ss-sketches { padding-top: 56px; padding-bottom: 56px; }
         .ss-plate-grid {
           display: grid;
           grid-template-columns: 1fr;
@@ -302,8 +255,8 @@ export default function AffectiveSculpturalSketchesPage() {
         }
         .ss-plate-tk {
           color: rgba(243, 242, 242, 0.4);
-          font-size: 9px;
-          letter-spacing: 0.12em;
+          font-size: 14px;
+          letter-spacing: 0em;
         }
         .ss-plate-caption {
           display: flex;
@@ -312,21 +265,21 @@ export default function AffectiveSculpturalSketchesPage() {
           align-items: baseline;
         }
         .ss-plate-idx {
-          font-size: 9px;
-          opacity: 0.45;
-          letter-spacing: 0.1em;
+          font-size: 14px;
+          opacity: 0.72;
+          letter-spacing: 0em;
           flex-shrink: 0;
         }
         .ss-plate-title {
           font-family: var(--font-inter), sans-serif;
           font-weight: 500;
-          font-size: 13px;
+          font-size: 16px;
           line-height: 1.4;
-          letter-spacing: 0.02em;
+          letter-spacing: 0em;
         }
 
         /* ── Related ── */
-        .ss-related { padding-top: 0; padding-bottom: 80px; }
+        .ss-related { padding-top: 0; padding-bottom: 48px; }
         .ss-rel-grid {
           display: flex;
           gap: 24px;
@@ -354,8 +307,8 @@ export default function AffectiveSculpturalSketchesPage() {
         .ss-rel-title {
           font-family: var(--font-inter), sans-serif;
           font-weight: 500;
-          font-size: 13px;
-          letter-spacing: 0.02em;
+          font-size: 16px;
+          letter-spacing: 0em;
           display: block;
           margin-bottom: 6px;
         }
@@ -363,7 +316,7 @@ export default function AffectiveSculpturalSketchesPage() {
         /* ── Footer copy ── */
         .ss-footer {
           padding-top: 0;
-          padding-bottom: 120px;
+          padding-bottom: 56px;
           max-width: var(--max-w);
         }
         .ss-footer-body {
@@ -373,6 +326,6 @@ export default function AffectiveSculpturalSketchesPage() {
           margin: 0;
         }
       `}</style>
-    </>
+    </article>
   );
 }

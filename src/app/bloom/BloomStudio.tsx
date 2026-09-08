@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   SHAPE_FAMILIES,
@@ -258,7 +259,7 @@ export function BloomStudio() {
   return (
     <section className="bl">
       <div className="container-page bl-head">
-        <p className="t-mono bl-kicker">SHAPES / BLOOM</p>
+        <Link href="/tools" className="bl-return">← Tools</Link>
         <h1 className="t-h1 bl-title">Bloom</h1>
         <p className="bl-deck">
           A field shape that grows. Set a <strong>seed</strong> and a{" "}
@@ -456,8 +457,13 @@ export function BloomStudio() {
       <style>{`
         .bl { padding-top: 40px; padding-bottom: 96px; }
         .bl-head { padding-top: 16px; padding-bottom: 40px; }
-        .bl-kicker { opacity: 0.55; margin: 0 0 18px; letter-spacing: 0.18em; }
-        .bl-title { margin: 0 0 18px; }
+        .bl-return {
+          display: inline-block; margin-bottom: 36px;
+          color: var(--muted, #a3a3a3); text-decoration: none; font-size: 16px;
+        }
+        .bl-return:hover { color: var(--ground); }
+        .bl-return:focus-visible { outline: 1px solid var(--ground); outline-offset: 5px; }
+        .bl-title { margin: 0 0 18px; font-size: clamp(26px, 3vw, 36px); }
         .bl-deck {
           font-family: var(--font-inter), sans-serif;
           font-weight: 300; font-size: 16px; line-height: 1.55;
@@ -471,7 +477,7 @@ export function BloomStudio() {
         }
 
         /* ── Preview ── */
-        .bl-stage { position: sticky; top: 88px; display: flex; flex-direction: column; gap: 16px; }
+        .bl-stage { position: sticky; top: 24px; display: flex; flex-direction: column; gap: 16px; }
         .bl-frame {
           position: relative; width: 100%; aspect-ratio: 1 / 1;
           border: 0.5px solid var(--hairline-strong); overflow: hidden;
@@ -515,25 +521,25 @@ export function BloomStudio() {
 
         .bl-chips { display: flex; flex-wrap: wrap; gap: 8px; }
         .bl-chip {
-          font-family: var(--font-plex-mono), ui-monospace, monospace; font-size: 11px; letter-spacing: 0.04em;
+          font-family: var(--font-plex-mono), ui-monospace, monospace; font-size: 14px; letter-spacing: 0.04em;
           padding: 8px 12px; border: 0.5px solid var(--hairline-strong); background: transparent;
           color: var(--ground); cursor: pointer;
           transition: background var(--d-fast) var(--ease-out), border-color var(--d-fast) var(--ease-out), color var(--d-fast) var(--ease-out);
         }
         .bl-chip:hover { border-color: var(--ground); }
-        .bl-chip[data-active="true"] { background: var(--ground); border-color: var(--ground); color: var(--signal); }
+        .bl-chip[data-active="true"] { background: var(--ground); border-color: var(--ground); color: var(--paper); }
 
         /* ── Dials ── */
         .bl-dials { display: flex; flex-direction: column; gap: 16px; }
         .bl-dial { display: flex; flex-direction: column; gap: 7px; }
         .bl-dial-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-        .bl-dial-label { font-family: var(--font-inter), sans-serif; font-weight: 400; font-size: 13px; opacity: 0.85; }
+        .bl-dial-label { font-family: var(--font-inter), sans-serif; font-weight: 400; font-size: 14px; opacity: 0.85; }
         .bl-dial-val { opacity: 0.55; }
         .bl-dial input[type="range"] {
           -webkit-appearance: none; appearance: none; width: 100%; height: 2px;
           background: var(--hairline-strong); accent-color: var(--ground); cursor: pointer;
         }
-        .bl-empty { margin: 0; font-size: 13px; font-weight: 300; opacity: 0.5; }
+        .bl-empty { margin: 0; font-size: 14px; font-weight: 300; opacity: 0.5; }
 
         /* ── Segmented + buttons ── */
         .bl-out-label { display: block; margin-bottom: 8px; }
@@ -541,28 +547,31 @@ export function BloomStudio() {
         .bl-seg-3 { grid-template-columns: repeat(3, 1fr); }
         .bl-seg-btn {
           display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-          font-family: var(--font-inter), sans-serif; font-weight: 500; font-size: 11px;
-          letter-spacing: 0.1em; text-transform: uppercase; padding: 12px 8px;
+          font-family: var(--font-inter), sans-serif; font-weight: 500; font-size: 14px;
+          letter-spacing: 0.02em; padding: 12px 8px;
           background: transparent; color: var(--ground); border: none;
           border-right: 0.5px solid var(--hairline-strong); cursor: pointer;
           transition: background var(--d-fast) var(--ease-out), color var(--d-fast) var(--ease-out);
         }
         .bl-seg-btn:last-child { border-right: none; }
         .bl-seg-btn:hover { background: var(--hairline); }
-        .bl-seg-btn[data-active="true"] { background: var(--ground); color: var(--signal); }
+        .bl-seg-btn[data-active="true"] { background: var(--ground); color: var(--paper); }
         .bl-seg-swatch { width: 18px; height: 12px; display: block; border: 0.5px solid rgba(127,127,127,0.4); }
 
         .bl-btn {
-          font-family: var(--font-inter), sans-serif; font-weight: 500; font-size: 11px;
+          font-family: var(--font-inter), sans-serif; font-weight: 500; font-size: 14px;
           letter-spacing: 0.18em; text-transform: uppercase; padding: 14px 24px;
           border: 1px solid var(--ground); background: transparent; color: var(--ground); cursor: pointer;
           transition: background var(--d-fast) var(--ease-out), color var(--d-fast) var(--ease-out);
         }
-        .bl-btn:hover { background: var(--ground); color: var(--signal); }
-        .bl-btn-primary { width: 100%; background: var(--ground); color: var(--signal); }
+        .bl-btn:hover { background: var(--ground); color: var(--paper); }
+        .bl-btn-primary { width: 100%; background: var(--ground); color: var(--paper); }
         .bl-btn-primary:hover { opacity: 0.85; }
 
         .bl-note { opacity: 0.4; letter-spacing: 0.18em; margin: 18px 0 0; }
+        @media (max-width: 899px) {
+          .bl-stage { position: static; }
+        }
       `}</style>
     </section>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   SHAPE_FAMILIES,
@@ -211,11 +212,10 @@ export function ShapesStudio() {
   return (
     <section className="shp">
       <div className="container-page shp-head">
-        <p className="t-mono shp-kicker">SHAPES / GENERATOR</p>
+        <Link href="/tools" className="shp-return">← Tools</Link>
         <h1 className="t-h1 shp-title">Field shape instrument</h1>
         <p className="shp-deck">
-          The same mosaic the home Field is built from, as an instrument. Pick a
-          base family, turn the dials, warp it with wobble, choose a ground, and
+          A mosaic of shape and colour. Pick a base family, turn the dials, warp it with wobble, choose a ground, and
           export a clean PNG or SVG.
         </p>
       </div>
@@ -387,12 +387,13 @@ export function ShapesStudio() {
           padding-top: 16px;
           padding-bottom: 40px;
         }
-        .shp-kicker {
-          opacity: 0.55;
-          margin: 0 0 18px;
-          letter-spacing: 0.18em;
+        .shp-return {
+          display: inline-block; margin-bottom: 36px;
+          color: var(--muted, #a3a3a3); text-decoration: none; font-size: 16px;
         }
-        .shp-title { margin: 0 0 18px; }
+        .shp-return:hover { color: var(--ground); }
+        .shp-return:focus-visible { outline: 1px solid var(--ground); outline-offset: 5px; }
+        .shp-title { margin: 0 0 18px; font-size: clamp(26px, 3vw, 36px); }
         .shp-deck {
           font-family: var(--font-inter), sans-serif;
           font-weight: 300;
@@ -419,7 +420,7 @@ export function ShapesStudio() {
         /* ── Preview ── */
         .shp-stage {
           position: sticky;
-          top: 88px;
+          top: 24px;
           display: flex;
           flex-direction: column;
           gap: 16px;
@@ -501,7 +502,7 @@ export function ShapesStudio() {
         .shp-shapes { display: flex; flex-wrap: wrap; gap: 8px; }
         .shp-chip {
           font-family: var(--font-plex-mono), ui-monospace, monospace;
-          font-size: 11px;
+          font-size: 14px;
           letter-spacing: 0.04em;
           padding: 8px 12px;
           border: 0.5px solid var(--hairline-strong);
@@ -515,7 +516,7 @@ export function ShapesStudio() {
         .shp-chip[data-active="true"] {
           background: var(--ground);
           border-color: var(--ground);
-          color: var(--signal);
+          color: var(--paper);
         }
 
         /* ── Dials ── */
@@ -530,7 +531,7 @@ export function ShapesStudio() {
         .shp-dial-label {
           font-family: var(--font-inter), sans-serif;
           font-weight: 400;
-          font-size: 13px;
+          font-size: 14px;
           opacity: 0.85;
         }
         .shp-dial-val { opacity: 0.55; }
@@ -545,7 +546,7 @@ export function ShapesStudio() {
         }
         .shp-empty {
           margin: 0;
-          font-size: 13px;
+          font-size: 14px;
           font-weight: 300;
           opacity: 0.5;
         }
@@ -559,7 +560,7 @@ export function ShapesStudio() {
         .shp-seg-btn {
           font-family: var(--font-inter), sans-serif;
           font-weight: 500;
-          font-size: 11px;
+          font-size: 14px;
           letter-spacing: 0.1em;
           text-transform: uppercase;
           padding: 12px 8px;
@@ -572,12 +573,12 @@ export function ShapesStudio() {
         }
         .shp-seg-btn:last-child { border-right: none; }
         .shp-seg-btn:hover { background: var(--hairline); }
-        .shp-seg-btn[data-active="true"] { background: var(--ground); color: var(--signal); }
+        .shp-seg-btn[data-active="true"] { background: var(--ground); color: var(--paper); }
 
         .shp-btn {
           font-family: var(--font-inter), sans-serif;
           font-weight: 500;
-          font-size: 11px;
+          font-size: 14px;
           letter-spacing: 0.18em;
           text-transform: uppercase;
           padding: 14px 24px;
@@ -587,11 +588,14 @@ export function ShapesStudio() {
           cursor: pointer;
           transition: background var(--d-fast) var(--ease-out), color var(--d-fast) var(--ease-out);
         }
-        .shp-btn:hover { background: var(--ground); color: var(--signal); }
-        .shp-btn-primary { width: 100%; background: var(--ground); color: var(--signal); }
+        .shp-btn:hover { background: var(--ground); color: var(--paper); }
+        .shp-btn-primary { width: 100%; background: var(--ground); color: var(--paper); }
         .shp-btn-primary:hover { opacity: 0.85; }
 
         .shp-export { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        @media (max-width: 899px) {
+          .shp-stage { position: static; }
+        }
       `}</style>
     </section>
   );

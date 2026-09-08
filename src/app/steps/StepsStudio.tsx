@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AFFECT_PALETTE } from "@/lib/affectPalette";
 import {
@@ -186,7 +187,7 @@ export function StepsStudio() {
   return (
     <section className="stp">
       <div className="container-page stp-head">
-        <p className="t-mono stp-kicker">SHAPES / STEPS</p>
+        <Link href="/tools" className="stp-return">← Tools</Link>
         <h1 className="t-h1 stp-title">Colour step instrument</h1>
         <p className="stp-deck">
           The Illustrator blend, in the browser. Set two or more colour stops,
@@ -401,8 +402,13 @@ export function StepsStudio() {
       <style>{`
         .stp { padding-top: 40px; padding-bottom: 96px; }
         .stp-head { padding-top: 16px; padding-bottom: 40px; }
-        .stp-kicker { opacity: 0.55; margin: 0 0 18px; letter-spacing: 0.18em; }
-        .stp-title { margin: 0 0 18px; }
+        .stp-return {
+          display: inline-block; margin-bottom: 36px;
+          color: var(--muted, #a3a3a3); text-decoration: none; font-size: 16px;
+        }
+        .stp-return:hover { color: var(--ground); }
+        .stp-return:focus-visible { outline: 1px solid var(--ground); outline-offset: 5px; }
+        .stp-title { margin: 0 0 18px; font-size: clamp(26px, 3vw, 36px); }
         .stp-deck {
           font-family: var(--font-inter), sans-serif;
           font-weight: 300; font-size: 16px; line-height: 1.55;
@@ -415,7 +421,7 @@ export function StepsStudio() {
         }
 
         /* ── Preview ── */
-        .stp-stage { position: sticky; top: 88px; display: flex; flex-direction: column; gap: 16px; }
+        .stp-stage { position: sticky; top: 24px; display: flex; flex-direction: column; gap: 16px; }
         .stp-frame {
           position: relative; width: 100%;
           border: 0.5px solid var(--hairline-strong); overflow: hidden;
@@ -459,7 +465,7 @@ export function StepsStudio() {
         .stp-shapes { display: flex; flex-wrap: wrap; gap: 8px; }
         .stp-chip {
           display: inline-flex; align-items: center; gap: 8px;
-          font-family: var(--font-plex-mono), ui-monospace, monospace; font-size: 11px; letter-spacing: 0.04em;
+          font-family: var(--font-plex-mono), ui-monospace, monospace; font-size: 14px; letter-spacing: 0.04em;
           padding: 7px 12px 7px 8px; border: 0.5px solid var(--hairline-strong);
           background: transparent; color: var(--ground); cursor: pointer;
           transition: border-color var(--d-fast) var(--ease-out);
@@ -481,13 +487,13 @@ export function StepsStudio() {
         }
         .stp-hex {
           flex: 1; min-width: 0;
-          font-family: var(--font-plex-mono), ui-monospace, monospace; font-size: 12px; letter-spacing: 0.04em;
+          font-family: var(--font-plex-mono), ui-monospace, monospace; font-size: 14px; letter-spacing: 0.04em;
           text-transform: uppercase; padding: 8px 10px;
           border: 0.5px solid var(--hairline-strong); background: transparent; color: var(--ground);
         }
         .stp-hex[data-invalid="true"] { border-color: var(--signal-red); color: var(--signal-red); }
         .stp-stop-x {
-          width: 24px; height: 24px; flex-shrink: 0; border-radius: 50%;
+          width: 24px; height: 24px; flex-shrink: 0; border-radius: 0;
           border: 0.5px solid var(--hairline-strong); background: transparent; color: var(--ground);
           cursor: pointer; font-size: 14px; line-height: 1;
           display: flex; align-items: center; justify-content: center;
@@ -496,7 +502,7 @@ export function StepsStudio() {
         .stp-stop-x:hover { border-color: var(--ground); }
         .stp-add {
           margin-top: 12px;
-          font-family: var(--font-plex-mono), ui-monospace, monospace; font-size: 11px; letter-spacing: 0.04em;
+          font-family: var(--font-plex-mono), ui-monospace, monospace; font-size: 14px; letter-spacing: 0.04em;
           padding: 9px 12px; width: 100%;
           border: 0.5px dashed var(--hairline-strong); background: transparent; color: var(--ground); cursor: pointer;
           transition: border-color var(--d-fast) var(--ease-out);
@@ -506,7 +512,7 @@ export function StepsStudio() {
         /* Dial */
         .stp-dial { display: flex; flex-direction: column; gap: 7px; }
         .stp-dial-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-        .stp-dial-label { font-family: var(--font-inter), sans-serif; font-weight: 400; font-size: 13px; opacity: 0.85; }
+        .stp-dial-label { font-family: var(--font-inter), sans-serif; font-weight: 400; font-size: 14px; opacity: 0.85; }
         .stp-dial-val { opacity: 0.55; }
         .stp-dial input[type="range"] {
           -webkit-appearance: none; appearance: none; width: 100%; height: 2px;
@@ -520,33 +526,36 @@ export function StepsStudio() {
         .stp-seg-2 { grid-template-columns: 1fr 1fr; }
         .stp-seg-3 { grid-template-columns: repeat(3, 1fr); }
         .stp-seg-btn {
-          font-family: var(--font-inter), sans-serif; font-weight: 500; font-size: 11px;
-          letter-spacing: 0.1em; text-transform: uppercase; padding: 12px 8px;
+          font-family: var(--font-inter), sans-serif; font-weight: 500; font-size: 14px;
+          letter-spacing: 0.02em; padding: 12px 8px;
           background: transparent; color: var(--ground); border: none; border-right: 0.5px solid var(--hairline-strong);
           cursor: pointer; transition: background var(--d-fast) var(--ease-out), color var(--d-fast) var(--ease-out);
         }
         .stp-seg-btn:last-child { border-right: none; }
         .stp-seg-btn:hover { background: var(--hairline); }
-        .stp-seg-btn[data-active="true"] { background: var(--ground); color: var(--signal); }
+        .stp-seg-btn[data-active="true"] { background: var(--ground); color: var(--paper); }
         .stp-seg-btn-stack { display: flex; flex-direction: column; gap: 3px; align-items: center; }
         .stp-seg-note { font-size: 8.5px; letter-spacing: 0.08em; opacity: 0.5; }
         .stp-seg-btn[data-active="true"] .stp-seg-note { opacity: 0.7; }
 
         .stp-check {
           display: flex; align-items: center; gap: 10px; margin-top: 18px;
-          font-family: var(--font-inter), sans-serif; font-size: 13px; opacity: 0.85; cursor: pointer;
+          font-family: var(--font-inter), sans-serif; font-size: 14px; opacity: 0.85; cursor: pointer;
         }
         .stp-check input { accent-color: var(--ground); width: 15px; height: 15px; cursor: pointer; }
 
         /* Buttons */
         .stp-btn {
-          font-family: var(--font-inter), sans-serif; font-weight: 500; font-size: 11px;
+          font-family: var(--font-inter), sans-serif; font-weight: 500; font-size: 14px;
           letter-spacing: 0.18em; text-transform: uppercase; padding: 14px 24px;
           border: 1px solid var(--ground); background: transparent; color: var(--ground); cursor: pointer;
           transition: background var(--d-fast) var(--ease-out), color var(--d-fast) var(--ease-out);
         }
-        .stp-btn:hover { background: var(--ground); color: var(--signal); }
+        .stp-btn:hover { background: var(--ground); color: var(--paper); }
         .stp-export { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        @media (max-width: 899px) {
+          .stp-stage { position: static; }
+        }
       `}</style>
     </section>
   );

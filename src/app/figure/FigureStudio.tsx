@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   BASE_LAYERS,
@@ -278,7 +279,7 @@ export function FigureStudio() {
   return (
     <section className="fig">
       <div className="container-page fig-head">
-        <p className="t-mono fig-kicker">FIGURE / GENERATOR</p>
+        <Link href="/tools" className="fig-return">← Tools</Link>
         <h1 className="t-h1 fig-title">Character instrument</h1>
         <p className="fig-deck">
           One agender body and a wardrobe of typed parts — base layer, outer
@@ -538,12 +539,13 @@ export function FigureStudio() {
           padding-top: 16px;
           padding-bottom: 40px;
         }
-        .fig-kicker {
-          opacity: 0.55;
-          margin: 0 0 18px;
-          letter-spacing: 0.18em;
+        .fig-return {
+          display: inline-block; margin-bottom: 36px;
+          color: var(--muted, #a3a3a3); text-decoration: none; font-size: 16px;
         }
-        .fig-title { margin: 0 0 18px; }
+        .fig-return:hover { color: var(--ground); }
+        .fig-return:focus-visible { outline: 1px solid var(--ground); outline-offset: 5px; }
+        .fig-title { margin: 0 0 18px; font-size: clamp(26px, 3vw, 36px); }
         .fig-deck {
           font-family: var(--font-inter), sans-serif;
           font-weight: 300;
@@ -577,7 +579,7 @@ export function FigureStudio() {
            constrains it to the grid container, not the row, and it rides over
            the controls below it. */
         @media (min-width: 900px) {
-          .fig-stage { position: sticky; top: 88px; }
+          .fig-stage { position: sticky; top: 24px; }
         }
         .fig-frame {
           position: relative;
@@ -667,7 +669,7 @@ export function FigureStudio() {
         .fig-tab {
           font-family: var(--font-inter), sans-serif;
           font-weight: 500;
-          font-size: 11px;
+          font-size: 14px;
           letter-spacing: 0.14em;
           text-transform: uppercase;
           padding: 14px 8px;
@@ -680,7 +682,7 @@ export function FigureStudio() {
         }
         .fig-tab:last-child { border-right: none; }
         .fig-tab:hover { background: var(--hairline); }
-        .fig-tab[data-active="true"] { background: var(--ground); color: var(--signal); }
+        .fig-tab[data-active="true"] { background: var(--ground); color: var(--paper); }
 
         .fig-panel {
           display: flex;
@@ -703,7 +705,7 @@ export function FigureStudio() {
         .fig-chips[data-disabled="true"] { opacity: 0.35; }
         .fig-chip {
           font-family: var(--font-plex-mono), ui-monospace, monospace;
-          font-size: 11px;
+          font-size: 14px;
           letter-spacing: 0.04em;
           padding: 8px 12px;
           border: 0.5px solid var(--hairline-strong);
@@ -717,7 +719,7 @@ export function FigureStudio() {
         .fig-chip[data-active="true"] {
           background: var(--ground);
           border-color: var(--ground);
-          color: var(--signal);
+          color: var(--paper);
         }
         .fig-chip:disabled { cursor: default; }
         .fig-chip:disabled:hover { border-color: var(--hairline-strong); }
@@ -744,7 +746,7 @@ export function FigureStudio() {
           box-shadow: inset 0 0 0 2px transparent;
         }
         .fig-sw[data-active="true"] {
-          box-shadow: inset 0 0 0 2px var(--signal), 0 0 0 1.5px var(--ground);
+          box-shadow: inset 0 0 0 2px var(--paper), 0 0 0 1.5px var(--ground);
         }
 
         /* ── Dials ── */
@@ -759,7 +761,7 @@ export function FigureStudio() {
         .fig-dial-label {
           font-family: var(--font-inter), sans-serif;
           font-weight: 400;
-          font-size: 13px;
+          font-size: 14px;
           opacity: 0.85;
         }
         .fig-dial-val { opacity: 0.55; }
@@ -776,7 +778,7 @@ export function FigureStudio() {
         .fig-empty, .fig-note {
           margin: 10px 0 0;
           font-family: var(--font-inter), sans-serif;
-          font-size: 13px;
+          font-size: 14px;
           font-weight: 300;
           opacity: 0.5;
         }
@@ -790,7 +792,7 @@ export function FigureStudio() {
         .fig-seg-btn {
           font-family: var(--font-inter), sans-serif;
           font-weight: 500;
-          font-size: 11px;
+          font-size: 14px;
           letter-spacing: 0.1em;
           text-transform: uppercase;
           padding: 12px 8px;
@@ -803,12 +805,12 @@ export function FigureStudio() {
         }
         .fig-seg-btn:last-child { border-right: none; }
         .fig-seg-btn:hover { background: var(--hairline); }
-        .fig-seg-btn[data-active="true"] { background: var(--ground); color: var(--signal); }
+        .fig-seg-btn[data-active="true"] { background: var(--ground); color: var(--paper); }
 
         .fig-btn {
           font-family: var(--font-inter), sans-serif;
           font-weight: 500;
-          font-size: 11px;
+          font-size: 14px;
           letter-spacing: 0.18em;
           text-transform: uppercase;
           padding: 14px 12px;
@@ -818,8 +820,8 @@ export function FigureStudio() {
           cursor: pointer;
           transition: background var(--d-fast) var(--ease-out), color var(--d-fast) var(--ease-out);
         }
-        .fig-btn:hover { background: var(--ground); color: var(--signal); }
-        .fig-btn-primary { background: var(--ground); color: var(--signal); }
+        .fig-btn:hover { background: var(--ground); color: var(--paper); }
+        .fig-btn-primary { background: var(--ground); color: var(--paper); }
         .fig-btn-primary:hover { opacity: 0.85; }
 
         .fig-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
@@ -828,6 +830,9 @@ export function FigureStudio() {
           margin: 12px 0 0;
           opacity: 0.45;
           letter-spacing: 0.14em;
+        }
+        @media (max-width: 899px) {
+          .fig-stage { position: static; }
         }
       `}</style>
     </section>

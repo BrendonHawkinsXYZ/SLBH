@@ -36,34 +36,18 @@ export default function ConvergentGrammarPage() {
     .filter(({ src }) => src);
 
   return (
-    <>
+    <article className="project-document">
       {/* ── Section 1: Header ── */}
       <section className="cg-hero">
         <div className="container-page cg-hero-inner">
-          <p className="t-mono cg-kicker">PROJECT 06 / 2026 / IN DEVELOPMENT / NYC</p>
           <h1 className="t-display cg-title">Convergent Grammar</h1>
+          <p className="project-metadata">2026–ongoing · In development · New York</p>
           <p className="cg-summary">
             A computational study of latent visual grammar across portraiture
             and adjacent image regimes.
           </p>
         </div>
       </section>
-
-      {/* ── Section 2: Readout strip ── */}
-      <div className="hairline-t hairline-b cg-readout">
-        <span className="t-mono" style={{ opacity: 0.55 }}>
-          SLBH / v2.0 / PROJECTS / CONVERGENT GRAMMAR
-        </span>
-        <span
-          className="t-label cg-readout-mid"
-          style={{ opacity: 0.55, letterSpacing: "0.18em" }}
-        >
-          AFFECT · SYSTEMS · DATA · TIME
-        </span>
-        <span className="t-mono" style={{ opacity: 0.55, textAlign: "right" }}>
-          STATUS: IN DEVELOPMENT · EST. 2026
-        </span>
-      </div>
 
       {/* ── Section 3: Hero visual ── */}
       <section
@@ -94,7 +78,6 @@ export default function ConvergentGrammarPage() {
         {/* Block A — QUESTION */}
         <div className="cg-block cg-block--text-left">
           <div className="cg-block-text">
-            <p className="t-mono cg-block-kicker">01 / QUESTION</p>
             <h2 className="t-h2 cg-block-headline">Do images share a grammar?</h2>
             <p className="t-body cg-block-body">
               Convergent Grammar began with a narrow question about portraiture.
@@ -133,7 +116,7 @@ export default function ConvergentGrammarPage() {
 
         {/* Block B — METHOD */}
         <div className="cg-block cg-block--diagram-left">
-          <div className="cg-block-visual cg-flow-wrap">
+          <div className="cg-block-visual cg-flow-wrap" role="region" aria-label="Scrollable system diagram" tabIndex={0}>
             <FlowDiagram
               ariaLabel="Method pipeline: open corpus ingestion → genre classification → compositional extraction → latent grammar"
               stages={[
@@ -145,7 +128,6 @@ export default function ConvergentGrammarPage() {
             />
           </div>
           <div className="cg-block-text">
-            <p className="t-mono cg-block-kicker">02 / METHOD</p>
             <h2 className="t-h2 cg-block-headline">
               A pipeline for reading images as structure.
             </h2>
@@ -169,7 +151,7 @@ export default function ConvergentGrammarPage() {
 
       {/* ── Section 5: Portrait studies — the primary evidence ── */}
       <section className="container-page cg-gallery">
-        <p className="t-mono cg-gallery-label">PORTRAIT STUDIES</p>
+        <h2 className="project-section-heading">Portrait studies</h2>
         <p className="t-body cg-gallery-intro">
           Each plate pairs a source portrait with the spatial grammar extracted
           from it — the geometric relationships between figure, ground, focal
@@ -206,7 +188,6 @@ export default function ConvergentGrammarPage() {
       <section className="container-page cg-editorial cg-editorial--tail">
         {/* Block C — SCOPE */}
         <div className="cg-block cg-block--full">
-          <p className="t-mono cg-block-kicker">03 / SCOPE</p>
           <h2 className="t-h2 cg-block-headline">
             Portraits first, then outward.
           </h2>
@@ -235,7 +216,7 @@ export default function ConvergentGrammarPage() {
       {/* ── Section 7: Related projects ── */}
       {related.length > 0 && (
         <section className="container-page cg-related">
-          <p className="t-mono cg-related-label">RELATED PROJECTS</p>
+          <h2 className="project-section-heading">Related projects</h2>
           <div className="cg-rel-grid">
             {related.map((p) => (
               <Link
@@ -262,7 +243,7 @@ export default function ConvergentGrammarPage() {
                     style={{
                       fontFamily: "var(--font-inter), sans-serif",
                       fontWeight: 500,
-                      fontSize: 13,
+                      fontSize: 16,
                       letterSpacing: "0.02em",
                       display: "block",
                       marginBottom: 6,
@@ -270,7 +251,7 @@ export default function ConvergentGrammarPage() {
                   >
                     {p.title}
                   </span>
-                  <span className="t-mono" style={{ opacity: 0.55, fontSize: 10 }}>
+                  <span className="t-mono" style={{ opacity: 0.55, fontSize: 14 }}>
                     {p.year}
                   </span>
                 </div>
@@ -298,42 +279,18 @@ export default function ConvergentGrammarPage() {
           padding-top: 56px;
           padding-bottom: 64px;
         }
-        .cg-kicker {
-          opacity: 0.55;
-          margin: 0 0 20px;
-        }
         .cg-title {
           margin: 0 0 28px;
         }
         .cg-summary {
           font-family: var(--font-inter), sans-serif;
           font-weight: 300;
-          font-size: 24px;
+          font-size: 18px;
           line-height: 1.4;
           max-width: 680px;
           opacity: 0.82;
           margin: 0;
         }
-        /* ── Readout strip ── */
-        .cg-readout {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 16px;
-          padding: 20px var(--pad-x-mobile);
-          max-width: var(--max-w);
-          margin-inline: auto;
-          width: 100%;
-          box-sizing: border-box;
-        }
-        @media (min-width: 768px) {
-          .cg-readout { padding: 20px var(--pad-x); }
-        }
-        .cg-readout-mid { display: none; }
-        @media (min-width: 768px) {
-          .cg-readout-mid { display: block; }
-        }
-
         /* ── Hero visual ── */
         .cg-visual {
           min-height: 100vh;
@@ -366,14 +323,14 @@ export default function ConvergentGrammarPage() {
 
         /* ── Editorial ── */
         .cg-editorial {
-          padding-top: 96px;
-          padding-bottom: 96px;
+          padding-top: 56px;
+          padding-bottom: 56px;
           display: flex;
           flex-direction: column;
-          gap: 96px;
+          gap: 56px;
         }
         @media (min-width: 900px) {
-          .cg-editorial { gap: 120px; }
+          .cg-editorial { gap: 56px; }
         }
 
         .cg-block {
@@ -382,7 +339,7 @@ export default function ConvergentGrammarPage() {
           gap: 48px;
         }
         @media (min-width: 900px) {
-          .cg-block { grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+          .cg-block { grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
           .cg-block--diagram-left .cg-block-visual { order: -1; }
         }
         .cg-block--full {
@@ -393,12 +350,6 @@ export default function ConvergentGrammarPage() {
            96px — so this one opens flush rather than stacking a second gap. */
         .cg-editorial--tail { padding-top: 0; }
 
-        .cg-block-kicker {
-          opacity: 0.45;
-          margin: 0 0 16px;
-          font-size: 10px;
-          letter-spacing: 0.12em;
-        }
         .cg-block-headline {
           margin: 0 0 28px;
         }
@@ -442,14 +393,14 @@ export default function ConvergentGrammarPage() {
           position: relative;
           z-index: 1;
           color: rgba(243, 242, 242, 0.4);
-          font-size: 9px;
-          letter-spacing: 0.12em;
+          font-size: 14px;
+          letter-spacing: 0em;
         }
         .cg-img-caption {
           margin: 12px 0 0;
-          font-size: 9px;
-          opacity: 0.45;
-          letter-spacing: 0.1em;
+          font-size: 14px;
+          opacity: 0.72;
+          letter-spacing: 0em;
         }
 
         /* Flow diagram */
@@ -462,13 +413,13 @@ export default function ConvergentGrammarPage() {
         /* ── Related ── */
         .cg-related {
           padding-top: 0;
-          padding-bottom: 80px;
+          padding-bottom: 48px;
         }
         .cg-related-label {
-          opacity: 0.45;
+          opacity: 0.72;
           margin: 0 0 32px;
-          font-size: 10px;
-          letter-spacing: 0.12em;
+          font-size: 14px;
+          letter-spacing: 0em;
         }
         .cg-rel-grid {
           display: flex;
@@ -498,13 +449,13 @@ export default function ConvergentGrammarPage() {
         /* ── Study image galleries ── */
         .cg-gallery {
           padding-top: 0;
-          padding-bottom: 96px;
+          padding-bottom: 56px;
         }
         .cg-gallery-label {
-          opacity: 0.45;
+          opacity: 0.72;
           margin: 0 0 16px;
-          font-size: 10px;
-          letter-spacing: 0.12em;
+          font-size: 14px;
+          letter-spacing: 0em;
         }
         .cg-gallery-intro {
           margin: 0 0 32px;
@@ -547,20 +498,20 @@ export default function ConvergentGrammarPage() {
         }
         .cg-gallery-tk {
           color: rgba(243, 242, 242, 0.4);
-          font-size: 9px;
-          letter-spacing: 0.12em;
+          font-size: 14px;
+          letter-spacing: 0em;
         }
         .cg-gallery-caption {
           margin: 12px 0 0;
-          font-size: 9px;
-          opacity: 0.45;
-          letter-spacing: 0.1em;
+          font-size: 14px;
+          opacity: 0.72;
+          letter-spacing: 0em;
         }
 
         /* ── Footer copy ── */
         .cg-footer {
           padding-top: 0;
-          padding-bottom: 120px;
+          padding-bottom: 56px;
           max-width: var(--max-w);
         }
         .cg-footer-body {
@@ -570,6 +521,6 @@ export default function ConvergentGrammarPage() {
           margin: 0;
         }
       `}</style>
-    </>
+    </article>
   );
 }

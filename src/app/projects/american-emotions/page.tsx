@@ -21,36 +21,18 @@ export default function AmericanEmotionsPage() {
   const render2024Src = findImage("american-emotions", "render-2024");
 
   return (
-    <>
+    <article className="project-document">
       {/* ── Section 1: Hero ── */}
       <section className="ae-hero">
         <div className="container-page ae-hero-inner">
-          <p className="t-mono ae-kicker">
-            PROJECT 03 / 2024 — ACTIVE / NYC
-          </p>
           <h1 className="t-display ae-title">American Emotions</h1>
+          <p className="project-metadata">2024–ongoing · Active instrument · 3 iterations · New York</p>
           <p className="ae-summary">
             A living instrument that renders collective affect as color, using
             public attention as the signal.
           </p>
         </div>
       </section>
-
-      {/* ── Section 2: Readout strip ── */}
-      <div className="hairline-t hairline-b ae-readout">
-        <span className="t-mono" style={{ opacity: 0.55 }}>
-          SLBH / v2.0 / PROJECTS / AMERICAN EMOTIONS
-        </span>
-        <span
-          className="t-label ae-readout-mid"
-          style={{ opacity: 0.55, letterSpacing: "0.18em" }}
-        >
-          AFFECT · SYSTEMS · DATA · TIME
-        </span>
-        <span className="t-mono" style={{ opacity: 0.55, textAlign: "right" }}>
-          STATUS: ACTIVE · EST. 2024 · ITERATIONS: 03
-        </span>
-      </div>
 
       {/* ── Section 3: Hero visual ── */}
       <section className="ae-visual" aria-label="American Emotions hero visual">
@@ -75,7 +57,6 @@ export default function AmericanEmotionsPage() {
         {/* Block A — ORIGIN */}
         <div className="ae-block ae-block--text-left">
           <div className="ae-block-text">
-            <p className="t-mono ae-block-kicker">01 / ORIGIN</p>
             <h2 className="t-h2 ae-block-headline">
               It started as a question about color.
             </h2>
@@ -116,11 +97,10 @@ export default function AmericanEmotionsPage() {
 
         {/* Block B — METHOD */}
         <div className="ae-block ae-block--diagram-left">
-          <div className="ae-block-visual ae-pipeline-wrap">
+          <div className="ae-block-visual ae-pipeline-wrap" role="region" aria-label="Scrollable system diagram" tabIndex={0}>
             <PipelineDiagram />
           </div>
           <div className="ae-block-text">
-            <p className="t-mono ae-block-kicker">02 / METHOD</p>
             <h2 className="t-h2 ae-block-headline">
               Public attention as an affect proxy.
             </h2>
@@ -144,7 +124,6 @@ export default function AmericanEmotionsPage() {
         {/* Block C — ITERATIONS */}
         <div className="ae-block ae-block--text-left">
           <div className="ae-block-text">
-            <p className="t-mono ae-block-kicker">03 / ITERATIONS</p>
             <h2 className="t-h2 ae-block-headline">
               Three runs, one continuous instrument.
             </h2>
@@ -162,13 +141,12 @@ export default function AmericanEmotionsPage() {
             </p>
           </div>
           <div className="ae-block-visual">
-            <IterationTimeline />
+            <div className="project-timeline"><IterationTimeline /></div>
           </div>
         </div>
 
         {/* Block D — INFLUENCE */}
         <div className="ae-block ae-block--full">
-          <p className="t-mono ae-block-kicker">04 / INFLUENCE</p>
           <h2 className="t-h2 ae-block-headline">
             The art project became the lab.
           </h2>
@@ -190,16 +168,16 @@ export default function AmericanEmotionsPage() {
       <section className="container-page ae-links">
         {[
           { label: "LIVE INSTRUMENT", href: "https://americanemotions.studiolabbh.xyz", note: "American Emotions App" },
-          { label: "RELATED PAPER", href: "/research/emotion-as-system", note: "/research/emotion-as-system" },
+          { label: "RELATED PAPER", href: "/research/emotion-as-system", note: "Emotion as System" },
           { label: "2024 ELECTION ARCHIVE", href: "https://www.instagram.com/americanemotions", note: "Instagram" },
-          { label: "SEE ALSO", href: "/projects/acg", note: "/projects/acg" },
+          { label: "SEE ALSO", href: "/projects/acg", note: "ACG by SLBH" },
         ].map(({ label, href, note }, i) => (
           <div key={label} className="ae-link-row" style={{ borderTop: i === 0 ? "0.5px solid var(--hairline)" : undefined }}>
             <span
               style={{
                 fontFamily: "var(--font-inter), sans-serif",
                 fontWeight: 500,
-                fontSize: 13,
+                fontSize: 16,
                 letterSpacing: "0.04em",
               }}
             >
@@ -221,7 +199,7 @@ export default function AmericanEmotionsPage() {
       {/* ── Section 6: Related projects ── */}
       {related.length > 0 && (
         <section className="container-page ae-related">
-          <p className="t-mono ae-related-label">RELATED PROJECTS</p>
+          <h2 className="project-section-heading">Related projects</h2>
           <div className="ae-rel-grid">
             {related.map((p) => (
               <Link
@@ -243,7 +221,7 @@ export default function AmericanEmotionsPage() {
                     style={{
                       fontFamily: "var(--font-inter), sans-serif",
                       fontWeight: 500,
-                      fontSize: 13,
+                      fontSize: 16,
                       letterSpacing: "0.02em",
                       display: "block",
                       marginBottom: 6,
@@ -251,7 +229,7 @@ export default function AmericanEmotionsPage() {
                   >
                     {p.title}
                   </span>
-                  <span className="t-mono" style={{ opacity: 0.55, fontSize: 10 }}>
+                  <span className="t-mono" style={{ opacity: 0.55, fontSize: 14 }}>
                     {p.year}
                   </span>
                 </div>
@@ -270,42 +248,18 @@ export default function AmericanEmotionsPage() {
           padding-top: 56px;
           padding-bottom: 64px;
         }
-        .ae-kicker {
-          opacity: 0.55;
-          margin: 0 0 20px;
-        }
         .ae-title {
           margin: 0 0 28px;
         }
         .ae-summary {
           font-family: var(--font-inter), sans-serif;
           font-weight: 300;
-          font-size: 24px;
+          font-size: 18px;
           line-height: 1.4;
           max-width: 640px;
           opacity: 0.82;
           margin: 0;
         }
-        /* ── Readout strip ── */
-        .ae-readout {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 16px;
-          padding: 20px var(--pad-x-mobile);
-          max-width: var(--max-w);
-          margin-inline: auto;
-          width: 100%;
-          box-sizing: border-box;
-        }
-        @media (min-width: 768px) {
-          .ae-readout { padding: 20px var(--pad-x); }
-        }
-        .ae-readout-mid { display: none; }
-        @media (min-width: 768px) {
-          .ae-readout-mid { display: block; }
-        }
-
         /* ── Hero visual ── */
         .ae-visual {
           min-height: 100vh;
@@ -339,14 +293,14 @@ export default function AmericanEmotionsPage() {
 
         /* ── Editorial ── */
         .ae-editorial {
-          padding-top: 96px;
-          padding-bottom: 96px;
+          padding-top: 56px;
+          padding-bottom: 56px;
           display: flex;
           flex-direction: column;
-          gap: 96px;
+          gap: 56px;
         }
         @media (min-width: 900px) {
-          .ae-editorial { gap: 120px; }
+          .ae-editorial { gap: 56px; }
         }
 
         .ae-block {
@@ -355,7 +309,7 @@ export default function AmericanEmotionsPage() {
           gap: 48px;
         }
         @media (min-width: 900px) {
-          .ae-block { grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+          .ae-block { grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
           .ae-block--diagram-left .ae-block-visual { order: -1; }
         }
         .ae-block--full {
@@ -363,12 +317,6 @@ export default function AmericanEmotionsPage() {
           max-width: 640px;
         }
 
-        .ae-block-kicker {
-          opacity: 0.45;
-          margin: 0 0 16px;
-          font-size: 10px;
-          letter-spacing: 0.12em;
-        }
         .ae-block-headline {
           margin: 0 0 28px;
         }
@@ -406,9 +354,9 @@ export default function AmericanEmotionsPage() {
         }
         .ae-archival-caption {
           margin: 12px 0 0;
-          font-size: 9px;
-          opacity: 0.45;
-          letter-spacing: 0.1em;
+          font-size: 14px;
+          opacity: 0.72;
+          letter-spacing: 0em;
         }
 
         /* Pipeline diagram */
@@ -421,7 +369,7 @@ export default function AmericanEmotionsPage() {
         /* ── Links ── */
         .ae-links {
           padding-top: 0;
-          padding-bottom: 80px;
+          padding-bottom: 48px;
         }
         .ae-link-row {
           display: flex;
@@ -432,7 +380,7 @@ export default function AmericanEmotionsPage() {
           border-bottom: 0.5px solid var(--hairline);
         }
         .ae-link-url {
-          font-size: 11px;
+          font-size: 14px;
           color: var(--ground);
           text-decoration: none;
         }
@@ -440,13 +388,13 @@ export default function AmericanEmotionsPage() {
         /* ── Related ── */
         .ae-related {
           padding-top: 0;
-          padding-bottom: 80px;
+          padding-bottom: 48px;
         }
         .ae-related-label {
-          opacity: 0.45;
+          opacity: 0.72;
           margin: 0 0 32px;
-          font-size: 10px;
-          letter-spacing: 0.12em;
+          font-size: 14px;
+          letter-spacing: 0em;
         }
         .ae-rel-grid {
           display: flex;
@@ -474,6 +422,6 @@ export default function AmericanEmotionsPage() {
         .ae-rel-meta { padding: 0 4px; }
 
       `}</style>
-    </>
+    </article>
   );
 }

@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { Orbitron, Inter, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
-import { StatusBar } from "@/components/StatusBar";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
+import { Arrival } from "@/components/Arrival";
+import { AmbientShape } from "@/components/AmbientShape";
+import { CircleCursor } from "@/components/CircleCursor";
 
 const orbitron = Orbitron({
   subsets: ["latin"],
@@ -31,8 +33,11 @@ export const metadata: Metadata = {
   description:
     "Studio Lab BH is a systems research lab working across affect, systems, data, and time.",
   icons: {
-    icon: "/SLBHFavi.png",
-    apple: "/SLBHFavi.png",
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon-32.png", type: "image/png", sizes: "32x32" },
+    ],
+    apple: "/apple-touch-icon.png",
   },
 };
 
@@ -43,12 +48,14 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${orbitron.variable} ${inter.variable} ${plexMono.variable}`}
-        style={{ height: "100dvh", overflow: "hidden" }}
       >
-        <StatusBar />
+        <a className="skip-link" href="#main">Skip to content</a>
+        <Arrival />
+        <AmbientShape />
+        <CircleCursor />
         <Nav />
         <div className="site-scroll-plane" data-site-scroll>
-          <main style={{ flex: 1, display: "flex", flexDirection: "column" }}>{children}</main>
+          <main id="main" style={{ flex: 1, display: "flex", flexDirection: "column" }}>{children}</main>
           <Footer />
         </div>
       </body>

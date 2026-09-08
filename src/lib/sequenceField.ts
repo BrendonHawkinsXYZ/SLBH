@@ -46,16 +46,16 @@ export class SequenceField {
 
   readonly slots: number;
 
-  constructor(size: number, slots: Slot[], pixelScale = 1) {
+  constructor(size: number, slots: Slot[], pixelScale = 1, random: () => number = Math.random) {
     this.size = size;
     this.slots = slots.length;
     const scale = Math.min(6, Math.max(0.5, pixelScale));
     this.cell = Math.max(BASE_CELL, Math.sqrt((size * size) / MAX_DOTS)) * scale;
     this.dotSize = this.cell * DOT_RATIO;
-    this.build(slots);
+    this.build(slots, random);
   }
 
-  private build(slots: Slot[]) {
+  private build(slots: Slot[], random: () => number) {
     const { size, cell } = this;
     const center = size / 2;
     const radius = size / 2 - size * MARGIN_FRAC;
@@ -79,8 +79,8 @@ export class SequenceField {
         if (d > 1) continue;
         theta.push(Math.atan2(ny, nx));
         dist.push(d);
-        jxArr.push((Math.random() - 0.5) * 2 * edgeNoise);
-        jyArr.push((Math.random() - 0.5) * 2 * edgeNoise);
+        jxArr.push((random() - 0.5) * 2 * edgeNoise);
+        jyArr.push((random() - 0.5) * 2 * edgeNoise);
         sxList.push(px); // remember the canvas position for colour sampling
         syList.push(py);
       }

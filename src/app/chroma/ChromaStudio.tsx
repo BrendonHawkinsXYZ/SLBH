@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrayBufferTarget as Mp4Target, Muxer as Mp4Muxer } from "mp4-muxer";
 import { ArrayBufferTarget as WebmTarget, Muxer as WebmMuxer } from "webm-muxer";
@@ -632,7 +633,7 @@ export function ChromaStudio() {
   return (
     <section className="cm">
       <div className="container-page cm-head">
-        <p className="t-mono cm-kicker">SHAPES / CHROMA</p>
+        <Link href="/tools" className="cm-return">← Tools</Link>
         <h1 className="t-h1 cm-title">Chroma sequencer</h1>
         <p className="cm-deck">
           Sequence {MIN_SLOTS}–{MAX_SLOTS} field shapes morphing into one another
@@ -825,8 +826,13 @@ export function ChromaStudio() {
       <style>{`
         .cm { padding-top: 40px; padding-bottom: 96px; }
         .cm-head { padding-top: 16px; padding-bottom: 40px; }
-        .cm-kicker { opacity: 0.55; margin: 0 0 18px; letter-spacing: 0.18em; }
-        .cm-title { margin: 0 0 18px; }
+        .cm-return {
+          display: inline-block; margin-bottom: 36px;
+          color: var(--muted, #a3a3a3); text-decoration: none; font-size: 16px;
+        }
+        .cm-return:hover { color: var(--ground); }
+        .cm-return:focus-visible { outline: 1px solid var(--ground); outline-offset: 5px; }
+        .cm-title { margin: 0 0 18px; font-size: clamp(26px, 3vw, 36px); }
         .cm-deck {
           font-family: var(--font-inter), sans-serif;
           font-weight: 300; font-size: 16px; line-height: 1.55;
@@ -837,7 +843,7 @@ export function ChromaStudio() {
           .cm-grid { grid-template-columns: minmax(0, 1fr) minmax(360px, 460px); gap: 64px; }
         }
 
-        .cm-stage { position: sticky; top: 88px; display: flex; flex-direction: column; gap: 16px; }
+        .cm-stage { position: sticky; top: 24px; display: flex; flex-direction: column; gap: 16px; }
         .cm-frame {
           position: relative; margin-inline: auto;
           border: 0.5px solid var(--hairline-strong); overflow: hidden;
@@ -882,12 +888,12 @@ export function ChromaStudio() {
         .cm-slot-active .cm-slot-btn { border-color: var(--ground); box-shadow: inset 0 0 0 1px var(--ground); }
         .cm-slot-swatch { width: 22px; height: 16px; display: block; border: 0.5px solid var(--hairline-strong); }
         .cm-slot-num { opacity: 0.5; }
-        .cm-slot-name { font-family: var(--font-plex-mono), ui-monospace, monospace; font-size: 11px; }
+        .cm-slot-name { font-family: var(--font-plex-mono), ui-monospace, monospace; font-size: 14px; }
         .cm-slot-x {
           position: absolute; top: -7px; right: -7px; width: 18px; height: 18px;
-          border-radius: 50%; border: 0.5px solid var(--hairline-strong);
+          border-radius: 0; border: 0.5px solid var(--hairline-strong);
           background: var(--paper); color: var(--ground); cursor: pointer;
-          font-size: 12px; line-height: 1; display: flex; align-items: center; justify-content: center;
+          font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center;
           opacity: 0; transition: opacity var(--d-fast) var(--ease-out);
         }
         .cm-slot:hover .cm-slot-x { opacity: 1; }
@@ -899,18 +905,18 @@ export function ChromaStudio() {
 
         .cm-chips { display: flex; flex-wrap: wrap; gap: 8px; }
         .cm-chip {
-          font-family: var(--font-plex-mono), ui-monospace, monospace; font-size: 11px; letter-spacing: 0.04em;
+          font-family: var(--font-plex-mono), ui-monospace, monospace; font-size: 14px; letter-spacing: 0.04em;
           padding: 8px 12px; border: 0.5px solid var(--hairline-strong); background: transparent;
           color: var(--ground); cursor: pointer;
           transition: background var(--d-fast) var(--ease-out), border-color var(--d-fast) var(--ease-out), color var(--d-fast) var(--ease-out);
         }
         .cm-chip:hover { border-color: var(--ground); }
-        .cm-chip[data-active="true"] { background: var(--ground); border-color: var(--ground); color: var(--signal); }
+        .cm-chip[data-active="true"] { background: var(--ground); border-color: var(--ground); color: var(--paper); }
 
         .cm-dials { display: flex; flex-direction: column; gap: 15px; }
         .cm-dial { display: flex; flex-direction: column; gap: 7px; }
         .cm-dial-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-        .cm-dial-label { font-family: var(--font-inter), sans-serif; font-weight: 400; font-size: 13px; opacity: 0.85; }
+        .cm-dial-label { font-family: var(--font-inter), sans-serif; font-weight: 400; font-size: 14px; opacity: 0.85; }
         .cm-dial-val { opacity: 0.55; }
         .cm-dial input[type="range"] {
           -webkit-appearance: none; appearance: none; width: 100%; height: 2px;
@@ -918,7 +924,7 @@ export function ChromaStudio() {
         }
         .cm-textfield { display: flex; flex-direction: column; gap: 7px; margin-top: 14px; }
         .cm-textfield input {
-          font-family: var(--font-inter), sans-serif; font-size: 13px; padding: 9px 11px;
+          font-family: var(--font-inter), sans-serif; font-size: 14px; padding: 9px 11px;
           border: 0.5px solid var(--hairline-strong); background: transparent; color: var(--ground);
         }
 
@@ -929,26 +935,29 @@ export function ChromaStudio() {
         .cm-seg-4 { grid-template-columns: repeat(4, 1fr); }
         .cm-out-gap2 { margin-top: 14px; }
         .cm-seg-btn {
-          font-family: var(--font-inter), sans-serif; font-weight: 500; font-size: 11px;
-          letter-spacing: 0.1em; text-transform: uppercase; padding: 12px 8px;
+          font-family: var(--font-inter), sans-serif; font-weight: 500; font-size: 14px;
+          letter-spacing: 0.02em; padding: 12px 8px;
           background: transparent; color: var(--ground); border: none; border-right: 0.5px solid var(--hairline-strong);
           cursor: pointer; transition: background var(--d-fast) var(--ease-out), color var(--d-fast) var(--ease-out);
         }
         .cm-seg-btn:last-child { border-right: none; }
         .cm-seg-btn:hover { background: var(--hairline); }
-        .cm-seg-btn[data-active="true"] { background: var(--ground); color: var(--signal); }
+        .cm-seg-btn[data-active="true"] { background: var(--ground); color: var(--paper); }
 
         .cm-btn {
-          font-family: var(--font-inter), sans-serif; font-weight: 500; font-size: 11px;
-          letter-spacing: 0.16em; text-transform: uppercase; padding: 14px 18px;
+          font-family: var(--font-inter), sans-serif; font-weight: 500; font-size: 14px;
+          letter-spacing: 0.02em; text-transform: uppercase; padding: 14px 18px;
           border: 1px solid var(--ground); background: transparent; color: var(--ground); cursor: pointer;
           transition: background var(--d-fast) var(--ease-out), color var(--d-fast) var(--ease-out), opacity var(--d-fast) var(--ease-out);
         }
-        .cm-btn:hover { background: var(--ground); color: var(--signal); }
+        .cm-btn:hover { background: var(--ground); color: var(--paper); }
         .cm-btn:disabled { opacity: 0.4; cursor: default; }
-        .cm-btn-primary { background: var(--ground); color: var(--signal); }
-        .cm-btn-primary:hover { opacity: 0.85; background: var(--ground); color: var(--signal); }
+        .cm-btn-primary { background: var(--ground); color: var(--paper); }
+        .cm-btn-primary:hover { opacity: 0.85; background: var(--ground); color: var(--paper); }
         .cm-btn-block { width: 100%; }
+        @media (max-width: 899px) {
+          .cm-stage { position: static; }
+        }
       `}</style>
     </section>
   );
