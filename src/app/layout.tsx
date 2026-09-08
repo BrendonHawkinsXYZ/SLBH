@@ -3,7 +3,6 @@ import { Orbitron, Inter, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
-import { Arrival } from "@/components/Arrival";
 import { AmbientShape } from "@/components/AmbientShape";
 import { CircleCursor } from "@/components/CircleCursor";
 
@@ -50,7 +49,6 @@ export default function RootLayout({
         className={`${orbitron.variable} ${inter.variable} ${plexMono.variable}`}
       >
         <a className="skip-link" href="#main">Skip to content</a>
-        <Arrival />
         <AmbientShape />
         <CircleCursor />
         <Nav />
