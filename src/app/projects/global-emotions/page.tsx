@@ -29,34 +29,18 @@ export default function GlobalEmotionsPage() {
   ];
 
   return (
-    <>
+    <article className="project-document">
       {/* ── Section 1: Header ── */}
       <section className="ge-hero">
         <div className="container-page ge-hero-inner">
-          <p className="t-mono ge-kicker">PROJECT 05 / 2026 / SEASONAL / GLOBAL</p>
           <h1 className="t-display ge-title">Global Emotions</h1>
+          <p className="project-metadata">2026–ongoing · Seasonal instrument · Global</p>
           <p className="ge-summary">
             Global Emotions is a public emotional observatory — a daily
             instrument that reads the world as a weather system of attention.
           </p>
         </div>
       </section>
-
-      {/* ── Section 2: Readout strip ── */}
-      <div className="hairline-t hairline-b ge-readout">
-        <span className="t-mono" style={{ opacity: 0.55 }}>
-          SLBH / v2.0 / PROJECTS / GLOBAL EMOTIONS
-        </span>
-        <span
-          className="t-label ge-readout-mid"
-          style={{ opacity: 0.55, letterSpacing: "0.18em" }}
-        >
-          AFFECT · SYSTEMS · DATA · TIME
-        </span>
-        <span className="t-mono" style={{ opacity: 0.55, textAlign: "right" }}>
-          AFFECT-FIELD-V2 · ONE FIELD PER DAY
-        </span>
-      </div>
 
       {/* ── Section 3: World field — the lead image ── */}
       <section className="container-page ge-worldfield">
@@ -82,7 +66,6 @@ export default function GlobalEmotionsPage() {
       <section className="container-page ge-editorial">
         {/* Block A — THE PROJECT */}
         <div className="ge-block ge-block--full">
-          <p className="t-mono ge-block-kicker">01 / THE PROJECT</p>
           <h2 className="t-h2 ge-block-headline">One field a day.</h2>
           <p className="t-body ge-block-body ge-block-body--wide">
             Each day, search behavior across countries is classified into
@@ -109,7 +92,6 @@ export default function GlobalEmotionsPage() {
             />
           </div>
           <div className="ge-block-text">
-            <p className="t-mono ge-block-kicker">02 / METHOD</p>
             <h2 className="t-h2 ge-block-headline">
               A daily computational artwork.
             </h2>
@@ -156,7 +138,7 @@ export default function GlobalEmotionsPage() {
 
       {/* ── Section 5: Instrument ── */}
       <section className="container-page ge-instrument">
-        <p className="t-mono ge-instrument-label">INSTRUMENT</p>
+        <h2 className="project-section-heading">Instrument</h2>
         <div className="ge-instrument-rows">
           {[
             { label: "SOURCE", value: "GOOGLE TRENDS — DAILY" },
@@ -183,9 +165,9 @@ export default function GlobalEmotionsPage() {
       {/* ── Section 6: Links ── */}
       <section className="container-page ge-links">
         {[
-          { label: "LIVE INSTRUMENT", href: LIVE_URL, note: "globalemotions.studiolabbh.xyz", external: true },
-          { label: "AMERICAN EMOTIONS", href: "/projects/american-emotions", note: "/projects/american-emotions" },
-          { label: "READ THE THEORY", href: "/research/emotion-as-system", note: "/research/emotion-as-system" },
+          { label: "LIVE INSTRUMENT", href: LIVE_URL, note: "Open instrument", external: true },
+          { label: "AMERICAN EMOTIONS", href: "/projects/american-emotions", note: "American Emotions" },
+          { label: "READ THE THEORY", href: "/research/emotion-as-system", note: "Emotion as System" },
         ].map(({ label, href, note, external }, i) => (
           <div
             key={label}
@@ -214,7 +196,7 @@ export default function GlobalEmotionsPage() {
       {/* ── Section 7: Related projects ── */}
       {related.length > 0 && (
         <section className="container-page ge-related">
-          <p className="t-mono ge-related-label">RELATED PROJECTS</p>
+          <h2 className="project-section-heading">Related projects</h2>
           <div className="ge-rel-grid">
             {related.map((p) => (
               <Link
@@ -238,7 +220,7 @@ export default function GlobalEmotionsPage() {
                 </div>
                 <div className="ge-rel-meta">
                   <span className="ge-rel-title">{p.title}</span>
-                  <span className="t-mono" style={{ opacity: 0.55, fontSize: 10 }}>
+                  <span className="t-mono" style={{ opacity: 0.55, fontSize: 14 }}>
                     {p.year}
                   </span>
                 </div>
@@ -262,43 +244,20 @@ export default function GlobalEmotionsPage() {
           padding-top: 56px;
           padding-bottom: 64px;
         }
-        .ge-kicker { opacity: 0.55; margin: 0 0 20px; }
         .ge-title { margin: 0 0 28px; }
         .ge-summary {
           font-family: var(--font-inter), sans-serif;
           font-weight: 300;
-          font-size: 24px;
+          font-size: 18px;
           line-height: 1.4;
           max-width: 680px;
           opacity: 0.82;
           margin: 0;
         }
-        /* ── Readout strip ── */
-        .ge-readout {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 16px;
-          padding: 20px var(--pad-x-mobile);
-          max-width: var(--max-w);
-          margin-inline: auto;
-          width: 100%;
-          box-sizing: border-box;
-        }
-        @media (min-width: 768px) {
-          .ge-readout { padding: 20px var(--pad-x); }
-        }
-        .ge-readout-mid { display: none; }
-        @media (min-width: 768px) {
-          .ge-readout-mid { display: block; }
-        }
-
         /* ── Hero visual ── */
 
         /* ── World field — the lead image ── */
-        /* First section under the readout strip — 96px matches the section
-           rhythm the rest of the site uses. */
-        .ge-worldfield { padding-top: 96px; padding-bottom: 96px; }
+        .ge-worldfield { padding-top: 56px; padding-bottom: 56px; }
         .ge-worldfield-fig { margin: 0; }
         /* The frame takes the image's own proportions rather than cropping it
            to a fixed ratio, so a 1919×987 export (or any other wide one) lands
@@ -322,20 +281,20 @@ export default function GlobalEmotionsPage() {
         }
         .ge-worldfield-tk {
           color: rgba(243, 242, 242, 0.4);
-          font-size: 9px;
-          letter-spacing: 0.12em;
+          font-size: 14px;
+          letter-spacing: 0em;
         }
 
         /* ── Editorial ── */
         .ge-editorial {
-          padding-top: 96px;
-          padding-bottom: 96px;
+          padding-top: 56px;
+          padding-bottom: 56px;
           display: flex;
           flex-direction: column;
-          gap: 96px;
+          gap: 56px;
         }
         @media (min-width: 900px) {
-          .ge-editorial { gap: 120px; }
+          .ge-editorial { gap: 56px; }
         }
         .ge-block {
           display: grid;
@@ -343,17 +302,11 @@ export default function GlobalEmotionsPage() {
           gap: 48px;
         }
         @media (min-width: 900px) {
-          .ge-block { grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+          .ge-block { grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
           .ge-block--diagram-left .ge-block-visual { order: -1; }
         }
         .ge-block--full { display: block; max-width: 640px; }
 
-        .ge-block-kicker {
-          opacity: 0.45;
-          margin: 0 0 16px;
-          font-size: 10px;
-          letter-spacing: 0.12em;
-        }
         .ge-block-headline { margin: 0 0 28px; }
         .ge-block-body {
           margin: 0 0 18px;
@@ -384,15 +337,15 @@ export default function GlobalEmotionsPage() {
         }
         .ge-img-caption {
           margin: 12px 0 0;
-          font-size: 9px;
-          opacity: 0.45;
-          letter-spacing: 0.1em;
+          font-size: 14px;
+          opacity: 0.72;
+          letter-spacing: 0em;
         }
 
         .ge-stack-wrap { display: flex; align-items: flex-start; padding-top: 8px; }
 
         /* ── Documentation strip ── */
-        .ge-doc-strip { padding-top: 0; padding-bottom: 96px; }
+        .ge-doc-strip { padding-top: 0; padding-bottom: 56px; }
         .ge-doc-grid {
           display: grid;
           grid-template-columns: 1fr;
@@ -412,18 +365,18 @@ export default function GlobalEmotionsPage() {
         .ge-doc-bg { position: absolute; inset: 0; background: var(--graphite); }
         .ge-doc-caption {
           margin: 12px 0 0;
-          font-size: 9px;
-          opacity: 0.45;
-          letter-spacing: 0.1em;
+          font-size: 14px;
+          opacity: 0.72;
+          letter-spacing: 0em;
         }
 
         /* ── Instrument rows ── */
-        .ge-instrument { padding-top: 0; padding-bottom: 96px; }
+        .ge-instrument { padding-top: 0; padding-bottom: 56px; }
         .ge-instrument-label {
-          opacity: 0.45;
+          opacity: 0.72;
           margin: 0 0 24px;
-          font-size: 10px;
-          letter-spacing: 0.12em;
+          font-size: 14px;
+          letter-spacing: 0em;
         }
         .ge-instrument-row {
           display: flex;
@@ -433,11 +386,11 @@ export default function GlobalEmotionsPage() {
           padding: 20px 0;
           border-bottom: 0.5px solid var(--hairline);
         }
-        .ge-instrument-key { font-size: 10px; letter-spacing: 0.14em; opacity: 0.72; }
-        .ge-instrument-val { font-size: 11px; opacity: 0.82; text-align: right; }
+        .ge-instrument-key { font-size: 14px; letter-spacing: 0em; opacity: 0.72; }
+        .ge-instrument-val { font-size: 14px; opacity: 0.82; text-align: right; }
 
         /* ── Links ── */
-        .ge-links { padding-top: 0; padding-bottom: 80px; }
+        .ge-links { padding-top: 0; padding-bottom: 48px; }
         .ge-link-row {
           display: flex;
           align-items: center;
@@ -449,22 +402,22 @@ export default function GlobalEmotionsPage() {
         .ge-link-label {
           font-family: var(--font-inter), sans-serif;
           font-weight: 500;
-          font-size: 13px;
-          letter-spacing: 0.04em;
+          font-size: 16px;
+          letter-spacing: 0em;
         }
         .ge-link-url {
-          font-size: 11px;
+          font-size: 14px;
           color: var(--ground);
           text-decoration: none;
         }
 
         /* ── Related ── */
-        .ge-related { padding-top: 0; padding-bottom: 80px; }
+        .ge-related { padding-top: 0; padding-bottom: 48px; }
         .ge-related-label {
-          opacity: 0.45;
+          opacity: 0.72;
           margin: 0 0 32px;
-          font-size: 10px;
-          letter-spacing: 0.12em;
+          font-size: 14px;
+          letter-spacing: 0em;
         }
         .ge-rel-grid {
           display: flex;
@@ -491,8 +444,8 @@ export default function GlobalEmotionsPage() {
         .ge-rel-title {
           font-family: var(--font-inter), sans-serif;
           font-weight: 500;
-          font-size: 13px;
-          letter-spacing: 0.02em;
+          font-size: 16px;
+          letter-spacing: 0em;
           display: block;
           margin-bottom: 6px;
         }
@@ -500,7 +453,7 @@ export default function GlobalEmotionsPage() {
         /* ── Footer copy ── */
         .ge-footer {
           padding-top: 0;
-          padding-bottom: 120px;
+          padding-bottom: 56px;
           max-width: var(--max-w);
         }
         .ge-footer-body {
@@ -510,6 +463,6 @@ export default function GlobalEmotionsPage() {
           margin: 0;
         }
       `}</style>
-    </>
+    </article>
   );
 }

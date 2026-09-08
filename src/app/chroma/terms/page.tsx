@@ -6,7 +6,7 @@ export const metadata = {
   robots: { index: true, follow: true },
 };
 
-const EFFECTIVE_DATE = "August 25, 2026";
+const EFFECTIVE_DATE = "September 7, 2026";
 
 export default function ChromaTermsPage() {
   return (
@@ -100,20 +100,20 @@ export default function ChromaTermsPage() {
           ),
         },
         {
-          title: "Memberships and purchases",
+          title: "Free access and previous purchases",
           content: (
             <>
               <p className={styles.paragraph}>
-                Chroma may offer monthly, yearly, and lifetime membership options.
-                Available products, prices, billing periods, renewal terms, and any
-                trial terms are shown by Apple before purchase.
+                Chroma’s journaling, daily readings, and Weekly Chroma are available
+                without a subscription or in-app purchase. Feature availability
+                remains subject to the device and software requirements described above.
               </p>
               <p className={styles.paragraph}>
-                Apple processes payment, billing, renewal, cancellation, and refund
-                requests under the applicable App Store terms. You can manage eligible
-                subscriptions through your{" "}
+                If you purchased a membership before Chroma became free, Apple
+                continues to handle applicable billing, cancellation, and refund
+                requests under its terms. You can review previous subscriptions in your{" "}
                 <a className={styles.link} href="https://apps.apple.com/account/subscriptions" target="_blank" rel="noopener noreferrer">Apple subscription settings</a>.
-                Chroma reads Apple’s verified entitlement to determine access.
+                {" "}Updating Chroma does not itself cancel a subscription or issue a refund.
               </p>
             </>
           ),
@@ -123,7 +123,7 @@ export default function ChromaTermsPage() {
           content: (
             <p className={styles.paragraph}>
               You may not misuse Chroma, interfere with its operation, attempt to
-              bypass purchase or security controls, reverse engineer it except where
+              bypass security controls, reverse engineer it except where
               applicable law expressly permits, or use it in violation of law or
               another person’s rights.
             </p>
@@ -143,8 +143,9 @@ export default function ChromaTermsPage() {
           title: "Third-party services",
           content: (
             <p className={styles.paragraph}>
-              Chroma relies on Apple services for distribution, purchases, device
-              capabilities, notifications, and optional sharing. Your use of those
+              Chroma relies on Apple services for distribution, device capabilities,
+              notifications, and optional sharing. Previous purchases were also
+              processed through Apple. Your use of those
               services is governed by Apple’s terms and privacy notices. A destination
               you select through the iOS share sheet is governed by that destination’s terms.
             </p>

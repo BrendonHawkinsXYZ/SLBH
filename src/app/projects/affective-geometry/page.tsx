@@ -25,12 +25,12 @@ export default function AffectiveGeometryPage() {
   const contactSrc = asset("contact-sheet");
 
   return (
-    <>
+    <article className="project-document">
       {/* ── Section 1: Header ── */}
       <section className="ag-hero">
         <div className="container-page ag-hero-inner">
-          <p className="t-mono ag-kicker">PROJECT 02 / 2026 / ACTIVE / NYC</p>
           <h1 className="t-display ag-title">Affective Geometry</h1>
+          <p className="project-metadata">2026 · Active study · New York</p>
           <p className="ag-summary">
             An art project that theorizes emotion as shape and color — a proof of
             concept for rendering affective computational geometry as 2D plates.
@@ -38,28 +38,12 @@ export default function AffectiveGeometryPage() {
         </div>
       </section>
 
-      {/* ── Section 2: Readout strip ── */}
-      <div className="hairline-t hairline-b ag-readout">
-        <span className="t-mono" style={{ opacity: 0.55 }}>
-          SLBH / v2.0 / PROJECTS / AFFECTIVE GEOMETRY
-        </span>
-        <span
-          className="t-label ag-readout-mid"
-          style={{ opacity: 0.55, letterSpacing: "0.18em" }}
-        >
-          AFFECT · SHAPE · COLOR · FIELD
-        </span>
-        <span className="t-mono" style={{ opacity: 0.55, textAlign: "right" }}>
-          25 SHAPES / 25 PALETTES · 4:4
-        </span>
-      </div>
 
 
       {/* ── Section 3: Premise ── */}
       <section className="container-page ag-editorial">
         <div className="ag-block">
           <div className="ag-block-text">
-            <p className="t-mono ag-block-kicker">01 / PREMISE</p>
             <h2 className="t-h2 ag-block-headline">Emotion is a shape, a field.</h2>
             <p className="t-body ag-block-body">
               Affective Geometry begins from a claim the lab keeps returning to:
@@ -92,7 +76,7 @@ export default function AffectiveGeometryPage() {
 
       {/* ── Section 4: Contact sheet + plates ── */}
       <section className="container-page ag-plates">
-        <p className="t-mono ag-plates-label">FIELD · CONTACT SHEET</p>
+        <h2 className="project-section-heading">Field / Contact sheet</h2>
         <figure className="ag-contact">
           <div className="ag-contact-frame">
             <div className="ag-plate-bg" />
@@ -132,8 +116,8 @@ export default function AffectiveGeometryPage() {
       {/* ── Section 5: Links ── */}
       <section className="container-page ag-links">
         {[
-          { label: "READ THE PAPER", href: "/research/emotion-as-system", note: "/research/emotion-as-system" },
-          { label: "CHROMA", href: "/#chroma", note: "LAUNCHING SEPTEMBER 2026" },
+          { label: "READ THE PAPER", href: "/research/emotion-as-system", note: "Emotion as System" },
+          { label: "CHROMA", href: "/work/chroma", note: "Chroma for iPhone" },
         ].map(({ label, href, note }, i) => (
           <div
             key={label}
@@ -159,53 +143,26 @@ export default function AffectiveGeometryPage() {
         /* ── Hero ── */
         .ag-hero { position: relative; }
         .ag-hero-inner { padding-top: 56px; padding-bottom: 64px; }
-        .ag-kicker { opacity: 0.55; margin: 0 0 20px; }
         .ag-title { margin: 0 0 28px; }
         .ag-summary {
           font-family: var(--font-inter), sans-serif;
           font-weight: 300;
-          font-size: 24px;
+          font-size: 18px;
           line-height: 1.4;
           max-width: 680px;
           opacity: 0.82;
           margin: 0;
         }
-        /* ── Readout strip ── */
-        .ag-readout {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 16px;
-          padding: 20px var(--pad-x-mobile);
-          max-width: var(--max-w);
-          margin-inline: auto;
-          width: 100%;
-          box-sizing: border-box;
-        }
-        @media (min-width: 768px) {
-          .ag-readout { padding: 20px var(--pad-x); }
-        }
-        .ag-readout-mid { display: none; }
-        @media (min-width: 768px) {
-          .ag-readout-mid { display: block; }
-        }
-
         /* ── Hero visual ── */
         /* ── Premise ── */
-        .ag-editorial { padding-top: 96px; padding-bottom: 96px; }
+        .ag-editorial { padding-top: 56px; padding-bottom: 56px; }
         .ag-block {
           display: grid;
           grid-template-columns: 1fr;
           gap: 48px;
         }
         @media (min-width: 900px) {
-          .ag-block { grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
-        }
-        .ag-block-kicker {
-          opacity: 0.45;
-          margin: 0 0 16px;
-          font-size: 10px;
-          letter-spacing: 0.12em;
+          .ag-block { grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
         }
         .ag-block-headline { margin: 0 0 28px; }
         .ag-block-body {
@@ -236,18 +193,18 @@ export default function AffectiveGeometryPage() {
         }
         .ag-img-caption {
           margin: 12px 0 0;
-          font-size: 9px;
-          opacity: 0.45;
-          letter-spacing: 0.1em;
+          font-size: 14px;
+          opacity: 0.72;
+          letter-spacing: 0em;
         }
 
         /* ── Contact sheet + plates ── */
-        .ag-plates { padding-top: 0; padding-bottom: 96px; }
+        .ag-plates { padding-top: 0; padding-bottom: 56px; }
         .ag-plates-label {
-          opacity: 0.45;
+          opacity: 0.72;
           margin: 0 0 24px;
-          font-size: 10px;
-          letter-spacing: 0.12em;
+          font-size: 14px;
+          letter-spacing: 0em;
         }
         .ag-contact { margin: 0 0 48px; }
         .ag-contact-frame {
@@ -277,9 +234,9 @@ export default function AffectiveGeometryPage() {
         .ag-plate-bg { position: absolute; inset: 0; background: var(--graphite); }
         .ag-plate-caption {
           margin: 12px 0 0;
-          font-size: 9px;
-          opacity: 0.45;
-          letter-spacing: 0.1em;
+          font-size: 14px;
+          opacity: 0.72;
+          letter-spacing: 0em;
         }
 
         /* ── Links ── */
@@ -295,24 +252,24 @@ export default function AffectiveGeometryPage() {
         .ag-link-label {
           font-family: var(--font-inter), sans-serif;
           font-weight: 500;
-          font-size: 13px;
-          letter-spacing: 0.04em;
+          font-size: 16px;
+          letter-spacing: 0em;
         }
-        .ag-link-url { font-size: 11px; color: var(--ground); text-decoration: none; }
+        .ag-link-url { font-size: 14px; color: var(--ground); text-decoration: none; }
 
         /* ── Footer line ── */
         .ag-footer {
           padding-top: 0;
-          padding-bottom: 120px;
+          padding-bottom: 56px;
           max-width: var(--max-w);
         }
         .ag-mono-line {
           margin: 0;
-          font-size: 9px;
-          letter-spacing: 0.14em;
-          opacity: 0.45;
+          font-size: 14px;
+          letter-spacing: 0em;
+          opacity: 0.72;
         }
       `}</style>
-    </>
+    </article>
   );
 }

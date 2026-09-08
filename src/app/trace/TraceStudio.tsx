@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   DEFAULT_TRACE,
@@ -309,7 +310,7 @@ export function TraceStudio() {
   return (
     <section className="trc">
       <div className="container-page trc-head">
-        <p className="t-mono trc-kicker">SHAPES / TRACE</p>
+        <Link href="/tools" className="trc-return">← Tools</Link>
         <h1 className="t-h1 trc-title">Image trace instrument</h1>
         <p className="trc-deck">
           Illustrator&rsquo;s Image Trace, in the browser. Drop in a sketch or a
@@ -477,8 +478,13 @@ export function TraceStudio() {
       <style>{`
         .trc { padding-top: 40px; padding-bottom: 96px; }
         .trc-head { padding-top: 16px; padding-bottom: 40px; }
-        .trc-kicker { opacity: 0.55; margin: 0 0 18px; letter-spacing: 0.18em; }
-        .trc-title { margin: 0 0 18px; }
+        .trc-return {
+          display: inline-block; margin-bottom: 36px;
+          color: var(--muted, #a3a3a3); text-decoration: none; font-size: 16px;
+        }
+        .trc-return:hover { color: var(--ground); }
+        .trc-return:focus-visible { outline: 1px solid var(--ground); outline-offset: 5px; }
+        .trc-title { margin: 0 0 18px; font-size: clamp(26px, 3vw, 36px); }
         .trc-deck {
           font-family: var(--font-inter), sans-serif;
           font-weight: 300; font-size: 16px; line-height: 1.55;
@@ -491,7 +497,7 @@ export function TraceStudio() {
         }
 
         /* ── Preview ── */
-        .trc-stage { position: sticky; top: 88px; display: flex; flex-direction: column; gap: 16px; }
+        .trc-stage { position: sticky; top: 24px; display: flex; flex-direction: column; gap: 16px; }
         .trc-frame {
           position: relative; width: 100%; max-height: 74vh; margin-inline: auto;
           border: 0.5px solid var(--hairline-strong); overflow: hidden;
@@ -512,7 +518,7 @@ export function TraceStudio() {
         .trc-drop-hint {
           position: absolute; inset: 0; display: none;
           align-items: center; justify-content: center;
-          background: rgba(243, 242, 242, 0.82); pointer-events: none;
+          background: rgba(10, 10, 10, 0.88); color: var(--ground); pointer-events: none;
         }
         .trc-frame[data-drag] .trc-drop-hint { display: flex; }
         .trc-meta { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
@@ -535,7 +541,7 @@ export function TraceStudio() {
         .trc-source { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .trc-hint {
           margin: 12px 0 0; font-family: var(--font-inter), sans-serif;
-          font-weight: 300; font-size: 12px; opacity: 0.5;
+          font-weight: 300; font-size: 14px; opacity: 0.5;
         }
         .trc-file { display: none; }
 
@@ -543,7 +549,7 @@ export function TraceStudio() {
         .trc-dials { display: flex; flex-direction: column; gap: 16px; }
         .trc-dial { display: flex; flex-direction: column; gap: 7px; }
         .trc-dial-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-        .trc-dial-label { font-family: var(--font-inter), sans-serif; font-weight: 400; font-size: 13px; opacity: 0.85; }
+        .trc-dial-label { font-family: var(--font-inter), sans-serif; font-weight: 400; font-size: 14px; opacity: 0.85; }
         .trc-dial-val { opacity: 0.55; }
         .trc-dial input[type="range"] {
           -webkit-appearance: none; appearance: none; width: 100%; height: 2px;
@@ -551,7 +557,7 @@ export function TraceStudio() {
         }
         .trc-check {
           display: flex; align-items: center; gap: 10px; margin-top: 16px;
-          font-family: var(--font-inter), sans-serif; font-size: 13px; opacity: 0.85; cursor: pointer;
+          font-family: var(--font-inter), sans-serif; font-size: 14px; opacity: 0.85; cursor: pointer;
         }
         .trc-check input { accent-color: var(--ground); width: 15px; height: 15px; cursor: pointer; flex-shrink: 0; }
 
@@ -570,29 +576,32 @@ export function TraceStudio() {
         /* Segmented */
         .trc-seg { display: grid; grid-template-columns: repeat(3, 1fr); border: 0.5px solid var(--hairline-strong); }
         .trc-seg-btn {
-          font-family: var(--font-inter), sans-serif; font-weight: 500; font-size: 11px;
-          letter-spacing: 0.1em; text-transform: uppercase; padding: 12px 8px;
+          font-family: var(--font-inter), sans-serif; font-weight: 500; font-size: 14px;
+          letter-spacing: 0.02em; padding: 12px 8px;
           background: transparent; color: var(--ground); border: none; border-right: 0.5px solid var(--hairline-strong);
           cursor: pointer; transition: background var(--d-fast) var(--ease-out), color var(--d-fast) var(--ease-out);
         }
         .trc-seg-btn:last-child { border-right: none; }
         .trc-seg-btn:hover { background: var(--hairline); }
-        .trc-seg-btn[data-active="true"] { background: var(--ground); color: var(--signal); }
+        .trc-seg-btn[data-active="true"] { background: var(--ground); color: var(--paper); }
 
         /* Buttons */
         .trc-btn {
-          font-family: var(--font-inter), sans-serif; font-weight: 500; font-size: 11px;
+          font-family: var(--font-inter), sans-serif; font-weight: 500; font-size: 14px;
           letter-spacing: 0.14em; text-transform: uppercase; padding: 14px 12px;
           border: 1px solid var(--ground); background: transparent; color: var(--ground); cursor: pointer;
           transition: background var(--d-fast) var(--ease-out), color var(--d-fast) var(--ease-out), opacity var(--d-fast) var(--ease-out);
         }
-        .trc-btn:hover { background: var(--ground); color: var(--signal); }
+        .trc-btn:hover { background: var(--ground); color: var(--paper); }
         .trc-btn:disabled { opacity: 0.35; cursor: default; }
         .trc-btn:disabled:hover { background: transparent; color: var(--ground); }
-        .trc-btn-primary { background: var(--ground); color: var(--signal); }
+        .trc-btn-primary { background: var(--ground); color: var(--paper); }
         .trc-btn-primary:hover { opacity: 0.85; }
         .trc-export { display: grid; grid-template-columns: 1fr; gap: 10px; }
         @media (min-width: 480px) { .trc-export { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 899px) {
+          .trc-stage { position: static; }
+        }
       `}</style>
     </section>
   );

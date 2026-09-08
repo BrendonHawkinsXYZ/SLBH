@@ -21,36 +21,20 @@ export default function TihifNycPage() {
   const heroSrc = asset("hero");
 
   return (
-    <>
+    <article className="project-document">
       {/* ── Section 1: Header ── */}
       <section className="tihif-hero">
         <div className="container-page tihif-hero-inner">
-          <p className="t-mono tihif-kicker">PROJECT 07 / 2025 / COMPLETE / NYC</p>
           <h1 className="t-display tihif-title">
             This Is How I&rsquo;m Feeling: NYC
           </h1>
+          <p className="project-metadata">2025 · Complete installation · New York</p>
           <p className="tihif-summary">
             A site-specific installation that streamed one person&rsquo;s daily
             emotion into three windows as colored light.
           </p>
         </div>
       </section>
-
-      {/* ── Section 2: Readout strip ── */}
-      <div className="hairline-t hairline-b tihif-readout">
-        <span className="t-mono" style={{ opacity: 0.55 }}>
-          SLBH / v2.0 / PROJECTS / TIHIF: NYC
-        </span>
-        <span
-          className="t-label tihif-readout-mid"
-          style={{ opacity: 0.55, letterSpacing: "0.18em" }}
-        >
-          AFFECT · SYSTEMS · DATA · TIME
-        </span>
-        <span className="t-mono" style={{ opacity: 0.55, textAlign: "right" }}>
-          STATUS: COMPLETE · 2025 · 3 WINDOWS
-        </span>
-      </div>
 
       {/* ── Section 3: Hero visual ── */}
       <section
@@ -80,7 +64,6 @@ export default function TihifNycPage() {
       <section className="container-page tihif-editorial">
         {/* Block A — PREMISE */}
         <div className="tihif-block tihif-block--full">
-          <p className="t-mono tihif-block-kicker">01 / PREMISE</p>
           <h2 className="t-h2 tihif-block-headline">
             What if a private feeling spilled into public light?
           </h2>
@@ -98,7 +81,7 @@ export default function TihifNycPage() {
 
         {/* Block B — PROCESS */}
         <div className="tihif-block tihif-block--diagram-left">
-          <div className="tihif-block-visual tihif-flow-wrap">
+          <div className="tihif-block-visual tihif-flow-wrap" role="region" aria-label="Scrollable system diagram" tabIndex={0}>
             <FlowDiagram
               ariaLabel="Process pipeline: daily journal → emotion scoring → color assignment → LED stream across three windows"
               stages={[
@@ -110,7 +93,6 @@ export default function TihifNycPage() {
             />
           </div>
           <div className="tihif-block-text">
-            <p className="t-mono tihif-block-kicker">02 / PROCESS</p>
             <h2 className="t-h2 tihif-block-headline">
               Journal, to emotion, to color, to light.
             </h2>
@@ -131,7 +113,6 @@ export default function TihifNycPage() {
 
         {/* Block C — FRAME */}
         <div className="tihif-block tihif-block--full">
-          <p className="t-mono tihif-block-kicker">03 / FRAME</p>
           <h2 className="t-h2 tihif-block-headline">
             A study in the permeability of affect.
           </h2>
@@ -156,12 +137,12 @@ export default function TihifNycPage() {
           {
             label: "RELATED WORK",
             href: "/projects/acg",
-            note: "/projects/acg",
+            note: "ACG by SLBH",
           },
           {
             label: "READ THE THEORY",
             href: "/research/emotion-as-system",
-            note: "/research/emotion-as-system",
+            note: "Emotion as System",
           },
         ].map(({ label, href, note }, i) => (
           <div
@@ -173,7 +154,7 @@ export default function TihifNycPage() {
               style={{
                 fontFamily: "var(--font-inter), sans-serif",
                 fontWeight: 500,
-                fontSize: 13,
+                fontSize: 16,
                 letterSpacing: "0.04em",
               }}
             >
@@ -189,7 +170,7 @@ export default function TihifNycPage() {
       {/* ── Section 7: Related projects ── */}
       {related.length > 0 && (
         <section className="container-page tihif-related">
-          <p className="t-mono tihif-related-label">RELATED PROJECTS</p>
+          <h2 className="project-section-heading">Related projects</h2>
           <div className="tihif-rel-grid">
             {related.map((p) => (
               <Link
@@ -216,7 +197,7 @@ export default function TihifNycPage() {
                     style={{
                       fontFamily: "var(--font-inter), sans-serif",
                       fontWeight: 500,
-                      fontSize: 13,
+                      fontSize: 16,
                       letterSpacing: "0.02em",
                       display: "block",
                       marginBottom: 6,
@@ -224,7 +205,7 @@ export default function TihifNycPage() {
                   >
                     {p.title}
                   </span>
-                  <span className="t-mono" style={{ opacity: 0.55, fontSize: 10 }}>
+                  <span className="t-mono" style={{ opacity: 0.55, fontSize: 14 }}>
                     {p.year}
                   </span>
                 </div>
@@ -253,42 +234,18 @@ export default function TihifNycPage() {
           padding-top: 56px;
           padding-bottom: 64px;
         }
-        .tihif-kicker {
-          opacity: 0.55;
-          margin: 0 0 20px;
-        }
         .tihif-title {
           margin: 0 0 28px;
         }
         .tihif-summary {
           font-family: var(--font-inter), sans-serif;
           font-weight: 300;
-          font-size: 24px;
+          font-size: 18px;
           line-height: 1.4;
           max-width: 680px;
           opacity: 0.82;
           margin: 0;
         }
-        /* ── Readout strip ── */
-        .tihif-readout {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 16px;
-          padding: 20px var(--pad-x-mobile);
-          max-width: var(--max-w);
-          margin-inline: auto;
-          width: 100%;
-          box-sizing: border-box;
-        }
-        @media (min-width: 768px) {
-          .tihif-readout { padding: 20px var(--pad-x); }
-        }
-        .tihif-readout-mid { display: none; }
-        @media (min-width: 768px) {
-          .tihif-readout-mid { display: block; }
-        }
-
         /* ── Hero visual ── */
         .tihif-visual {
           min-height: 100vh;
@@ -321,14 +278,14 @@ export default function TihifNycPage() {
 
         /* ── Editorial ── */
         .tihif-editorial {
-          padding-top: 96px;
-          padding-bottom: 96px;
+          padding-top: 56px;
+          padding-bottom: 56px;
           display: flex;
           flex-direction: column;
-          gap: 96px;
+          gap: 56px;
         }
         @media (min-width: 900px) {
-          .tihif-editorial { gap: 120px; }
+          .tihif-editorial { gap: 56px; }
         }
 
         .tihif-block {
@@ -337,7 +294,7 @@ export default function TihifNycPage() {
           gap: 48px;
         }
         @media (min-width: 900px) {
-          .tihif-block { grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+          .tihif-block { grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
           .tihif-block--diagram-left .tihif-block-visual { order: -1; }
         }
         .tihif-block--full {
@@ -345,12 +302,6 @@ export default function TihifNycPage() {
           max-width: 640px;
         }
 
-        .tihif-block-kicker {
-          opacity: 0.45;
-          margin: 0 0 16px;
-          font-size: 10px;
-          letter-spacing: 0.12em;
-        }
         .tihif-block-headline {
           margin: 0 0 28px;
         }
@@ -375,7 +326,7 @@ export default function TihifNycPage() {
         /* ── Links ── */
         .tihif-links {
           padding-top: 0;
-          padding-bottom: 80px;
+          padding-bottom: 48px;
         }
         .tihif-link-row {
           display: flex;
@@ -386,7 +337,7 @@ export default function TihifNycPage() {
           border-bottom: 0.5px solid var(--hairline);
         }
         .tihif-link-url {
-          font-size: 11px;
+          font-size: 14px;
           color: var(--ground);
           text-decoration: none;
         }
@@ -394,13 +345,13 @@ export default function TihifNycPage() {
         /* ── Related ── */
         .tihif-related {
           padding-top: 0;
-          padding-bottom: 80px;
+          padding-bottom: 48px;
         }
         .tihif-related-label {
-          opacity: 0.45;
+          opacity: 0.72;
           margin: 0 0 32px;
-          font-size: 10px;
-          letter-spacing: 0.12em;
+          font-size: 14px;
+          letter-spacing: 0em;
         }
         .tihif-rel-grid {
           display: flex;
@@ -430,7 +381,7 @@ export default function TihifNycPage() {
         /* ── Footer copy ── */
         .tihif-footer {
           padding-top: 0;
-          padding-bottom: 120px;
+          padding-bottom: 56px;
           max-width: var(--max-w);
         }
         .tihif-footer-body {
@@ -440,6 +391,6 @@ export default function TihifNycPage() {
           margin: 0;
         }
       `}</style>
-    </>
+    </article>
   );
 }

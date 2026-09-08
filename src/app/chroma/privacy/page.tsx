@@ -7,7 +7,7 @@ export const metadata = {
   robots: { index: true, follow: true },
 };
 
-const EFFECTIVE_DATE = "August 25, 2026";
+const EFFECTIVE_DATE = "September 7, 2026";
 
 export default function ChromaPrivacyPage() {
   return (
@@ -110,16 +110,17 @@ export default function ChromaPrivacyPage() {
           ),
         },
         {
-          title: "Memberships and purchases",
+          title: "Free access and previous purchases",
           content: (
             <>
               <p className={styles.paragraph}>
-                Chroma may offer monthly, yearly, and lifetime membership options.
-                Apple processes purchases and manages billing through the App Store.
-                Chroma reads the verified entitlement needed to unlock purchased access.
+                Chroma does not require purchases or check purchase entitlements to
+                provide access. Previous purchases were processed by Apple. Studio
+                Lab BH does not receive or store your payment-card information.
+                Apple may continue to provide historical purchase reporting, which
+                does not include your journal content.
               </p>
               <p className={styles.paragraph}>
-                Studio Lab BH does not receive or store your payment-card information.
                 Apple’s handling of App Store activity is described in its{" "}
                 <a className={styles.link} href="https://www.apple.com/legal/privacy/data/en/appstore/" target="_blank" rel="noopener noreferrer">App Store &amp; Privacy notice</a>.
               </p>
@@ -135,8 +136,8 @@ export default function ChromaPrivacyPage() {
                 SDKs, cross-app tracking, or the Apple advertising identifier.
               </p>
               <p className={styles.paragraph}>
-                Apple may provide Studio Lab BH with App Store purchase and product
-                reporting that does not include your Chroma journal content.
+                Apple may provide Studio Lab BH with App Store product reporting and
+                historical purchase reporting that does not include your Chroma journal content.
               </p>
             </>
           ),

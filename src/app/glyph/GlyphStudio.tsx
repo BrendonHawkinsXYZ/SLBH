@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   DEFAULT_SIZE,
@@ -699,7 +700,7 @@ export function GlyphStudio() {
   return (
     <section className="gly">
       <div className="container-page gly-head">
-        <p className="t-mono gly-kicker">GLYPH / EDITOR</p>
+        <Link href="/tools" className="gly-return">← Tools</Link>
         <h1 className="t-h1 gly-title">Pixel emoji instrument</h1>
         <p className="gly-deck">
           Shigetaka Kurita drew the first emoji set on a 12 × 12 monochrome grid
@@ -1139,12 +1140,13 @@ export function GlyphStudio() {
           padding-top: 16px;
           padding-bottom: 40px;
         }
-        .gly-kicker {
-          opacity: 0.55;
-          margin: 0 0 18px;
-          letter-spacing: 0.18em;
+        .gly-return {
+          display: inline-block; margin-bottom: 36px;
+          color: var(--muted, #a3a3a3); text-decoration: none; font-size: 16px;
         }
-        .gly-title { margin: 0 0 18px; }
+        .gly-return:hover { color: var(--ground); }
+        .gly-return:focus-visible { outline: 1px solid var(--ground); outline-offset: 5px; }
+        .gly-title { margin: 0 0 18px; font-size: clamp(26px, 3vw, 36px); }
         .gly-deck {
           font-family: var(--font-inter), sans-serif;
           font-weight: 300;
@@ -1175,7 +1177,7 @@ export function GlyphStudio() {
           gap: 16px;
         }
         @media (min-width: 900px) {
-          .gly-stage { position: sticky; top: 88px; }
+          .gly-stage { position: sticky; top: 24px; }
         }
         .gly-frame {
           position: relative;
@@ -1294,7 +1296,7 @@ export function GlyphStudio() {
         .gly-chips { display: flex; flex-wrap: wrap; gap: 8px; }
         .gly-chip {
           font-family: var(--font-plex-mono), ui-monospace, monospace;
-          font-size: 11px;
+          font-size: 14px;
           letter-spacing: 0.04em;
           padding: 8px 12px;
           border: 0.5px solid var(--hairline-strong);
@@ -1308,7 +1310,7 @@ export function GlyphStudio() {
         .gly-chip[data-active="true"] {
           background: var(--ground);
           border-color: var(--ground);
-          color: var(--signal);
+          color: var(--paper);
         }
         .gly-nudge { display: flex; gap: 8px; }
         .gly-nudge .gly-chip { width: 40px; text-align: center; }
@@ -1326,7 +1328,7 @@ export function GlyphStudio() {
         .gly-seg-btn {
           font-family: var(--font-inter), sans-serif;
           font-weight: 500;
-          font-size: 11px;
+          font-size: 14px;
           letter-spacing: 0.1em;
           text-transform: uppercase;
           padding: 14px 8px;
@@ -1339,12 +1341,12 @@ export function GlyphStudio() {
         }
         .gly-seg-btn:last-child { border-right: none; }
         .gly-seg-btn:hover { background: var(--hairline); }
-        .gly-seg-btn[data-active="true"] { background: var(--ground); color: var(--signal); }
+        .gly-seg-btn[data-active="true"] { background: var(--ground); color: var(--paper); }
 
         .gly-btn {
           font-family: var(--font-inter), sans-serif;
           font-weight: 500;
-          font-size: 11px;
+          font-size: 14px;
           letter-spacing: 0.18em;
           text-transform: uppercase;
           padding: 14px 12px;
@@ -1354,9 +1356,9 @@ export function GlyphStudio() {
           cursor: pointer;
           transition: background var(--d-fast) var(--ease-out), color var(--d-fast) var(--ease-out);
         }
-        .gly-btn:hover:not(:disabled) { background: var(--ground); color: var(--signal); }
+        .gly-btn:hover:not(:disabled) { background: var(--ground); color: var(--paper); }
         .gly-btn:disabled { opacity: 0.3; cursor: default; }
-        .gly-btn-primary { background: var(--ground); color: var(--signal); }
+        .gly-btn-primary { background: var(--ground); color: var(--paper); }
         .gly-btn-primary:hover:not(:disabled) { opacity: 0.85; }
         .gly-btn-primary:disabled { opacity: 0.3; }
 
@@ -1411,7 +1413,7 @@ export function GlyphStudio() {
         .gly-source-hint {
           font-family: var(--font-inter), sans-serif;
           font-weight: 300;
-          font-size: 13px;
+          font-size: 14px;
           opacity: 0.45;
         }
 
@@ -1459,7 +1461,7 @@ export function GlyphStudio() {
         .gly-dial-label {
           font-family: var(--font-inter), sans-serif;
           font-weight: 400;
-          font-size: 13px;
+          font-size: 14px;
           opacity: 0.85;
         }
         .gly-dial-val { opacity: 0.55; }
@@ -1476,13 +1478,16 @@ export function GlyphStudio() {
         .gly-empty, .gly-note {
           margin: 10px 0 0;
           font-family: var(--font-inter), sans-serif;
-          font-size: 13px;
+          font-size: 14px;
           font-weight: 300;
           opacity: 0.5;
         }
 
         @media (max-width: 480px) {
           .gly-meta { flex-direction: column; }
+        }
+        @media (max-width: 899px) {
+          .gly-stage { position: static; }
         }
       `}</style>
     </section>
