@@ -57,8 +57,13 @@ export function getWorks(): Work[] {
     year: "", summary: "Working definitions and visual studies from Affective Computational Geometry.",
     image: "/diagrams/emotion-definition.png", status: "", related: ["emotion-as-system"],
   };
+  const posterCollection: Work = {
+    id: "posters", title: "Posters", href: "/posters", formats: ["Graphical"],
+    year: "", summary: "Graphic studies in language, attention, technology, and culture by Brendon Hawkins.",
+    image: "/posters/techno-savior.png", status: "", related: [],
+  };
   const rank = ["emotion-as-system", "chroma", "acg", "affective-geometry", "american-emotions", "affective-sculptural-sketches", "global-emotions", "convergent-grammar", "tihif-nyc"];
-  return [...papers, chroma, ...projects, diagramCollection].sort((a, b) => {
+  return [...papers, chroma, ...projects, diagramCollection, posterCollection].sort((a, b) => {
     const aRank = rank.indexOf(a.id), bRank = rank.indexOf(b.id);
     return (aRank < 0 ? rank.length : aRank) - (bRank < 0 ? rank.length : bRank);
   });
