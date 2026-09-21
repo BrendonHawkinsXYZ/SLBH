@@ -49,4 +49,12 @@ export const posters: PosterRecord[] = [
     height: 2024,
     alt: "Three rows of mirrored words, Was, War, and Won, outlined in bright pink on black. The middle row is filled with a reflective photograph.",
   },
+  {
+    id: "an-unsettled-feeling",
+    title: "An Unsettled Feeling",
+    image: "/posters/an-unsettled-feeling.png",
+    width: 1501,
+    height: 1942,
+    alt: "On a vivid blue background, repeated black lines reading An unsettled feeling keeps the body front and center gradually break apart above numbered white silhouettes of a desk, monitor, and chair.",
+  },
 ];
