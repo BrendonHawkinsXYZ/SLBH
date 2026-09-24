@@ -45,6 +45,11 @@ const CV: CVCategory[] = [
     entries: [
       {
         year: "2026",
+        title: "Tell Me How You Feel: Chroma",
+        detail: "Plated Studios",
+      },
+      {
+        year: "2026",
         title:
           "Making AI Make Sense Together: Designing a Critical AI Research Commons with NYC Open Data",
         detail: "School of Data: Data Week",
@@ -54,6 +59,11 @@ const CV: CVCategory[] = [
   {
     label: "PUBLIC SPEAKING",
     entries: [
+      {
+        year: "2026",
+        title: "Queer Tech Stories Across Generations",
+        detail: "Out in Tech Leadership Institute",
+      },
       { year: "2025", title: "Queer Tech Stories Across Generations", detail: "PayPal HQ" },
       { year: "2025", title: "Building Products in the Age of AI", detail: "Hearst" },
       {
