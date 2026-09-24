@@ -1,4 +1,4 @@
-import { ProjectFile } from "@/components/projects/ProjectFile";
+import { ProjectEssay } from "@/components/projects/essay/ProjectEssay";
 import { projectFiles } from "@/lib/projectFiles";
 
 const project = projectFiles["tihif-nyc"];
@@ -9,5 +9,5 @@ export const metadata = {
 };
 
 export default function ProjectPage() {
-  return <ProjectFile project={project} />;
+  return <ProjectEssay slug="tihif-nyc" />;
 }

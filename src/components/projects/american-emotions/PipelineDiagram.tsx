@@ -2,7 +2,7 @@ export function PipelineDiagram() {
   const boxes = [
     { x: 8,   labels: ["GOOGLE TRENDS", "RSS"] },
     { x: 178, labels: ["GPT-4o", "EMOTION SCORING"] },
-    { x: 348, labels: ["171-EMOTION", "TAXONOMY + COLOR"] },
+    { x: 348, labels: ["V2 · 171 EMOTIONS", "TAXONOMY + COLOR"] },
     { x: 518, labels: ["LUMINOUS FIELD", "RENDER"] },
   ];
   const W = 114;
@@ -13,7 +13,7 @@ export function PipelineDiagram() {
     <svg
       viewBox="0 0 640 120"
       width="100%"
-      aria-label="Pipeline: Google Trends RSS → GPT-4o Emotion Scoring → 171-Emotion Taxonomy + Free Color → Luminous Field Render"
+      aria-label="Later American Emotions v2 pipeline: Google Trends RSS → GPT-4o Emotion Scoring → 171-Emotion Taxonomy + Free Color → Luminous Field Render"
       style={{ display: "block", color: "currentColor" }}
     >
       <defs>

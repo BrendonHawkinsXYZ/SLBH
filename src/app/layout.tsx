@@ -30,7 +30,7 @@ const plexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: "Studio Lab BH",
   description:
-    "Studio Lab BH is a systems research lab working across affect, systems, data, and time.",
+    "Studio Lab BH is an independent systems studio and research practice founded by Brendon Hawkins. The work moves between theory, research, and application. Affect is its first formal field of inquiry.",
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },

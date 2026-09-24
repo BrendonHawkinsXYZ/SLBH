@@ -61,8 +61,8 @@ export function HomeSurface() {
               transition={{ duration: DURATIONS.base, ease: EASE_OUT, delay: 1.5 }}
               className="t-body-lg hero-body"
             >
-              Studio Lab BH is a systems research lab building computational
-              models and instruments for affect.
+              Studio Lab BH is an independent systems studio and research
+              practice. Affect is its first formal field of inquiry.
             </motion.p>
 
             <motion.div

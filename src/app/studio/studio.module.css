@@ -32,6 +32,15 @@
   line-height: 1.6;
 }
 
+.tagline { font-size: 20px; line-height: 1.5; letter-spacing: -0.025em; }
+.operatingModel { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 26px 0; margin: 0 0 24px; border-block: 1px solid var(--hairline); font-size: clamp(17px, 3.2vw, 26px); letter-spacing: -0.035em; }
+.reciprocal { color: var(--muted); }
+.commitments { list-style: none; padding: 0; margin: 0; }
+.commitments li + li, .currentWork + .currentWork { margin-top: 28px; }
+.commitments .label { margin-bottom: 5px; }
+.commitments p { margin-bottom: 0; }
+@media (max-width: 380px) { .operatingModel { gap: 6px; font-size: 15px; } }
+
 .meta,
 .number,
 .affiliations dt,
@@ -125,6 +134,8 @@
 .affiliations {
   margin: 0;
 }
+
+.document .affiliationNote { margin-top: 22px; }
 
 .affiliations > div {
   display: grid;

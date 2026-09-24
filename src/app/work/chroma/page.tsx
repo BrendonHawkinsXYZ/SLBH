@@ -1,13 +1,6 @@
-import { ProjectFile } from "@/components/projects/ProjectFile";
-import { projectFiles } from "@/lib/projectFiles";
+import { permanentRedirect } from "next/navigation";
+import { CHROMA_URL } from "@/lib/site";
 
-const project = projectFiles["chroma"];
-
-export const metadata = {
-  title: `${project.title} — Studio Lab BH`,
-  description: project.summary,
-};
-
-export default function ProjectPage() {
-  return <ProjectFile project={project} />;
+export default function ChromaPage() {
+  permanentRedirect(CHROMA_URL);
 }

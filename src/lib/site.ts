@@ -5,3 +5,5 @@
  */
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") ?? "https://studiolabbh.xyz";
+
+export const CHROMA_URL = "https://chroma.studiolabbh.xyz/";

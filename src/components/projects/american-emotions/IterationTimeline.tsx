@@ -3,7 +3,7 @@ const phases = [
     index: "01",
     name: "AMERICAN EMOTIONS",
     range: "2024",
-    duration: "7 MONTHS",
+    duration: "ELECTION-PERIOD EXPERIMENT",
     status: "COMPLETE",
   },
   {
@@ -15,8 +15,8 @@ const phases = [
   },
   {
     index: "03",
-    name: "AMERICAN EMOTIONS",
-    range: "APR 2026 —",
+    name: "GLOBAL EMOTIONS",
+    range: "2026 —",
     duration: "ONGOING",
     status: "ONGOING",
   },

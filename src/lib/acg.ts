@@ -1,13 +1,13 @@
 // Edited from /projects/acg and content/projects/acg/index.mdx.
-// The project file and page studies share the same facts and documentation.
+// Facts and documentation for the ACG project file.
 export const acg = {
-  title: "ACG by SLBH",
+  title: "Tell Me How You Feel: ACG",
   name: "Affective Computational Geometry",
   year: "2026–ongoing",
-  type: "Applied research",
+  type: "Installation",
   location: "New York",
   summary:
-    "An applied research series that translates emotional data into shared physical experiences.",
+    "An installation series placing interpreted public signals and participant input in a shared sensory environment.",
   premise:
     "Can the emotional atmosphere of a country and the feelings of a room become something we can encounter together?",
   activation: {
@@ -82,7 +82,7 @@ export const records: ACGRecord[] = [
     title: "An invitation to respond",
     category: "Participation",
     file: "activation-prompt",
-    alt: "The printed affective prompt displayed at the ACG activation",
+    alt: "A visitor scans the storefront prompt beside a window filled with yellow light",
     caption: "The in-room prompt. Participation becomes an input to the installation.",
     note: "The installation invites a response to a simple question about feeling. The person looking at the system can also become part of it.",
     width: 2000,
@@ -129,7 +129,7 @@ export const records: ACGRecord[] = [
     // The source filename says alignment, but the photograph shows two different colors.
     alt: "ACG storefront at night with a blue America field and a red UWS field",
     caption: "Two fields at night. This photograph records different colors in the two windows.",
-    note: "Difference is part of the reading. When the fields take the same color, the system expresses a moment of alignment between its collective and local inputs.",
+    note: "Difference is part of the reading. When the fields take the same color, they converge within the mapping system; that match does not establish a shared emotional experience.",
     width: 2000,
     height: 1600,
   },

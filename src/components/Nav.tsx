@@ -7,9 +7,10 @@ import { LocalReadout } from "./LocalReadout";
 export function Nav() {
   const pathname = usePathname();
   const isHome = pathname === "/";
+  const isProject = pathname.startsWith("/projects/");
   const parent = pathname.startsWith("/projects/") ? "/projects" : pathname.startsWith("/research/") ? "/research" : null;
   return (
-    <header className="site-header container-page">
+    <header className={`site-header container-page${isProject ? " site-header--essay" : ""}`}>
       <div>
         <Link href="/" className="site-name">STUDIO LAB BH</Link>
         {!isHome && (

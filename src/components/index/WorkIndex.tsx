@@ -10,7 +10,7 @@ export function WorkIndex({ works, filters = false }: { works: Work[]; filters?:
   const [active, setActive] = useState<Work | null>(null);
   const [filter, setFilter] = useState<WorkFormat | "All">("All");
   const previewRef = useRef<HTMLElement>(null);
-  const formats: WorkFormat[] = ["Product", "Research", "Study", "Instrument", "Installation", "Graphical"];
+  const formats: WorkFormat[] = ["Paper", "Product", "Study", "Instrument", "Installation", "Visual Work", "Program / Workshop"];
   const visible = works.filter(work => filter === "All" || work.formats.includes(filter));
   function position(x: number, y: number) {
     const preview = previewRef.current;
@@ -42,7 +42,7 @@ export function WorkIndex({ works, filters = false }: { works: Work[]; filters?:
         <Link href={work.href} className={styles.row}
           onMouseEnter={event => enter(work, event)} onMouseMove={event => position(event.clientX, event.clientY)} onMouseLeave={() => setActive(null)}
           onFocus={event => focus(work, event)} onBlur={() => setActive(null)} onClick={() => setActive(null)}>
-          <span className={styles.title}>{work.title}</span>
+          <span className={styles.description}><span className={styles.title}>{work.title}</span><span className={styles.question}>{work.question}</span></span>
           <span className={styles.format}>{work.formats[0]}</span>
         </Link>
       </li>

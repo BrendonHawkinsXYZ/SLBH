@@ -11,10 +11,11 @@ function Facts({ facts }: { facts: FileFact[] }) {
   return <dl className={styles.factList}>{facts.map((fact) => <div key={fact.label}><dt>{fact.label}</dt><dd>{fact.value}</dd></div>)}</dl>;
 }
 
-export function ProjectFile({ project, preview = false }: { project: ProjectFileData; preview?: boolean }) {
+export function ProjectFile({ project }: { project: ProjectFileData }) {
   const sections = [
     { id: "abstract", title: "Abstract" },
     { id: "method", title: project.method.title },
+    ...(project.sections?.map(({ id, title }) => ({ id, title })) ?? []),
     ...(project.images.length ? [{ id: "documentation", title: "Documentation" }] : []),
     ...(project.record ? [{ id: "record", title: project.record.title }] : []),
     ...(project.references.length ? [{ id: "references", title: "References" }] : []),
@@ -24,7 +25,7 @@ export function ProjectFile({ project, preview = false }: { project: ProjectFile
     return <h2><span>{String(index + 1).padStart(2, "0")}</span>{sections[index].title}</h2>;
   }
 
-  return <article className={`${styles.file} ${preview ? styles.preview : "container-page"}`}>
+  return <article className={`container-page ${styles.file}`}>
     <header className={styles.fileHeader}>
       <div><h1>{project.title}</h1>{project.subtitle && <p className={styles.fileSubtitle}>{project.subtitle}</p>}</div>
       <p className={styles.fileStatement}>{project.statement}</p>
@@ -32,7 +33,7 @@ export function ProjectFile({ project, preview = false }: { project: ProjectFile
     <div className={styles.fileGrid}>
       <aside className={styles.fileRail} aria-label="Project details and contents">
         <Facts facts={project.facts} />
-        {!!project.actions?.length && <div className={styles.actions}>{project.actions.map((link) => <FileLinkElement key={link.href} link={link}>{link.title} ↗</FileLinkElement>)}</div>}
+        {!!project.actions?.length && <div className={styles.actions}>{project.actions.map((link) => <FileLinkElement key={link.href} link={link}>{link.title} {link.href.startsWith("https://") ? "↗" : "→"}</FileLinkElement>)}</div>}
         <nav className={styles.contents} aria-label="File contents">{sections.map((section, index) => <a key={section.id} href={`#${section.id}`}><span>{String(index + 1).padStart(2, "0")}</span>{section.title}</a>)}</nav>
       </aside>
       <div className={styles.fileBody}>
@@ -47,6 +48,16 @@ export function ProjectFile({ project, preview = false }: { project: ProjectFile
           {project.method.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
           {project.method.details?.map((detail) => <details key={detail.title} className={styles.disclosure}><summary>{detail.title}<span aria-hidden="true">+</span></summary>{detail.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</details>)}
         </section>
+        {project.sections?.map((section) => <section key={section.id} id={section.id} className={styles.fileSection}>
+          {heading(section.id)}
+          {section.columns && <div className={styles.fieldColumns}>{section.columns.map((column) => <div key={column.title}>
+            <h3>{column.title}</h3>
+            <ul className={styles.plainList}>{column.items.map((item) => <li key={item}>{item}</li>)}</ul>
+          </div>)}</div>}
+          {section.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+          {section.questions && <ul className={styles.questions}>{section.questions.map((question) => <li key={question}>{question}</li>)}</ul>}
+          {section.links && <div className={styles.sectionLinks}>{section.links.map((link) => <FileLinkElement key={link.href} link={link}>{link.title} →</FileLinkElement>)}</div>}
+        </section>)}
         {!!project.images.length && <section id="documentation" className={styles.fileSection}>{heading("documentation")}<DocumentationCarousel images={project.images} /></section>}
         {project.record && <section id="record" className={styles.fileSection}>{heading("record")}<Facts facts={project.record.facts} />{project.record.paragraphs?.map((paragraph) => <p className={styles.recordNote} key={paragraph}>{paragraph}</p>)}</section>}
         {!!project.references.length && <section id="references" className={styles.fileSection}>{heading("references")}<div className={styles.relatedRecords}>{project.references.map((link) => <FileLinkElement key={link.href} link={link}><span>{link.title}</span><span>{link.role}</span><span aria-hidden="true">↗</span></FileLinkElement>)}</div></section>}
