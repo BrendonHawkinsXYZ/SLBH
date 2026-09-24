@@ -10,6 +10,14 @@ export type DocumentImage = {
 
 export type FileFact = { label: string; value: string };
 export type FileLink = { title: string; href: string; role?: string };
+export type FileSection = {
+  id: string;
+  title: string;
+  paragraphs: string[];
+  columns?: { title: string; items: string[] }[];
+  questions?: string[];
+  links?: FileLink[];
+};
 
 export type ProjectFileData = {
   title: string;
@@ -26,6 +34,7 @@ export type ProjectFileData = {
     details?: { title: string; paragraphs: string[] }[];
   };
   images: DocumentImage[];
+  sections?: FileSection[];
   record?: { title: string; facts: FileFact[]; paragraphs?: string[] };
   references: FileLink[];
 };

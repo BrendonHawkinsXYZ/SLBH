@@ -31,8 +31,8 @@ export const TOOLS: Tool[] = [
   },
   {
     index: "04",
-    title: "Chroma",
-    href: "/chroma",
+    title: "Chroma sequence",
+    href: "/tools/chroma",
     line: "A sequence of shapes in a 15-second loop.",
     out: "MP4 · WEBM",
   },

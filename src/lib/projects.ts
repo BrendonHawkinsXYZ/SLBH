@@ -16,7 +16,9 @@ export type ProjectType =
   | "Instrument"
   | "Installation"
   | "Study"
-  | "Research"
+  | "Paper"
+  | "Visual Work"
+  | "Program / Workshop"
   | "Archive";
 
 /**
@@ -49,6 +51,7 @@ export type Project = {
   status: ProjectStatus;
   type: ProjectType;
   summary: string;
+  question?: string;
   related: string[];
   links: ProjectLink[];
   href?: string;        // overrides the default /projects/{slug} index link
@@ -86,8 +89,9 @@ export function getAllProjects(): Project[] {
         d.toUpperCase()
       ),
       status: (data.status ?? "active") as ProjectStatus,
-      type: (data.type ?? "Research") as ProjectType,
+      type: (data.type ?? "Study") as ProjectType,
       summary: data.summary ?? "",
+      question: data.question,
       related: (data.related ?? []) as string[],
       links: (data.links ?? []) as ProjectLink[],
       href: data.href ? String(data.href) : undefined,

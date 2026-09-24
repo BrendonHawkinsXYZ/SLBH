@@ -38,6 +38,11 @@
 .fieldColumns h3 span { color: var(--muted); font: 14px var(--font-plex-mono), monospace; margin-right: 14px; }
 .fieldColumns p { font-size: 15px; line-height: 1.8; margin: 0; }
 .steps { list-style: none; padding: 0; margin: 0; font-size: 15px; }
+.plainList { padding-left: 18px; margin: 0; font-size: 15px; }
+.plainList li + li { margin-top: 9px; }
+.questions { max-width: 68ch; padding-left: 20px; margin: 20px 0 0; }
+.questions li + li { margin-top: 12px; }
+.sectionLinks { display: flex; flex-wrap: wrap; gap: 14px 28px; margin-top: 24px; font-size: 15px; }
 .steps li + li::before { content: "↓"; display: block; color: var(--muted); margin: 6px 0; }
 .disclosure { font-size: 15px; margin-top: 28px; border-top: 1px solid var(--file-rule); }
 .disclosure summary { display: flex; justify-content: space-between; gap: 20px; padding-top: 16px; list-style: none; cursor: pointer; }

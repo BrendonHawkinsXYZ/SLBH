@@ -1,14 +1,17 @@
 import type { DocumentImage, FileLink, ProjectFileData } from "@/components/projects/ProjectFile.types";
 import { acg, records, related } from "./acg";
+import { CHROMA_URL } from "./site";
 
 // Project narratives are edited from the existing detail pages. The index keeps
 // its frontmatter source; these records define the richer project documents.
 const theory: FileLink = { title: "Emotion as System", role: "The research foundation", href: "/research/emotion-as-system" };
-const acgLink: FileLink = { title: "ACG by SLBH", role: "Applied affective research", href: "/projects/acg" };
-const americanLink: FileLink = { title: "American Emotions", role: "Collective affect as color", href: "/projects/american-emotions" };
+const acgLink: FileLink = { title: "Tell Me How You Feel: ACG", role: "A shared encounter with affect", href: "/projects/acg" };
+const americanLink: FileLink = { title: "American Emotions", role: "Interpreted public attention as color", href: "/projects/american-emotions" };
 const geometryLink: FileLink = { title: "Affective Geometry", role: "Emotion as shape and color", href: "/projects/affective-geometry" };
 const tihifLink: FileLink = { title: "This Is How I’m Feeling: NYC", role: "Private feeling in public space", href: "/projects/tihif-nyc" };
-const chromaLink: FileLink = { title: "Chroma", role: "A private emotional journal", href: "/work/chroma" };
+const workshopLink: FileLink = { title: "Tell Me How You Feel: Chroma", role: "Drawing, florals, food, and conversation", href: "/projects/tell-me-how-you-feel-chroma" };
+const globalLink: FileLink = { title: "Global Emotions", role: "The current public-signal instrument", href: "/projects/global-emotions" };
+const chromaLink: FileLink = { title: "Chroma", role: "A private emotional journal", href: CHROMA_URL };
 
 function documentation(folder: string, items: { file: string; title: string; caption: string; width: number; height: number; alt?: string }[]): DocumentImage[] {
   return items.map((item, index) => ({
@@ -25,28 +28,34 @@ function documentation(folder: string, items: { file: string; title: string; cap
 export const projectFiles: Record<string, ProjectFileData> = {
   acg: {
     title: acg.title,
-    subtitle: acg.name,
+    subtitle: "An installation series within Affective Computational Geometry",
     statement: "Emotional data,\nin shared space.",
     facts: [
       { label: "Period", value: acg.year },
       { label: "Location", value: acg.location },
       { label: "Form", value: "Installation / sensory systems" },
-      { label: "Status", value: "Ongoing series" },
+      { label: "Status", value: "Ongoing series · First activation complete" },
     ],
-    summary: acg.summary,
+    summary: "What happens when different descriptions of affect are rendered into the same shared environment?",
     abstract: [
-      "Its first storefront activation places two emotional fields beside one another: a collective field drawn from American Emotions, and a local field shaped by visitors. Both are translated into light.",
-      "The work asks how affect becomes legible outside a diagram—in the space people share.",
+      "The first storefront activation placed two fields beside one another: one drawn from American Emotions, and another shaped by visitor input. Both were translated into light.",
+      "Affective Computational Geometry is the broader thesis and conceptual program. Tell Me How You Feel: ACG is an installation series within it—one way to encounter its questions in shared space.",
     ],
     method: {
       title: "System",
       columns: [
-        { title: "Collective field", steps: ["Public data", "American Emotions", "Light array 01"] },
-        { title: "Local field", steps: ["Visitor response", "Emotion + color interpretation", "Light array 02"] },
+        { title: "Public signal", steps: ["Public / computational signals", "Interpretation through American Emotions", "Light array 01"] },
+        { title: "Participant input", steps: ["Visitors declare a feeling", "The response enters the color mapping", "Light array 02"] },
       ],
-      paragraphs: ["Two inputs. A shared color logic. When the fields converge, the installation expresses a moment of alignment between the room and the world outside it."],
-      details: [{ title: "System scope", paragraphs: ["Light is the first rendering method. The underlying system is designed to move between sites and sensory outputs, including color, scent, printed matter, and public displays. The ongoing research concerns this translation from emotional data to experience.", "A storefront, a retail activation, a public program, or a temporary installation can each become a site for the system. Inputs may include public data, visitor response, location-based signals, temporal field states, and sensory pairings."] }],
+      paragraphs: ["One field begins with an interpretation of public signals; the other begins with what participants choose to express. They are different forms of evidence, even when rendered through the same visual system.", "Matching colors represent convergence inside the mapping system. They do not establish that the room and the outside world experienced the same emotion. The artwork asks what that convergence might mean."],
+      details: [{ title: "System scope", paragraphs: ["Light is the first rendering method. The broader program explores translation between emotional descriptions and sensory forms, including color, scent, printed matter, and public displays."] }],
     },
+    sections: [{
+      id: "observations", title: "Observation / Open questions",
+      paragraphs: ["At The Space, April 28–30, 2026, the two light arrays occupied adjacent storefront windows. The documentation records visitors gathering around an in-room prompt and, in one nighttime view, a blue public-signal field beside a red participant field."],
+      questions: ["What do people read into a match—or a difference—between the windows?", "How does sharing a visual grammar change the way these different sources are understood?", "What remains private or unrepresented when a response becomes a color?"],
+      links: [workshopLink],
+    }],
     images: records.map((record) => ({ ...record, src: `/projects/acg/${record.file}.png` })),
     record: { title: "Activation record", facts: [
       { label: "Site", value: acg.activation.venue },
@@ -55,7 +64,7 @@ export const projectFiles: Record<string, ProjectFileData> = {
       { label: "Format", value: acg.activation.format },
       { label: "Series", value: "Ongoing · Next activation to be announced" },
     ] },
-    references: related,
+    references: [...related, workshopLink],
   },
 
   "affective-geometry": {
@@ -128,71 +137,85 @@ export const projectFiles: Record<string, ProjectFileData> = {
     title: "American Emotions",
     statement: "Public attention,\nrendered as color.",
     facts: [
-      { label: "Period", value: "2024–ongoing" },
-      { label: "Location", value: "New York" },
-      { label: "Form", value: "Art / live instrument" },
-      { label: "Status", value: "Active · Third iteration" },
+      { label: "Origin", value: "2024" },
+      { label: "Scope", value: "United States" },
+      { label: "Form", value: "Instrument" },
+      { label: "Continuation", value: "Global Emotions" },
     ],
-    actions: [{ title: "Open live instrument", href: "https://americanemotions.studiolabbh.xyz" }],
-    summary: "A living instrument that renders collective affect as color, using public attention as the signal.",
-    abstract: ["The project began in 2024 with a question: could a nation’s emotional state be rendered, and what would the right medium be? The answer arrived as color.", "Its first seven-month run led up to the 2024 presidential election. Tracking public attention and watching its inferred affect move over time established the philosophy that grounds the lab’s work."],
+    actions: [{ title: "Explore the successor: Global Emotions", href: "/projects/global-emotions" }],
+    summary: "An authored instrument that interprets public attention through emotion and color.",
+    abstract: ["The project began in 2024 with a question: could public attention be interpreted as an affective field, and what would the right medium be? Color became a way to explore that question.", "The original election-period experiment used search activity as a proxy for attention. Its fields record the computational model’s interpretation of those signals, rather than a verified measurement of a population’s emotional state."],
     method: {
-      title: "System",
+      title: "Signal → Interpretation → Rendering",
       columns: [
-        { title: "Interpretation", steps: ["Google Trends RSS", "Language-model emotion scoring", "171-emotion taxonomy + color"] },
-        { title: "Rendering", steps: ["Emotional weights", "Accumulation over time", "A luminous color field"] },
+        { title: "Signal", steps: ["Public search activity", "Google Trends RSS"] },
+        { title: "Interpretation", steps: ["Authored affective model", "Emotion weights and color assignments"] },
+        { title: "Rendering", steps: ["Accumulation over time", "A luminous color field"] },
       ],
-      paragraphs: ["Search trends serve as a proxy for collective attention. Each query receives emotional weight and a color from the continuous spectrum. Its trace joins a field that can be read as an atmosphere."],
+      paragraphs: ["Each query receives emotional weight and a color within the authored system. Its trace joins a field that can be read as an atmosphere. Search activity supplies the input; the model supplies the interpretation."],
       details: [
-        { title: "Rendering method", paragraphs: ["The renderer uses float32 additive accumulation with Gaussian bloom. Individual queries leave soft traces that layer into a density map of collective attention."] },
-        { title: "The art project became the lab", paragraphs: ["American Emotions established the lab’s axiom that affect has value: it is structured, measurable, collective, and shaped. Its pipeline informed Chroma, its renderer became a research instrument, and its questions became papers."] },
+        { title: "Rendering method", paragraphs: ["The later American Emotions renderer uses float32 additive accumulation with Gaussian bloom. Individual queries leave soft traces that layer into a density map of interpreted attention."] },
+        { title: "Taxonomy across versions", paragraphs: ["The retained 2024 pipeline asks a language model to assign emotion labels and RGB colors using an open vocabulary. The later American Emotions v2 source defines 171 emotions; Global Emotions documents 169. These describe different iterations, not interchangeable counts for the original experiment."] },
       ],
     },
+    sections: [{
+      id: "questions-opened", title: "What the experiment opened",
+      paragraphs: ["The 2024 experiment opened questions about the distance between a public signal, an emotional interpretation, and a visual form. What can attention stand in for? What does the model introduce? What can color communicate that a label cannot?", "That line of inquiry later informed Emotion as System, Chroma, and the ACG installation series. Chroma gives the person authority to name a feeling; the installation places participant input beside interpreted public signals. Each returns the original question in a different form."],
+      links: [theory, chromaLink, acgLink],
+    }, {
+      id: "continuation", title: "From American Emotions to Global Emotions",
+      paragraphs: ["Global Emotions continues this inquiry across locations in a daily field interface. The current instrument is a later development, not a live replay of the 2024 American Emotions system. Its model and coverage should be read through its own dated records."],
+      links: [globalLink],
+    }],
     images: documentation("projects/american-emotions", [
-      { file: "hero.png", title: "Collective field", caption: "American Emotions. Collective affect rendered as a luminous color field.", width: 2686, height: 1391 },
-      { file: "render-2024.png", title: "2024 election run", caption: "An archival rendering from the seven-month 2024 election run.", width: 3040, height: 3040 },
+      { file: "hero.png", title: "Interpreted field", caption: "American Emotions. Public attention interpreted as a luminous color field.", width: 2686, height: 1391 },
+      { file: "render-2024.png", title: "2024 election run", caption: "An archival rendering from the 2024 election-period experiment.", width: 3040, height: 3040 },
     ]),
-    record: { title: "Iteration record", facts: [
-      { label: "2024", value: "American Emotions · Seven months leading up to the presidential election · Complete" },
-      { label: "2025", value: "New York Emotions · Six weeks leading up to the mayoral election · Complete" },
-      { label: "April 2026–", value: "American Emotions · Ongoing, through midterms and into the next presidential cycle" },
+    record: { title: "Project record", facts: [
+      { label: "Origin", value: "American Emotions · 2024 election-period experiment" },
+      { label: "Related work", value: "New York Emotions · 2025 mayoral-election period" },
+      { label: "Continuation", value: "Global Emotions · Current location-based interface" },
     ] },
-    references: [theory, acgLink, tihifLink, { title: "2024 election archive", role: "Archival documentation", href: "https://www.instagram.com/americanemotions" }],
+    references: [theory, chromaLink, acgLink, globalLink, tihifLink, { title: "American Emotions archive", role: "Historical documentation", href: "https://www.instagram.com/americanemotions" }],
   },
 
   "global-emotions": {
     title: "Global Emotions",
-    statement: "The world, one\nemotional field a day.",
+    statement: "A weather system\nof attention.",
     facts: [
       { label: "Period", value: "2026–ongoing" },
-      { label: "Scope", value: "Global / by country" },
-      { label: "Form", value: "Art / live instrument" },
-      { label: "Status", value: "Seasonal instrument" },
+      { label: "Scope", value: "Locations / world aggregate" },
+      { label: "Form", value: "Instrument" },
+      { label: "Status", value: "Live · Dated field archive" },
     ],
     actions: [{ title: "Open live instrument", href: "https://globalemotions.studiolabbh.xyz" }],
-    summary: "A public emotional observatory that reads the world as a weather system of attention.",
-    abstract: ["Each day, search behavior across countries is classified into emotional categories and mapped to a color field. The fields accumulate into an archive—a record of how the world felt, one day at a time.", "The work extends the inquiry of American Emotions beyond one country. Each place receives an atmospheric reading of its public mood."],
+    summary: "Global Emotions interprets public search and news signals through an authored affective model, producing a daily visual field for each available location.",
+    abstract: ["The work extends the inquiry of American Emotions beyond one country. Fields accumulate into an archive of the instrument’s interpretations of public signals, not a direct record of how everyone in a place felt."],
     method: {
       title: "System",
       columns: [
-        { title: "Input", steps: ["Daily search trends", "Headline context", "Traffic + publication-time weighting"] },
-        { title: "Output", steps: ["Emotional classification", "A color field per place", "A daily archive"] },
+        { title: "Input", steps: ["Search trends and headline context", "Traffic and publication-time weighting"] },
+        { title: "Output", steps: ["Authored emotional classification", "A color field for an available location", "A dated archive record"] },
       ],
-      paragraphs: ["Signals are aggregated by country and stripped of individual identity. Attention intensity shapes the reading; a valence–arousal–dominance space provides the emotional coordinates."],
+      paragraphs: ["The published method maps signals into a taxonomy of 169 emotions with color and valence–arousal–dominance coordinates. Its categories and weights are choices made within the model.", "The affect label describes the model’s interpretation. Search pressure is a separate attention-intensity readout; it should not be read as a measure of how strongly a population feels an emotion."],
     },
+    sections: [{
+      id: "reading-the-record", title: "Reading a field",
+      paragraphs: ["Use the location code, record date, and model version together. A US-NY field is a New York state view, not a national reading. WORLD is an aggregate view. Neither represents every person within its scope.", "On September 24, 2026, the location selector listed 177 places, including country and territory views, U.S. states, the District of Columbia, and a world aggregate. A listed location does not guarantee a field for every day.", "The archive is organized by day. The Today view may show the latest available dated field; check its generated timestamp rather than assuming it was produced today. An absent record provides no basis for inferring calm, neutrality, or zero activity."],
+    }],
     images: documentation("projects/global-emotions", [
-      { file: "field-world.png", title: "World field", caption: "The world field. A daily view of collective affect across countries.", width: 1919, height: 987 },
-      { file: "location.png", title: "Country view", caption: "The location view. One country’s emotional and chromatic field.", width: 1200, height: 900 },
-      { file: "archive.png", title: "Daily archive", caption: "The archive. Daily fields accumulate into a record over time.", width: 1200, height: 900 },
+      { file: "field-world.png", title: "World field", caption: "The world view. An aggregate visual interpretation of available public signals.", width: 1919, height: 987 },
+      { file: "location.png", title: "Location view", caption: "A location view. Scope is identified by its location code.", width: 1200, height: 900 },
+      { file: "archive.png", title: "Daily archive", caption: "Dated fields preserve the instrument’s interpretations over time.", width: 1200, height: 900 },
     ]),
     record: { title: "Instrument record", facts: [
-      { label: "Source", value: "Google Trends · Daily" },
-      { label: "Taxonomy", value: "169 emotions" },
+      { label: "Source", value: "Public search trends and headline context" },
+      { label: "Taxonomy", value: "169 emotions in the published method" },
       { label: "Space", value: "Valence–arousal–dominance" },
-      { label: "Weighting", value: "Attention intensity" },
-      { label: "Output", value: "One field per place per day" },
-      { label: "Version", value: "Affect-field-v2" },
-    ], paragraphs: ["The live instrument is the canonical source. Each day is an artifact that can be cited."] },
+      { label: "Readouts", value: "Interpreted affect / search pressure / attention velocity" },
+      { label: "Cadence", value: "Daily archive · See each record’s generated date" },
+      { label: "Model", value: "affect-field-v3 · US-NY record, September 23, 2026" },
+    ], paragraphs: ["The model version above comes from the dated field’s View Data record. Historical fields retain their own provenance."] },
     references: [americanLink, acgLink, theory],
   },
 
@@ -217,8 +240,8 @@ export const projectFiles: Record<string, ProjectFileData> = {
       details: [{ title: "Research scope", paragraphs: ["Portraiture is the most densely sampled genre and the reference grammar for every other scan. The work widens into other image types and sources, including photographic archives, contemporary image libraries, and machine-generated imagery. Each source tests whether the grammar survives a change of regime."] }],
     },
     images: documentation("projects/convergent-grammar", [
-      { file: "hero.png", title: "Grammar overview", caption: "Source images with extracted spatial grammar traced in vectors.", width: 2686, height: 1391 },
-      { file: "example.png", title: "Extraction example", caption: "A source portrait with its extracted spatial grammar.", width: 2048, height: 2728 },
+      { file: "hero.png", title: "Grammar overview", caption: "A collection of source portraits from the working corpus.", width: 2686, height: 1391 },
+      { file: "example.png", title: "Extraction example", caption: "Layered geometric traces from the portrait study.", width: 2048, height: 2728 },
       ...[1, 2, 3].map((number) => ({ file: `portrait-0${number}.png`, title: `Portrait study ${number}`, caption: `Portrait study ${number}. Source image and extracted relationships between figure, ground, focal point, and negative space.`, width: 2048, height: 2728 })),
     ]),
     record: { title: "Research record", facts: [
@@ -248,9 +271,9 @@ export const projectFiles: Record<string, ProjectFileData> = {
         { title: "Broadcast", steps: ["A color signal", "Three networked LED fixtures", "Three studio windows"] },
       ],
       paragraphs: ["Each day began with a journal entry. The entry was translated into an emotion and then a color, using the scoring process shared with American Emotions. As the day’s feeling shifted, so did the light."],
-      details: [{ title: "Affect as a shared coordinate", paragraphs: ["The work gives a direct form to the lab’s proposition that affect is a field phenomenon: it moves beyond the body and can become visible in shared space. The subsequent work, ACG by SLBH, scales this premise."] }],
+      details: [{ title: "Affect as a shared coordinate", paragraphs: ["The work gives a direct form to the lab’s proposition that affect is a field phenomenon: it moves beyond the body and can become visible in shared space. The subsequent work, Tell Me How You Feel: ACG, scales this premise."] }],
     },
-    images: documentation("projects/tihif-nyc", [{ file: "hero.png", title: "Three windows at night", caption: "The installation from the street. Three colored windows broadcast a daily feeling as light.", width: 2686, height: 1391 }]),
+    images: documentation("projects/tihif-nyc", [{ file: "cover.png", title: "A feeling on the street", caption: "Three studio windows glowing red above a New York street at night.", width: 800, height: 1000 }, { file: "hero.png", title: "Three windows at night", caption: "The installation from the street. Three colored windows broadcast a daily feeling as light.", width: 2686, height: 1391 }]),
     record: { title: "Installation record", facts: [
       { label: "Site", value: "A studio in New York City" },
       { label: "Run", value: "2025 · Complete" },
@@ -271,7 +294,7 @@ export const projectFiles: Record<string, ProjectFileData> = {
     ],
     actions: [{ title: "View on the App Store", href: "https://apps.apple.com/us/app/mood-tracker-journal-chroma/id6784464340" }, { title: "Visit Chroma", href: "https://chroma.studiolabbh.xyz/" }],
     summary: "A private place to give a moment color and form, then return to it over time.",
-    abstract: ["Speak or type what happened. Chroma turns the moment into color, form, and a private reflection—entirely on your iPhone.", "The shapes come from Affective Geometry. The product carries the lab’s work on emotion as a system into a personal, everyday practice."],
+    abstract: ["Speak or type what happened. Chroma turns the moment into color, form, and a private reflection—entirely on your iPhone.", "The shapes come from Affective Geometry. The product brings the studio’s inquiry into a personal, everyday practice—and raises questions of its own."],
     method: {
       title: "Experience",
       columns: [
@@ -280,6 +303,19 @@ export const projectFiles: Record<string, ProjectFileData> = {
       ],
       paragraphs: ["Individual moments become a record you can return to. Readings and reflections offer another way to notice the feelings that recur."],
     },
+    sections: [{
+      id: "research-position", title: "The person and the system",
+      columns: [
+        { title: "The person", items: ["Describes the moment", "Identifies the feeling", "Chooses color"] },
+        { title: "The system", items: ["Translates those selections into visual form", "Preserves the person’s original description", "Generates reflective language around the entry"] },
+      ],
+      paragraphs: ["Chroma is designed around acknowledgment rather than emotional scoring or compulsory improvement. The system can offer reflection, but the person retains authority over the experience it represents.", "Calling Chroma a research instrument describes its role in developing and questioning the studio’s ideas. Studio Lab BH does not collect private journal data for research. Journal content and generated reflections remain on the person’s device."],
+    }, {
+      id: "returned-to-research", title: "What Chroma returned to the research",
+      paragraphs: ["Building and releasing Chroma put a concrete tension into the product: the person supplies a description, feeling, and color, while the system generates another layer of language. Preserving the original description alongside that reflection makes the distinction visible.", "The questions below arise from those product decisions. They are open design questions, not findings drawn from people’s private journals."],
+      questions: ["How can reflective language remain an invitation without becoming an authoritative account of someone’s experience?", "What changes when a person returns to a feeling’s visual form after the moment has passed?", "How can an archive acknowledge recurring experiences without turning them into targets for improvement?"],
+      links: [workshopLink],
+    }],
     images: documentation("chroma", [
       { file: "collection.png", title: "Chroma overview", caption: "Voice journaling, daily readings, weekly reflection, and on-device privacy.", width: 6686, height: 5376 },
       { file: "screen-01.png", title: "Daily reading", caption: "A daily reading. A moment remembered in color, form, and language.", width: 690, height: 1493 },
@@ -294,6 +330,6 @@ export const projectFiles: Record<string, ProjectFileData> = {
       { label: "Output", value: "Color, form, and a private reflection" },
       { label: "Privacy", value: "Entirely on your device" },
     ] },
-    references: [geometryLink, { title: "Diagrams", role: "Working definitions and visual studies", href: "/diagrams" }, theory, { title: "Privacy", role: "Chroma privacy policy", href: "/chroma/privacy" }, { title: "Terms", role: "Chroma terms of service", href: "/chroma/terms" }],
+    references: [geometryLink, workshopLink, { title: "Diagrams", role: "Working definitions and visual studies", href: "/diagrams" }, theory, { title: "Privacy", role: "Chroma privacy policy", href: "/chroma/privacy" }, { title: "Terms", role: "Chroma terms of service", href: "/chroma/terms" }],
   },
 };

@@ -5,14 +5,14 @@ import styles from "../studio/studio.module.css";
 export const metadata = {
   title: "Brendon Hawkins — SLBH",
   description:
-    "Brendon Hawkins is the founder of Studio Lab BH. His work moves across art, research, product, and emerging technologies.",
+    "Brendon Hawkins is a systems theorist, researcher, artist, and product leader; founder of Studio Lab BH and Founding Advisory Board Chair of the CUNY Public Interest Technology Lab.",
 };
 
 const AFFILIATIONS = [
   { role: "FOUNDER", org: "Studio Lab BH" },
   {
-    role: "FOUNDING BOARD CHAIR",
-    org: "PIT Lab at CUNY",
+    role: "FOUNDING ADVISORY BOARD CHAIR",
+    org: "CUNY Public Interest Technology Lab",
   },
 ];
 
@@ -84,7 +84,7 @@ const CV: CVCategory[] = [
   {
     label: "SOLO EXHIBITIONS",
     entries: [
-      { year: "2026", title: "ACG By Studio Lab BH", detail: "The Space, New York, NY" },
+      { year: "2026", title: "Tell Me How You Feel: ACG", detail: "The Space, New York, NY" },
       { year: "2024", title: "Three Degrees", detail: "Industrious, Pittsburgh, PA" },
       { year: "2019", title: "#ShowUp", detail: "Mattress Factory, Pittsburgh, PA" },
       { year: "2018", title: "Untitled", detail: "Bunker Projects, Pittsburgh, PA" },
@@ -219,19 +219,20 @@ export default function BrendonPage() {
             />
           </figure>
           <p>
-            Brendon Hawkins is the founder of <Link href="/studio" className={styles.bioLink}>Studio Lab BH</Link> and Interim
-            Founding Board Chair at PIT Lab at CUNY. His work builds
-            computational frameworks for affect: how emotion behaves as a
-            structured system across populations, platforms, environments,
-            and time.
+            Brendon Hawkins is a systems theorist, researcher, artist, and product
+            leader. He is the founder of <Link href="/studio" className={styles.bioLink}>Studio Lab BH</Link> and{" "}
+            <a className={styles.bioLink} href="https://nycpitpopup.org/cuny-pit-lab-to-name-brendon-hawkins-as-founding-advisory-board-chair/" target="_blank" rel="noopener noreferrer">Founding Advisory Board Chair</a> of the CUNY Public Interest Technology Lab.
           </p>
           <p>
-            His practice is interdisciplinary by design. He trained as an
-            artist and works as a technologist, with a background spanning
-            art, research, product, and emerging technologies. Prior work
-            centered on time, identity, language, and culture as systems;
-            current work formalizes affect as a missing layer in how we
-            model human experience.
+            His practice examines how human experience, culture, and perception
+            are translated into computational and representational systems. His
+            work moves between research, software, visual art, and participatory
+            environments.
+          </p>
+          <p>
+            Product leadership at Hearst Television and Candid grounds this work
+            in implementation: moving from emerging technology and prototypes to
+            usable products, APIs, and systems.
           </p>
           <p>
             Based in New York. Formative roots in Pittsburgh. Studies ASL.
@@ -249,6 +250,12 @@ export default function BrendonPage() {
               </div>
             ))}
           </dl>
+          <p className={styles.affiliationNote}>
+            The <a className={styles.bioLink} href="https://nycpitpopup.org/our-partners/" target="_blank" rel="noopener noreferrer">CUNY Public Interest Technology Lab</a> connects
+            students, educators, and community partners around technology in the
+            public interest. Its work includes critical AI literacy, civic data,
+            open-source tools, and participatory design.
+          </p>
         </section>
 
         <details className={styles.cv}>
