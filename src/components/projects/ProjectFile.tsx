@@ -11,7 +11,7 @@ function Facts({ facts }: { facts: FileFact[] }) {
   return <dl className={styles.factList}>{facts.map((fact) => <div key={fact.label}><dt>{fact.label}</dt><dd>{fact.value}</dd></div>)}</dl>;
 }
 
-export function ProjectFile({ project, preview = false }: { project: ProjectFileData; preview?: boolean }) {
+export function ProjectFile({ project }: { project: ProjectFileData }) {
   const sections = [
     { id: "abstract", title: "Abstract" },
     { id: "method", title: project.method.title },
@@ -24,7 +24,7 @@ export function ProjectFile({ project, preview = false }: { project: ProjectFile
     return <h2><span>{String(index + 1).padStart(2, "0")}</span>{sections[index].title}</h2>;
   }
 
-  return <article className={`${styles.file} ${preview ? styles.preview : "container-page"}`}>
+  return <article className={`container-page ${styles.file}`}>
     <header className={styles.fileHeader}>
       <div><h1>{project.title}</h1>{project.subtitle && <p className={styles.fileSubtitle}>{project.subtitle}</p>}</div>
       <p className={styles.fileStatement}>{project.statement}</p>

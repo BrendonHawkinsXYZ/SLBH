@@ -1,5 +1,5 @@
 // Edited from /projects/acg and content/projects/acg/index.mdx.
-// The project file and page studies share the same facts and documentation.
+// Facts and documentation for the ACG project file.
 export const acg = {
   title: "ACG by SLBH",
   name: "Affective Computational Geometry",
