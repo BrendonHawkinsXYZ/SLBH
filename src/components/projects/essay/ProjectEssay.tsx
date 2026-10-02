@@ -3,11 +3,12 @@ import Link from "next/link";
 import { projectFiles } from "@/lib/projectFiles";
 import { chromaWorkshop } from "@/lib/chromaWorkshop";
 import { ACGStory, GeometryStory, WorkshopStory } from "./ProjectStories";
+import { NewYorkEmotionsStory } from "./NewYorkEmotionsStory";
 import { ResearchStory } from "./ResearchStories";
 import { ProjectDetails } from "./ProjectDetails";
 import styles from "./ProjectEssay.module.css";
 
-export type EssaySlug = "acg" | "affective-geometry" | "tell-me-how-you-feel-chroma" | "affective-sculptural-sketches" | "american-emotions" | "global-emotions" | "convergent-grammar" | "tihif-nyc";
+export type EssaySlug = "new-york-emotions" | "acg" | "affective-geometry" | "tell-me-how-you-feel-chroma" | "affective-sculptural-sketches" | "american-emotions" | "global-emotions" | "convergent-grammar" | "tihif-nyc";
 
 function projectFor(slug: string) {
   return slug === "tell-me-how-you-feel-chroma" ? chromaWorkshop : projectFiles[slug];
@@ -26,7 +27,7 @@ export function ProjectEssay({ slug }: { slug: EssaySlug }) {
   }).slice(0, 3);
 
   return <article className={styles.essayPage}>
-    {slug === "acg" ? <ACGStory /> : slug === "affective-geometry" ? <GeometryStory /> : slug === "tell-me-how-you-feel-chroma" ? <WorkshopStory /> : <ResearchStory slug={slug} project={project} />}
+    {slug === "new-york-emotions" ? <NewYorkEmotionsStory /> : slug === "acg" ? <ACGStory /> : slug === "affective-geometry" ? <GeometryStory /> : slug === "tell-me-how-you-feel-chroma" ? <WorkshopStory /> : <ResearchStory slug={slug} project={project} />}
     <ProjectDetails project={project} />
     {!!related.length && <section className={styles.furtherWork} aria-labelledby="related-work-title">
       <div className={styles.sectionTopline}><h2 id="related-work-title">Related work</h2><Link href="/projects">All work →</Link></div>

@@ -1,0 +1,38 @@
+.encounter { display: grid; grid-template-columns: 1fr 1fr; gap: 96px; align-items: center; padding-top: 128px; }
+.encounter h2 { font-size: clamp(40px, 4.5vw, 64px); line-height: 1.08; }
+.encounter p { margin-top: 32px; max-width: 36ch; font-size: 18px; color: var(--muted); }
+.encounter > figure { width: 88%; justify-self: end; }
+/* Override the shared closing-section text grid for these paired artworks. */
+div.comparison { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; align-items: start; padding-bottom: 0; }
+
+.voices { padding-block: 128px; }
+.voicesIntro { display: grid; grid-template-columns: 1.5fr 1fr; gap: 96px; align-items: end; margin-bottom: 64px; }
+.voicesIntro h2 { font-size: clamp(40px, 4.5vw, 64px); line-height: 1.08; }
+.voicesIntro > p { font-size: 18px; color: var(--muted); max-width: 40ch; }
+.quotes { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px 80px; }
+.quotes figure { border-top: 1px solid var(--study-rule); padding-top: 32px; display: flex; flex-direction: column; justify-content: space-between; gap: 32px; }
+.quotes blockquote { margin: 0; }
+.quotes blockquote p { font-size: clamp(24px, 2.2vw, 32px); line-height: 1.45; letter-spacing: -.025em; max-width: 32ch; }
+.quotes figcaption { display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--muted); }
+.blip { display: inline-block; flex: 0 0 24px; width: 24px; height: 24px; border-radius: 50%; }
+.contactSheet { width: 88%; margin-inline: auto !important; }
+@media (max-width: 1100px) {
+  .encounter, .voicesIntro { gap: 48px; }
+  .quotes { column-gap: 48px; }
+  .encounter > figure { width: 100%; }
+}
+@media (max-width: 760px) {
+  .encounter { grid-template-columns: 1fr; gap: 40px; padding-top: 64px; }
+  .encounter h2 { font-size: 40px; }
+  .encounter p { margin-top: 24px; max-width: 50ch; }
+  .encounter > figure { width: 100%; }
+  div.comparison { grid-template-columns: 1fr; gap: 40px; }
+
+  .voices { padding-block: 64px; }
+  .voicesIntro { grid-template-columns: 1fr; gap: 24px; margin-bottom: 40px; }
+  .voicesIntro h2 { font-size: 40px; }
+  .quotes { grid-template-columns: 1fr; gap: 40px; }
+  .quotes figure { padding-top: 24px; gap: 24px; }
+  .contactSheet { width: calc(100% + 48px); margin-inline: -24px !important; }
+  .contactSheet figcaption { padding-inline: 24px; }
+}

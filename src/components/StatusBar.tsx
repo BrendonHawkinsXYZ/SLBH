@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import Link from "next/link";
 
 function formatClock(date: Date) {
   const time = new Intl.DateTimeFormat(undefined, {
@@ -129,7 +128,7 @@ export function StatusBar() {
         className="t-mono status-pub"
         style={{ color: "var(--ground)", opacity: 0.72, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
       >
-        GLOBAL EMOTIONS · LIVE INSTRUMENT
+        GLOBAL EMOTIONS · INACTIVE
       </span>
 
       <span style={{ marginLeft: "auto", display: "flex", gap: 16, alignItems: "center", flexShrink: 0 }}>
@@ -151,27 +150,12 @@ export function StatusBar() {
         >
           {city ?? ""}
         </span>
-        <Link
-          href="https://globalemotions.studiolabbh.xyz/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="t-mono link-quiet status-read"
-          style={{
-            color: "var(--ground)",
-            fontWeight: 500,
-            textDecoration: "underline",
-            textUnderlineOffset: 3,
-          }}
-        >
-          VIEW LIVE ↗︎
-        </Link>
       </span>
 
       <style>{`
         @media (max-width: 639px) {
           .status-pub { display: none; }
           .status-city { display: none; }
-          .status-read { display: none; }
         }
         @media (max-width: 767px) {
           .status-bar { padding: 0 16px !important; }

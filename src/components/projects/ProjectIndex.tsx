@@ -12,6 +12,7 @@ const CARD_H = 400;
 const STATUS_LABEL: Record<ProjectStatus, string> = {
   flagship: "FLAGSHIP",
   active: "ACTIVE",
+  inactive: "INACTIVE",
   seasonal: "SEASONAL",
   complete: "COMPLETE",
   archived: "ARCHIVED",

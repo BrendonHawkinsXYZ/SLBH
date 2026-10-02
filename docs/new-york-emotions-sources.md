@@ -1,0 +1,10 @@
+# New York Emotions source notes
+
+Internal editorial record. Added October 2, 2026.
+
+- The artist’s account supplies the approximate month-long run around the 2025 NYC mayoral election, once-daily public-signal collection, six-hour participatory study, and direct continuation into Tell Me How You Feel: ACG. Exact project boundaries and a statistical comparison are not asserted.
+- `rss_trending_searches_2025.csv` contains 170 search-trend records. All use the Google Trends `US-NY` feed. Publication timestamps range from October 21 to November 6, 2025, in the offsets stored in the CSV. These are publication dates, not collection timestamps. The `Response` column contains model outputs, not visitor statements. The feed is state-level and includes interests beyond the mayoral election.
+- `data/submissions.csv` contains 27 submissions with `text`, `emotion`, and `color` columns. It has no participant IDs or timestamps. Counts are described as submissions, not unique people. The artist explicitly approved four anonymous excerpts on October 2, 2026. Public quotations are verbatim from CSV rows 2, 6, 19, and 23 (including header), paired with the emotion label and color from the same row. No additional participant statements are published.
+- The exact prompt, “How are you feeling right now?”, is visible on the iPad in `IMG_7927 2.HEIC`. `IMG_7922 2.HEIC` documents the NYC PIT Pop Up sign. `IMG_7923.HEIC` and `IMG_7928 2.HEIC` show early and later views of the screen. The site uses resized WebP conversions with orientation and full compositions preserved.
+- The supplied “14 Days” plate is presented as a visual selection, not proof of the full project duration. The supplied live contact sheet records the six-hour sequence. No exact correspondence between individual panels and dated RSS records is asserted.
+- The supplied animated GIF is displayed directly and unmodified, preserving its original frames and timing. Image optimization is disabled for the GIF to preserve animation. Original files and source CSVs are unchanged; raw submissions are not copied to the public directory.

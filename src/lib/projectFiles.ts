@@ -1,16 +1,18 @@
 import type { DocumentImage, FileLink, ProjectFileData } from "@/components/projects/ProjectFile.types";
 import { acg, records, related } from "./acg";
 import { CHROMA_URL } from "./site";
+import { newYorkEmotions } from "./newYorkEmotions";
 
 // Project narratives are edited from the existing detail pages. The index keeps
 // its frontmatter source; these records define the richer project documents.
 const theory: FileLink = { title: "Emotion as System", role: "The research foundation", href: "/research/emotion-as-system" };
 const acgLink: FileLink = { title: "Tell Me How You Feel: ACG", role: "A shared encounter with affect", href: "/projects/acg" };
 const americanLink: FileLink = { title: "American Emotions", role: "Interpreted public attention as color", href: "/projects/american-emotions" };
+const newYorkLink: FileLink = { title: "New York Emotions", role: "Inferred emotion meets feelings expressed in person", href: "/projects/new-york-emotions" };
 const geometryLink: FileLink = { title: "Affective Geometry", role: "Emotion as shape and color", href: "/projects/affective-geometry" };
 const tihifLink: FileLink = { title: "This Is How I’m Feeling: NYC", role: "Private feeling in public space", href: "/projects/tihif-nyc" };
 const workshopLink: FileLink = { title: "Tell Me How You Feel: Chroma", role: "Drawing, florals, food, and conversation", href: "/projects/tell-me-how-you-feel-chroma" };
-const globalLink: FileLink = { title: "Global Emotions", role: "The current public-signal instrument", href: "/projects/global-emotions" };
+const globalLink: FileLink = { title: "Global Emotions", role: "Public signals interpreted across locations", href: "/projects/global-emotions" };
 const chromaLink: FileLink = { title: "Chroma", role: "A private emotional journal", href: CHROMA_URL };
 
 function documentation(folder: string, items: { file: string; title: string; caption: string; width: number; height: number; alt?: string }[]): DocumentImage[] {
@@ -26,6 +28,7 @@ function documentation(folder: string, items: { file: string; title: string; cap
 }
 
 export const projectFiles: Record<string, ProjectFileData> = {
+  "new-york-emotions": newYorkEmotions,
   acg: {
     title: acg.title,
     subtitle: "An installation series within Affective Computational Geometry",
@@ -38,6 +41,7 @@ export const projectFiles: Record<string, ProjectFileData> = {
     ],
     summary: "What happens when different descriptions of affect are rendered into the same shared environment?",
     abstract: [
+      "New York Emotions first placed a daily inferred field beside live participant responses during a six-hour study in 2025. Tell Me How You Feel: ACG developed that comparison into an installation in light.",
       "The first storefront activation placed two fields beside one another: one drawn from American Emotions, and another shaped by visitor input. Both were translated into light.",
       "Affective Computational Geometry is the broader thesis and conceptual program. Tell Me How You Feel: ACG is an installation series within it—one way to encounter its questions in shared space.",
     ],
@@ -64,7 +68,7 @@ export const projectFiles: Record<string, ProjectFileData> = {
       { label: "Format", value: acg.activation.format },
       { label: "Series", value: "Ongoing · Next activation to be announced" },
     ] },
-    references: [...related, workshopLink],
+    references: [newYorkLink, ...related, workshopLink],
   },
 
   "affective-geometry": {
@@ -161,10 +165,10 @@ export const projectFiles: Record<string, ProjectFileData> = {
     sections: [{
       id: "questions-opened", title: "What the experiment opened",
       paragraphs: ["The 2024 experiment opened questions about the distance between a public signal, an emotional interpretation, and a visual form. What can attention stand in for? What does the model introduce? What can color communicate that a label cannot?", "That line of inquiry later informed Emotion as System, Chroma, and the ACG installation series. Chroma gives the person authority to name a feeling; the installation places participant input beside interpreted public signals. Each returns the original question in a different form."],
-      links: [theory, chromaLink, acgLink],
+      links: [newYorkLink, theory, chromaLink, acgLink],
     }, {
       id: "continuation", title: "From American Emotions to Global Emotions",
-      paragraphs: ["Global Emotions continues this inquiry across locations in a daily field interface. The current instrument is a later development, not a live replay of the 2024 American Emotions system. Its model and coverage should be read through its own dated records."],
+      paragraphs: ["Global Emotions continues this inquiry across locations in a daily field interface. The instrument is a later development, not a live replay of the 2024 American Emotions system. Its model and coverage should be read through its own dated records."],
       links: [globalLink],
     }],
     images: documentation("projects/american-emotions", [
@@ -174,9 +178,9 @@ export const projectFiles: Record<string, ProjectFileData> = {
     record: { title: "Project record", facts: [
       { label: "Origin", value: "American Emotions · 2024 election-period experiment" },
       { label: "Related work", value: "New York Emotions · 2025 mayoral-election period" },
-      { label: "Continuation", value: "Global Emotions · Current location-based interface" },
+      { label: "Continuation", value: "Global Emotions · Location-based instrument" },
     ] },
-    references: [theory, chromaLink, acgLink, globalLink, tihifLink, { title: "American Emotions archive", role: "Historical documentation", href: "https://www.instagram.com/americanemotions" }],
+    references: [newYorkLink, theory, chromaLink, acgLink, globalLink, tihifLink, { title: "American Emotions archive", role: "Historical documentation", href: "https://www.instagram.com/americanemotions" }],
   },
 
   "global-emotions": {
@@ -186,9 +190,8 @@ export const projectFiles: Record<string, ProjectFileData> = {
       { label: "Period", value: "2026–ongoing" },
       { label: "Scope", value: "Locations / world aggregate" },
       { label: "Form", value: "Instrument" },
-      { label: "Status", value: "Live · Dated field archive" },
+      { label: "Status", value: "Inactive" },
     ],
-    actions: [{ title: "Open live instrument", href: "https://globalemotions.studiolabbh.xyz" }],
     summary: "Global Emotions interprets public search and news signals through an authored affective model, producing a daily visual field for each available location.",
     abstract: ["The work extends the inquiry of American Emotions beyond one country. Fields accumulate into an archive of the instrument’s interpretations of public signals, not a direct record of how everyone in a place felt."],
     method: {

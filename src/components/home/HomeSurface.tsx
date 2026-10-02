@@ -77,14 +77,6 @@ export function HomeSurface() {
               >
                 Read the paper
               </Link>
-              <Link
-                href="https://globalemotions.studiolabbh.xyz/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="t-nav link-quiet hero-pill hero-pill-ghost"
-              >
-                See the work
-              </Link>
             </motion.div>
           </div>
         </div>

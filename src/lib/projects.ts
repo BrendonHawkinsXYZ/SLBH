@@ -6,6 +6,7 @@ import { findAsset } from "./assets";
 export type ProjectStatus =
   | "flagship"
   | "active"
+  | "inactive"
   | "seasonal"
   | "complete"
   | "archived"
@@ -31,6 +32,7 @@ export const STATUS_ORDER: ProjectStatus[] = [
   "active",
   "seasonal",
   "in-development",
+  "inactive",
   "complete",
   "archived",
 ];
