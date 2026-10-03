@@ -5,7 +5,7 @@ import styles from "../studio/studio.module.css";
 export const metadata = {
   title: "Brendon Hawkins — SLBH",
   description:
-    "Brendon Hawkins is a systems theorist, researcher, artist, and product leader; founder of Studio Lab BH and Founding Advisory Board Chair of the CUNY Public Interest Technology Lab.",
+    "Brendon Hawkins is a systems theorist, researcher, artist, and technologist; founder of Studio Lab BH and Founding Advisory Board Chair of the CUNY Public Interest Technology Lab.",
 };
 
 const AFFILIATIONS = [
@@ -29,7 +29,7 @@ const CV: CVCategory[] = [
         detail: "CUNY, New York, NY",
       },
       { year: "2020–21", title: "FINE Residency", detail: "Children’s Museum of Pittsburgh" },
-      { year: "2020", title: "Field Work Gallery" },
+      { year: "2020", title: "A.I.R.", detail: "Field Work Gallery" },
       {
         year: "2019",
         title: "Creative and Social Impact Fellow",
@@ -37,12 +37,17 @@ const CV: CVCategory[] = [
       },
       { year: "2019", title: "Distillery", detail: "Brew House Association" },
       { year: "2019", title: "Visiting Artist", detail: "Legacy Arts Project" },
-      { year: "2018", title: "Bunker Projects" },
+      { year: "2018", title: "A.I.R.", detail: "Bunker Projects" },
     ],
   },
   {
     label: "WORKSHOPS",
     entries: [
+      {
+        year: "2026",
+        title: "Tell Me How You Feel: Translation",
+        detail: "NYC PIT Pop Up",
+      },
       {
         year: "2026",
         title: "Tell Me How You Feel: Chroma",
@@ -82,6 +87,26 @@ const CV: CVCategory[] = [
     ],
   },
   {
+    label: "PRODUCT EXPERIENCE",
+    entries: [
+      {
+        title: "Hearst Television · Technical Product Manager",
+        detail: "Emerging Technology — AI, rapid prototyping, research",
+      },
+      {
+        title: "Candid · Product Manager",
+        detail: "API — Apple Pay API, GraphQL API, Demographics API",
+      },
+    ],
+  },
+  {
+    label: "LEADERSHIP & SERVICE",
+    entries: [
+      { title: "Out in Tech", detail: "Multi Chapter Leadership: NYC + Pittsburgh" },
+      { title: "Hearst UX Guild", detail: "Founding Member" },
+    ],
+  },
+  {
     label: "SOLO EXHIBITIONS",
     entries: [
       { year: "2026", title: "Tell Me How You Feel: ACG", detail: "The Space, New York, NY" },
@@ -113,15 +138,6 @@ const CV: CVCategory[] = [
     ],
   },
   {
-    label: "PUBLISHED WORK",
-    entries: [
-      { year: "2020", title: "Worst Title Ever", detail: "Cover Artist · Aaron Jones" },
-      { year: "2018", title: "Cali Cod", detail: "Photo Editor · The Tenth Magazine" },
-      { year: "2017", title: "Hidden Flame", detail: "Editorial Photographer · NeuNeu Magazine" },
-      { year: "2017", title: "Wonderland", detail: "Editorial Photographer · Fucking Young" },
-    ],
-  },
-  {
     label: "PERFORMANCES",
     entries: [
       { year: "2019", title: "Stone Wall: 50th Anniversary", detail: "Andy Warhol Museum" },
@@ -131,26 +147,6 @@ const CV: CVCategory[] = [
         detail: "Andy Warhol Museum",
       },
       { year: "2018", title: "My People Queer Art", detail: "KST Alloy" },
-    ],
-  },
-  {
-    label: "COMMITTEES",
-    entries: [
-      { title: "Out in Tech", detail: "Pittsburgh Leadership" },
-      { title: "Hearst UX Guild", detail: "Founding Member" },
-    ],
-  },
-  {
-    label: "SELECT PROFESSIONAL EXPERIENCE",
-    entries: [
-      {
-        title: "Hearst Television · Technical Product Manager",
-        detail: "Emerging Technology — AI, rapid prototyping, research",
-      },
-      {
-        title: "Candid · Product Manager",
-        detail: "API — Apple Pay API, GraphQL API, Demographics API",
-      },
     ],
   },
   {
@@ -219,20 +215,21 @@ export default function BrendonPage() {
             />
           </figure>
           <p>
-            Brendon Hawkins is a systems theorist, researcher, artist, and product
-            leader. He is the founder of <Link href="/studio" className={styles.bioLink}>Studio Lab BH</Link> and{" "}
-            <a className={styles.bioLink} href="https://nycpitpopup.org/cuny-pit-lab-to-name-brendon-hawkins-as-founding-advisory-board-chair/" target="_blank" rel="noopener noreferrer">Founding Advisory Board Chair</a> of the CUNY Public Interest Technology Lab.
+            Brendon Hawkins is a systems theorist, researcher, artist, and
+            technologist. He is the founder of <Link href="https://www.studiolabbh.xyz/studio" className={styles.bioLink}>Studio Lab BH</Link> and
+            Founding Advisory Board Chair of the CUNY Public Interest Technology Lab.
           </p>
           <p>
             His practice examines how human experience, culture, and perception
-            are translated into computational and representational systems. His
-            work moves between research, software, visual art, and participatory
-            environments.
+            become computational and representational systems. Working across
+            research, software, visual art, and participatory environments, he
+            studies the relationship between internal states, collective behavior,
+            and the technologies used to interpret them.
           </p>
           <p>
-            Product leadership at Hearst Television and Candid grounds this work
-            in implementation: moving from emerging technology and prototypes to
-            usable products, APIs, and systems.
+            His background in product and emerging technology grounds this work
+            in implementation, moving ideas between theory, experimentation, and
+            functional systems.
           </p>
           <p>
             Based in New York. Formative roots in Pittsburgh. Studies ASL.
@@ -259,7 +256,7 @@ export default function BrendonPage() {
         </section>
 
         <details className={styles.cv}>
-          <summary>Curriculum vitae <span aria-hidden="true">+</span></summary>
+          <summary>Selected experience <span aria-hidden="true">+</span></summary>
           <div className={styles.archive}>
             {CV.map((category) => (
               <section key={category.label} className={styles.cvCategory}>
