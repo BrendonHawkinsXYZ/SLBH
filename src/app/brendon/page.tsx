@@ -62,7 +62,7 @@ const CV: CVCategory[] = [
     ],
   },
   {
-    label: "PUBLIC SPEAKING",
+    label: "PUBLIC TALKS & CONVERSATIONS",
     entries: [
       {
         year: "2026",
@@ -71,6 +71,12 @@ const CV: CVCategory[] = [
       },
       { year: "2025", title: "Queer Tech Stories Across Generations", detail: "PayPal HQ" },
       { year: "2025", title: "Building Products in the Age of AI", detail: "Hearst" },
+      {
+        year: "2025",
+        title:
+          "Showing Up: Brendon Hawkins on Art, Technology, and Community Accountability",
+        detail: "Syncing Up Podcast · Out in Tech",
+      },
       {
         year: "2024",
         title: "Speculative: Designing for the day after tomorrow",
@@ -138,18 +144,6 @@ const CV: CVCategory[] = [
     ],
   },
   {
-    label: "PERFORMANCES",
-    entries: [
-      { year: "2019", title: "Stone Wall: 50th Anniversary", detail: "Andy Warhol Museum" },
-      {
-        year: "2018",
-        title: "The Warhol Shop Talk: Black Joy, Masculinity, & Barbershops",
-        detail: "Andy Warhol Museum",
-      },
-      { year: "2018", title: "My People Queer Art", detail: "KST Alloy" },
-    ],
-  },
-  {
     label: "EDUCATION",
     entries: [
       {
@@ -161,34 +155,6 @@ const CV: CVCategory[] = [
         year: "2021",
         title: "Certificate, Web Development and Computer Science",
         detail: "Bloom Institute of Technology",
-      },
-    ],
-  },
-  {
-    label: "MEDIA & PRESS",
-    entries: [
-      {
-        year: "2025",
-        title:
-          "Showing Up: Brendon Hawkins on Art, Technology, and Community Accountability",
-        detail: "Syncing Up Podcast · Out in Tech",
-      },
-      {
-        year: "2020",
-        title:
-          "MuseumLab opens line of communication with Channel group art exhibition",
-        detail: "Pittsburgh City Paper · Amanda Waltz",
-      },
-      {
-        year: "2019",
-        title:
-          "LGBTQ+ artists assert their identities for The Self, Realized: Queering the Art of Self-Portraiture",
-        detail: "Pittsburgh City Paper · Amanda Waltz",
-      },
-      {
-        year: "2018",
-        title: "Five stand-out stars from new all-black fashion mag Neu Neu",
-        detail: "Dazed Magazine · Kemi Alemoru",
       },
     ],
   },
@@ -207,9 +173,9 @@ export default function BrendonPage() {
           <p className={styles.meta}>Founder</p>
           <figure className={styles.portrait}>
             <Image
-              src="/studio/brendon-portrait.png"
-              alt="Brendon Hawkins speaking into a microphone."
-              width={800}
+              src="/studio/brendon-hawkins-portrait.png"
+              alt="Portrait of Brendon Hawkins in warm light."
+              width={1000}
               height={1000}
               sizes="(max-width: 480px) calc(100vw - 44px), 340px"
             />
