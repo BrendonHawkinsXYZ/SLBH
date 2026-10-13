@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { newYorkEmotions as project, newYorkResponses } from "@/lib/newYorkEmotions";
+import { newYorkEmotions as project, newYorkResponses, newYorkTimeLapse } from "@/lib/newYorkEmotions";
 import { EssayImage } from "./EssayImage";
 import styles from "./ProjectEssay.module.css";
 import ny from "./NewYorkEmotionsStory.module.css";
@@ -44,7 +44,7 @@ export function NewYorkEmotionsStory() {
       <div className={ny.comparison}>
         <EssayImage project={project} file="daily-field.webp" caption="The day’s inferred reading, shown at the pop-up." sizes="(max-width: 760px) 100vw, 48vw" />
         <figure className={styles.picture}>
-          <Image src="/projects/new-york-emotions/six-hours.gif" alt="Time lapse of colored response blips accumulating during the six-hour New York Emotions study" width={800} height={1000} unoptimized />
+          <Image src={newYorkTimeLapse.src} alt={newYorkTimeLapse.alt} width={newYorkTimeLapse.width} height={newYorkTimeLapse.height} unoptimized />
           <figcaption>Six hours of responses, condensed into a time lapse.</figcaption>
         </figure>
       </div>

@@ -323,8 +323,6 @@ a { text-underline-offset: 4px; }
 :root { --label: 14px; --nav: 16px; --body-sm: 14px; --mono: 14px; --mono-sm: 14px; }
 .site-name { font-size: 14px; }
 .site-location, .site-path, .site-footer { font-size: 14px; }
-.home-index { padding-top: 52px; padding-bottom: 24px; }
-.home-index h1 { font-size: 18px; font-weight: 400; line-height: 1.5; margin: 0 0 44px; max-width: 520px; }
 .index-directories { max-width: 780px; margin-top: 40px; }
 .index-directories a { display: grid; grid-template-columns: minmax(0, 1fr) 150px; align-items: baseline; gap: 24px; padding: 10px 0; font-size: 17px; text-decoration: none; }
 .index-directories a span:last-child { font: 14px/1.6 var(--font-plex-mono), monospace; text-align: right; color: var(--muted); }
@@ -332,14 +330,13 @@ a { text-underline-offset: 4px; }
 .work-page { padding-top: 24px; padding-bottom: 80px; }
 .work-page h1 { font-size: 28px; font-weight: 400; margin: 0 0 36px; }
 @media(min-width: 1100px) { .index-directories { max-width: calc(100% - 380px); } }
-@media(max-width: 600px) { .site-name, .site-location, .site-path, .site-footer { font-size: 14px; } .home-index { padding-top: 36px; } .index-directories a { grid-template-columns: minmax(0, 1fr) 110px; gap: 14px; font-size: 16px; } .index-directories a span:last-child { font-size: 14px; } }
+@media(max-width: 600px) { .site-name, .site-location, .site-path, .site-footer { font-size: 14px; } .index-directories a { grid-template-columns: minmax(0, 1fr) 110px; gap: 14px; font-size: 16px; } .index-directories a span:last-child { font-size: 14px; } }
 
-/* A living form behind the document, drawn with the Chroma sequencer. */
+/* Document layering and the Chroma sequencer canvas. */
 body { isolation: isolate; }
 .site-scroll-plane { position: relative; z-index: 1; background: transparent; }
 .site-header { position: relative; z-index: 1; }
-.ambient-shape { position: fixed; top: 50%; left: 50%; width: 100px; height: 100px; transform: translate(-50%, -50%); opacity: .35; pointer-events: none; z-index: 0; }
-.morph-shape { display: block; width: 100px; height: 100px; }
+.morph-shape { display: block; width: 100%; height: 100%; }
 .circle-cursor { position: fixed; top: 0; left: 0; width: 22px; height: 22px; box-sizing: border-box; border: 1.5px solid #fff; border-radius: 50%; z-index: 9999; pointer-events: none; mix-blend-mode: difference; }
 .circle-cursor[data-selectable="true"] { background: #fff; border-color: transparent; }
 @media(hover: hover) and (pointer: fine) { html[data-circle-cursor="true"], html[data-circle-cursor="true"] * { cursor: none !important; } }
@@ -356,33 +353,6 @@ body { isolation: isolate; }
 .chroma-document-related { display: grid; gap: 16px; margin: 48px 0; }
 .chroma-document-related h2 { font-size: 20px; font-weight: 400; margin: 0 0 8px; }
 .chroma-document-related a { width: fit-content; }
-
-/* The product is the current focus; the rest of the practice stays an index. */
-.home-index { padding-top: 28px; }
-.home-feature { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 64px; align-items: center; margin-bottom: 68px; max-width: 1100px; }
-.home-feature-copy { max-width: 390px; }
-.home-feature-copy h1 { margin: 0 0 24px; font-size: 28px; font-weight: 400; line-height: 1.2; }
-.home-feature-copy h1 a { text-decoration: none; }
-.home-feature-copy p { font-size: 17px; line-height: 1.6; margin: 0 0 18px; }
-.home-feature-link { display: inline-block; font-size: 16px; margin-top: 12px; }
-.home-feature-image { display: block; }
-.home-feature-image img { display: block; width: 100%; height: auto; }
-.home-selected h2 { margin: 0 0 24px; font-size: 20px; font-weight: 400; }
-.home-intro { max-width: 730px; margin-bottom: 56px; font-size: 17px; line-height: 1.75; }
-.home-intro p { margin: 0 0 18px; }
-.home-intro > a { font: 14px/1.6 var(--font-plex-mono), monospace; text-underline-offset: 5px; }
-.home-lineage { max-width: 730px; margin: 0 0 28px; font-size: 15px; line-height: 1.75; color: var(--muted); }
-.home-lineage a { text-underline-offset: 4px; text-decoration-color: var(--hairline-strong); }
-.ambient-shape { width: min(500px, 70vw, 70svh); height: min(500px, 70vw, 70svh); opacity: .6; }
-.morph-shape { width: 100%; height: 100%; }
-@media(max-width: 767px) { .home-feature { grid-template-columns: 1fr; gap: 24px; margin-bottom: 44px; } .home-feature-copy { max-width: 480px; } .home-feature-copy h1 { font-size: 26px; margin-bottom: 20px; } .home-feature-copy p { font-size: 16px; } .home-feature-image { width: 100%; max-width: 560px; } }
-
-/* A shared edge for the header, feature, and every index row. */
-.container-page { max-width: none; }
-.home-feature { max-width: none; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-.home-feature-copy { max-width: 500px; }
-.index-directories { width: 100%; max-width: none; }
-@media(max-width: 767px) { .home-feature { grid-template-columns: 1fr; } .home-feature-image { max-width: none; } }
 
 .site-header { gap: 24px; align-items: baseline; }
 .site-header > div { flex-shrink: 0; }
@@ -406,4 +376,38 @@ body { isolation: isolate; }
   :root { --essay-gutter: 24px; }
   .site-header--essay { flex-wrap: wrap; gap: 16px; padding-block: 24px; }
   .site-header--essay > p { margin-left: auto; }
+}
+
+/* The home gallery and its navigation together fill the first viewport.
+   Sticky positioning lets the header travel with the document, then dock. */
+:root { --home-nav-height: 88px; }
+.site-header--home {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  flex-shrink: 0;
+  height: var(--home-nav-height);
+  align-items: center;
+  background: var(--paper);
+}
+.floating-shape {
+  position: fixed;
+  right: var(--pad-x);
+  bottom: 28px;
+  width: min(250px, 35vw, 35svh);
+  aspect-ratio: 1;
+  z-index: 10;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 600ms ease;
+}
+.floating-shape--visible { opacity: 1; visibility: visible; }
+@media (max-width: 767px) {
+  :root { --home-nav-height: calc(96px + env(safe-area-inset-bottom)); }
+  .site-header--home { padding: 24px var(--pad-x-mobile); padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+  .floating-shape { right: var(--pad-x-mobile); bottom: calc(24px + env(safe-area-inset-bottom)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .floating-shape { transition: none; }
 }
