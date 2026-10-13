@@ -81,7 +81,7 @@ export default function StudioPage() {
             work can also begin with a practical brief, without becoming a formal
             research project.
           </p>
-          <Link className={styles.textLink} href="/projects">Explore the work →</Link>
+          <Link className={styles.textLink} href="/#work">Explore the work →</Link>
         </section>
 
         <section className={styles.section} aria-labelledby="current-heading">

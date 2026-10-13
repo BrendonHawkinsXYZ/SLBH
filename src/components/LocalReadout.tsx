@@ -20,7 +20,7 @@ function timezoneLocation(): string {
   return cityName(place) ?? "Local";
 }
 
-export function LocalReadout() {
+export function LocalReadout({ home = false }: { home?: boolean }) {
   // An empty initial render matches the server, whose time zone is irrelevant.
   const [clock, setClock] = useState<Clock | null>(null);
   const [location, setLocation] = useState<string | null>(null);
@@ -47,7 +47,7 @@ export function LocalReadout() {
   }, []);
 
   return (
-    <p className={styles.readout} aria-live="off">
+    <p className={`${styles.readout}${home ? ` ${styles.home}` : ""}`} aria-live="off">
       <time className={styles.time} dateTime={clock?.iso} title="Your local time">
         {clock?.time ?? "—:—:—"}
       </time>

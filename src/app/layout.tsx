@@ -5,6 +5,9 @@ import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { AmbientShape } from "@/components/AmbientShape";
 import { CircleCursor } from "@/components/CircleCursor";
+import { HeroGallery } from "@/components/home/HeroGallery";
+import { getGalleryArtwork } from "@/lib/artwork";
+import { getWorks } from "@/lib/works";
 
 const orbitron = Orbitron({
   subsets: ["latin"],
@@ -51,7 +54,7 @@ export default function RootLayout({
         <a className="skip-link" href="#main">Skip to content</a>
         <AmbientShape />
         <CircleCursor />
-        <Nav />
+        <Nav gallery={<HeroGallery artwork={getGalleryArtwork(getWorks())} />} />
         <div className="site-scroll-plane" data-site-scroll>
           <main id="main" style={{ flex: 1, display: "flex", flexDirection: "column" }}>{children}</main>
           <Footer />

@@ -1,5 +1,13 @@
 import type { ProjectFileData } from "@/components/projects/ProjectFile.types";
 
+export const newYorkTimeLapse = {
+  src: "/projects/new-york-emotions/six-hours.gif",
+  stillSrc: "/projects/new-york-emotions/six-hours-contact-sheet.webp",
+  title: "Six hours together",
+  alt: "Time lapse of colored response blips accumulating during the six-hour New York Emotions study",
+  width: 800,
+  height: 1000,
+};
 
 // The artist approved these four anonymous, verbatim excerpts for this page.
 // CSV row numbers include the header; labels and colors come from the same row.
