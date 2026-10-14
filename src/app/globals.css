@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 :root {
-  /* Achromatic core */
+  /* Six local-time blacks; the browser selects --paper before first paint. */
   --ground: #F1F1EE;
-  --paper: #090909;
+  --paper: #0D121E;
   --muted: #969693;
   --signal: #F5F5F3;
   --graphite: #1B1B1F;
@@ -394,15 +394,23 @@ body { isolation: isolate; }
   position: fixed;
   right: var(--pad-x);
   bottom: 28px;
-  width: min(250px, 35vw, 35svh);
+  width: min(125px, 17.5vw, 17.5svh);
   aspect-ratio: 1;
-  z-index: 10;
+  z-index: 10000;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity 600ms ease;
+  transition: opacity 600ms ease, visibility 0s linear 600ms;
 }
-.floating-shape--visible { opacity: 1; visibility: visible; }
+.floating-shape--visible { opacity: 1; visibility: visible; transition-delay: 0s; }
+
+/* Static texture on the paper surfaces, underneath all images and text. */
+html, body, .site-header--home, #home-gallery {
+  background-image: url("/textures/grain.svg");
+  background-size: 128px 128px;
+  background-repeat: repeat;
+  background-blend-mode: soft-light;
+}
 @media (max-width: 767px) {
   :root { --home-nav-height: calc(96px + env(safe-area-inset-bottom)); }
   .site-header--home { padding: 24px var(--pad-x-mobile); padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
