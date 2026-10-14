@@ -13,7 +13,7 @@ export function Nav({ gallery }: { gallery?: ReactNode }) {
   return (
     <>
     {isHome && gallery}
-    <header className={`site-header container-page${isHome ? " site-header--home" : ""}${isProject ? " site-header--essay" : ""}`}>
+    <header className={`site-header container-page${isHome ? " site-header--home site-surface" : ""}${isProject ? " site-header--essay" : ""}`}>
       <div>
         <Link href="/" className="site-name">STUDIO LAB BH</Link>
         {!isHome && (

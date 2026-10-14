@@ -105,7 +105,7 @@ export function HeroGallery({ artwork }: { artwork: Artwork[] }) {
     <section
       id="home-gallery"
       ref={galleryRef}
-      className={styles.gallery}
+      className={`site-surface ${styles.gallery}`}
       aria-label="Work from Studio Lab BH"
       aria-roledescription="carousel"
       onFocusCapture={() => setFocused(true)}
