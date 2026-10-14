@@ -14,6 +14,8 @@ export function ArtworkTiles({ artwork, index, reducedMotion, onSelect, onHover 
   const stripRef = useRef<HTMLDivElement>(null);
   const tileRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const initialized = useRef(false);
+  const touchInput = useRef(false);
+  const touchSelection = useRef(false);
   const [hoveredTile, setHoveredTile] = useState<number | null>(null);
   const count = artwork.length;
 
@@ -24,14 +26,19 @@ export function ArtworkTiles({ artwork, index, reducedMotion, onSelect, onHover 
       .map(position => tileRefs.current[position])
       .filter((tile): tile is HTMLButtonElement => Boolean(tile));
     const center = strip.scrollLeft + strip.clientWidth / 2;
-    const target = initialized.current
+    const fromTouch = touchSelection.current;
+    touchSelection.current = false;
+    // A tap settles on the middle copy in one step, without off-screen focus
+    // or overlapping smooth-scroll and loop-rebase operations.
+    const target = initialized.current && !fromTouch
       ? candidates.reduce((nearest, tile) =>
           Math.abs(tile.offsetLeft + tile.clientWidth / 2 - center) < Math.abs(nearest.offsetLeft + nearest.clientWidth / 2 - center) ? tile : nearest)
       : tileRefs.current[count + index];
     if (!target) return;
     strip.scrollTo({
       left: target.offsetLeft - strip.clientWidth / 2 + target.clientWidth / 2,
-      behavior: !initialized.current || reducedMotion ? "instant" : "smooth",
+      top: 0,
+      behavior: !initialized.current || reducedMotion || fromTouch ? "instant" : "smooth",
     });
     initialized.current = true;
   }, [index, count, reducedMotion]);
@@ -75,8 +82,17 @@ export function ArtworkTiles({ artwork, index, reducedMotion, onSelect, onHover 
 
   return (
     <div ref={stripRef} className={styles.colorIndex} role="group" aria-label="Choose an artwork"
-      onMouseEnter={() => onHover(true)}
-      onMouseLeave={() => { setHoveredTile(null); onHover(false); }}>
+      onPointerDownCapture={event => {
+        touchInput.current = event.pointerType === "touch";
+        if (touchInput.current) { setHoveredTile(null); onHover(false); }
+      }}
+      onKeyDownCapture={() => { touchInput.current = false; }}
+      onPointerEnter={event => {
+        if (event.pointerType === "mouse" && window.matchMedia("(hover: hover)").matches) onHover(true);
+      }}
+      onPointerLeave={event => {
+        if (event.pointerType === "mouse") { setHoveredTile(null); onHover(false); }
+      }}>
       {[0, 1, 2].flatMap(copy => artwork.map((piece, tileIndex) => {
         const position = copy * count + tileIndex;
         const difference = hoveredTile === null ? 0 : Math.abs(tileIndex - hoveredTile);
@@ -92,15 +108,22 @@ export function ArtworkTiles({ artwork, index, reducedMotion, onSelect, onHover 
           aria-hidden={copy !== 1}
           aria-label={`View ${piece.project}: ${piece.title}`}
           aria-pressed={index === tileIndex}
-          onMouseEnter={() => setHoveredTile(tileIndex)}
-          onFocus={() => setHoveredTile(tileIndex)}
+          // Cancel only the compatibility mouse focus after a tap, leaving
+          // pointer/touch defaults intact for native horizontal swiping.
+          onMouseDown={event => { if (touchInput.current) event.preventDefault(); }}
+          onPointerEnter={event => {
+            if (event.pointerType === "mouse" && window.matchMedia("(hover: hover)").matches) setHoveredTile(tileIndex);
+          }}
+          onFocus={() => { if (!touchInput.current) setHoveredTile(tileIndex); }}
           onBlur={() => setHoveredTile(null)}
           onClick={() => {
             const strip = stripRef.current;
             const tile = tileRefs.current[position];
             const direction = strip && tile && tile.offsetLeft + tile.clientWidth / 2 < strip.scrollLeft + strip.clientWidth / 2 ? -1 : 1;
-            // Only the middle copy participates in keyboard/screen-reader navigation.
-            tileRefs.current[count + tileIndex]?.focus({ preventScroll: true });
+            touchSelection.current = touchInput.current && tileIndex !== index;
+            // Preserve native touch focus; only mouse/keyboard navigation moves
+            // focus between the repeated copies. Touch must not focus off-screen.
+            if (!touchInput.current) tileRefs.current[count + tileIndex]?.focus({ preventScroll: true });
             onSelect(tileIndex, direction);
           }}
           onKeyDown={event => {

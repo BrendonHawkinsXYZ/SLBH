@@ -42,15 +42,17 @@
 .colorIndex {
   position: absolute;
   bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  inset-inline: 0;
+  margin-inline: auto;
   display: flex;
-  width: max-content;
-  max-width: min(800px, calc(100% - var(--pad-x) * 2));
+  width: calc(100% - var(--pad-x) * 2);
+  max-width: 800px;
   height: 52px;
   padding-inline: 12px;
   align-items: center;
   overflow-x: auto;
+  overflow-y: hidden;
+  overflow-anchor: none;
   scrollbar-width: none;
   overscroll-behavior-x: contain;
 }
@@ -80,8 +82,8 @@
   .gallery { --artwork-space: 188px; }
   .slide { padding: 24px var(--pad-x-mobile); }
   .caption { font-size: 11px; margin-top: 16px; }
-  .colorIndex { max-width: calc(100% - var(--pad-x-mobile) * 2); }
+  .colorIndex { width: calc(100% - var(--pad-x-mobile) * 2); }
 }
-@media (prefers-reduced-motion: reduce) {
+@media (hover: none), (prefers-reduced-motion: reduce) {
   .tile span { transition: none; transform: none; }
 }
