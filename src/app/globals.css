@@ -4,6 +4,9 @@
   /* Six local-time blacks; the browser selects --paper before first paint. */
   --ground: #F1F1EE;
   --paper: #0D121E;
+  --paper-grain: url("/textures/grain.svg");
+  --paper-grain-size: 128px 128px;
+  --paper-grain-blend: soft-light;
   --muted: #969693;
   --signal: #F5F5F3;
   --graphite: #1B1B1F;
@@ -85,7 +88,6 @@
 
 html {
   color-scheme: dark;
-  background: var(--paper);
   color: var(--ground);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -100,7 +102,6 @@ body {
   font-weight: 400;
   font-size: var(--body);
   line-height: 1.55;
-  background: var(--paper);
   color: var(--ground);
   /* Force text-presentation for arrow glyphs (↗ etc.) so iOS doesn't
      render them as colored emoji. Pairs with U+FE0E variation selector
@@ -114,24 +115,11 @@ body {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  background: var(--paper);
 }
 
 ::selection {
-  background: #f1f1ee;
-  color: #090909;
-}
-
-/* ═══ GROUND REGISTER ═══
-   Pages rendered in the dark register opt in via <body data-register="ground">. */
-
-body[data-register="ground"] {
   background: var(--ground);
-  color: var(--signal);
-}
-
-body[data-register="ground"] ::selection {
-  background: rgba(245, 245, 243, 0.08);
+  color: var(--paper);
 }
 
 /* ═══ TYPOGRAPHIC ROLES ═══ */
@@ -335,6 +323,7 @@ a { text-underline-offset: 4px; }
 /* Document layering and the Chroma sequencer canvas. */
 body { isolation: isolate; }
 .site-scroll-plane { position: relative; z-index: 1; background: transparent; }
+.site-document { background: transparent; color: inherit; }
 .site-header { position: relative; z-index: 1; }
 .morph-shape { display: block; width: 100%; height: 100%; }
 .circle-cursor { position: fixed; top: 0; left: 0; width: 22px; height: 22px; box-sizing: border-box; border: 1.5px solid #fff; border-radius: 50%; z-index: 9999; pointer-events: none; mix-blend-mode: difference; }
@@ -388,7 +377,6 @@ body { isolation: isolate; }
   flex-shrink: 0;
   height: var(--home-nav-height);
   align-items: center;
-  background: var(--paper);
 }
 .floating-shape {
   position: fixed;
@@ -404,12 +392,14 @@ body { isolation: isolate; }
 }
 .floating-shape--visible { opacity: 1; visibility: visible; transition-delay: 0s; }
 
-/* Static texture on the paper surfaces, underneath all images and text. */
-html, body, .site-header--home, #home-gallery {
-  background-image: url("/textures/grain.svg");
-  background-size: 128px 128px;
+/* Every route inherits this backdrop from the root layout. Route containers
+   stay transparent; opaque UI surfaces opt into the same style with this class. */
+html, body, .site-surface {
+  background-color: var(--paper);
+  background-image: var(--paper-grain);
+  background-size: var(--paper-grain-size);
   background-repeat: repeat;
-  background-blend-mode: soft-light;
+  background-blend-mode: var(--paper-grain-blend);
 }
 @media (max-width: 767px) {
   :root { --home-nav-height: calc(96px + env(safe-area-inset-bottom)); }

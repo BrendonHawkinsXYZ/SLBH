@@ -4,7 +4,6 @@
   flex-shrink: 0;
   height: calc(100svh - var(--home-nav-height));
   min-height: 240px;
-  background: var(--paper);
 }
 .stage { position: absolute; inset: 0 0 52px; overflow: hidden; touch-action: pan-y pinch-zoom; }
 .slide {
