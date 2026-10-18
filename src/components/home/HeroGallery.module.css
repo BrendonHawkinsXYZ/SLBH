@@ -1,0 +1,88 @@
+.gallery {
+  --artwork-space: 176px;
+  position: relative;
+  flex-shrink: 0;
+  height: calc(100svh - var(--home-nav-height));
+  min-height: 240px;
+}
+.stage { position: absolute; inset: 0 0 52px; overflow: hidden; touch-action: pan-y pinch-zoom; }
+.slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px var(--pad-x);
+}
+.artwork {
+  display: block;
+  flex-shrink: 0;
+  width: min(100%, calc((100svh - var(--home-nav-height) - var(--artwork-space)) * var(--artwork-ratio)));
+  aspect-ratio: var(--artwork-ratio);
+}
+.artwork img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  user-select: none;
+}
+.caption {
+  flex-shrink: 0;
+  margin-top: 20px;
+  text-align: center;
+  font: 12px/1.7 var(--font-plex-mono), monospace;
+}
+.caption a { text-decoration: none; }
+.caption a:hover { text-decoration: underline; }
+.caption span { display: block; color: var(--muted); }
+.colorIndex {
+  position: absolute;
+  bottom: 0;
+  inset-inline: 0;
+  margin-inline: auto;
+  display: flex;
+  width: calc(100% - var(--pad-x) * 2);
+  max-width: 800px;
+  height: 52px;
+  padding-inline: 12px;
+  align-items: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overflow-anchor: none;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+.colorIndex::-webkit-scrollbar { display: none; }
+.tile {
+  flex: 0 0 24px;
+  display: grid;
+  place-items: center;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.tile span {
+  display: block;
+  width: 12px;
+  height: 12px;
+  background: var(--tile-color);
+  box-shadow: inset 0 0 0 1px #ffffff26;
+  transform: translateY(calc((var(--tile-scale) - 1) * -7px)) scale(var(--tile-scale));
+  transition: transform 180ms ease;
+}
+.tile[aria-pressed="true"] span { outline: 1px solid var(--ground); outline-offset: 3px; }
+.tile:focus-visible { outline-offset: -2px; }
+@media (max-width: 767px) {
+  .gallery { --artwork-space: 188px; }
+  .slide { padding: 24px var(--pad-x-mobile); }
+  .caption { font-size: 11px; margin-top: 16px; }
+  .colorIndex { width: calc(100% - var(--pad-x-mobile) * 2); }
+}
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .tile span { transition: none; transform: none; }
+}

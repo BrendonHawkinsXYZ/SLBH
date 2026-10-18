@@ -30,7 +30,7 @@ export function ProjectEssay({ slug }: { slug: EssaySlug }) {
     {slug === "new-york-emotions" ? <NewYorkEmotionsStory /> : slug === "acg" ? <ACGStory /> : slug === "affective-geometry" ? <GeometryStory /> : slug === "tell-me-how-you-feel-chroma" ? <WorkshopStory /> : <ResearchStory slug={slug} project={project} />}
     <ProjectDetails project={project} />
     {!!related.length && <section className={styles.furtherWork} aria-labelledby="related-work-title">
-      <div className={styles.sectionTopline}><h2 id="related-work-title">Related work</h2><Link href="/projects">All work →</Link></div>
+      <div className={styles.sectionTopline}><h2 id="related-work-title">Related work</h2><Link href="/#work">All work →</Link></div>
       <div className={styles.furtherGrid}>{related.map(({ href, title, image }) => <Link href={href} key={href}>
         <div><Image src={image.src} alt={image.alt} width={image.width} height={image.height} sizes="(max-width: 760px) 100vw, 32vw" /></div>
         <p><span>{title}</span><span aria-hidden="true">↗</span></p>

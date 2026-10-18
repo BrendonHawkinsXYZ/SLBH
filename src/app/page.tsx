@@ -1,38 +1,69 @@
-import { CHROMA_URL } from "@/lib/site";
-import Image from "next/image";
 import Link from "next/link";
-import { WorkIndex } from "@/components/index/WorkIndex";
-import { getSelectedWorks } from "@/lib/works";
+import { getWorks, type WorkFormat } from "@/lib/works";
+import styles from "@/components/home/HomeBibliography.module.css";
+
+const sections: { format: WorkFormat; title: string; id: string }[] = [
+  { format: "Paper", title: "Research & publications", id: "research" },
+  { format: "Product", title: "Products", id: "products" },
+  { format: "Instrument", title: "Instruments", id: "instruments" },
+  { format: "Study", title: "Studies", id: "studies" },
+  { format: "Installation", title: "Installations", id: "installations" },
+  { format: "Program / Workshop", title: "Programs & workshops", id: "programs" },
+  { format: "Visual Work", title: "Visual work", id: "visual-work" },
+];
 
 export default function HomePage() {
+  const works = getWorks();
   return (
-    <div className="container-page home-index">
-      <section className="home-feature" aria-labelledby="chroma-feature-title">
-        <div className="home-feature-copy">
-          <h1 id="chroma-feature-title"><Link href={CHROMA_URL}>Chroma</Link></h1>
-          <p>A private place to give feeling a form.</p>
-          <p>Speak or type what happened. Chroma turns the moment into color, form, and a private reflection—entirely on your iPhone.</p>
-          <a href="https://apps.apple.com/us/app/mood-tracker-journal-chroma/id6784464340" className="home-feature-link" target="_blank" rel="noopener noreferrer">Chroma for iPhone ↗</a>
+    <div className={`container-page ${styles.document}`}>
+      <section className={styles.introduction} aria-label="About the practice">
+        <div className={styles.introRow}>
+          <h1>Studio Lab BH</h1>
+          <p>An independent systems studio and research practice studying how human experience becomes legible through computation, culture, and shared environments.</p>
+          <Link href="/studio">About the studio <span aria-hidden="true">↗</span></Link>
         </div>
-        <Link href={CHROMA_URL} className="home-feature-image" aria-label="Explore Chroma, the studio’s emotional journal">
-          <Image src="/chroma/collection.png" alt="Chroma: voice journaling, daily readings, weekly reflection, and on-device privacy" width={6686} height={5376} sizes="(max-width: 767px) 100vw, 600px" priority />
-        </Link>
-      </section>
-      <section className="home-selected" aria-labelledby="selected-work-title">
-        <div className="home-intro">
-          <p>Studio Lab BH is an independent systems studio and research practice studying how human experience becomes legible through computation, culture, and shared environments. The work moves between theory, research, and application through software, artworks, studies, and participatory programs.</p>
-          <Link href="/studio">About the studio →</Link>
+        <div className={styles.introRow}>
+          <h2>Brendon Hawkins</h2>
+          <p>Runs the lab. A systems theorist, researcher, artist, and technologist working across software, visual art, and participatory environments.</p>
+          <Link href="/brendon">Biography & CV <span aria-hidden="true">↗</span></Link>
         </div>
-        <h2 id="selected-work-title">Select Work</h2>
-        <p className="home-lineage"><Link href="/projects/american-emotions">American Emotions</Link> initiated a line of inquiry that later informed <Link href="/research/emotion-as-system">Emotion as System</Link>, <Link href={CHROMA_URL}>Chroma</Link>, and <Link href="/projects/acg">Tell Me How You Feel: ACG</Link>. Products and shared encounters return new questions to that inquiry.</p>
-        <WorkIndex works={getSelectedWorks("chroma")} />
       </section>
-      <nav className="index-directories" aria-label="Studio index">
-        <Link href="/projects"><span>All work</span><span>Index →</span></Link>
-        <Link href="/studio"><span>Studio</span><span>Information →</span></Link>
-        <Link href="/brendon"><span>Brendon Hawkins</span><span>About →</span></Link>
-        <a href="mailto:brendon@studiolabbh.xyz"><span>Contact</span><span>Email ↗</span></a>
-      </nav>
+
+      <section id="work" className={styles.work} aria-labelledby="work-title">
+        <div className={styles.workHeading}>
+          <h2 id="work-title">Work</h2>
+          <nav aria-label="Work categories">
+            {sections.filter(section => works.some(work => work.formats[0] === section.format)).map(section => (
+              <a key={section.id} href={`#${section.id}`}>{section.title}</a>
+            ))}
+          </nav>
+        </div>
+        {sections.map(section => {
+          const entries = works.filter(work => work.formats[0] === section.format)
+            .sort((a, b) => b.year.localeCompare(a.year));
+          if (!entries.length) return null;
+          return (
+            <section key={section.id} id={section.id} className={styles.category} aria-labelledby={`${section.id}-title`}>
+              <h3 id={`${section.id}-title`}>{section.title}</h3>
+              <ol className={styles.entries}>
+                {entries.map(work => (
+                  <li key={work.id}>
+                    <span className={styles.year}>{work.year || "—"}</span>
+                    <div className={styles.entry}>
+                      <Link href={work.href} className={styles.title}>{work.title} <span aria-hidden="true">↗</span></Link>
+                      <p>{work.id === "emotion-as-system" ? "A foundational architecture for affect, meaning, perception, and action." : work.summary}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          );
+        })}
+      </section>
+      <div className={styles.contact}>
+        <span>Contact</span>
+        <a href="mailto:brendon@studiolabbh.xyz">brendon@studiolabbh.xyz <span aria-hidden="true">↗</span></a>
+      </div>
     </div>
   );
 }

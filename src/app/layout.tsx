@@ -6,6 +6,11 @@ import { Footer } from "@/components/Footer";
 import { AmbientShape } from "@/components/AmbientShape";
 import { CircleCursor } from "@/components/CircleCursor";
 import { AdaptiveFavicon } from "@/components/AdaptiveFavicon";
+import { SiteAtmosphere } from "@/components/SiteAtmosphere";
+import { HeroGallery } from "@/components/home/HeroGallery";
+import { getGalleryArtwork } from "@/lib/artwork";
+import { getWorks } from "@/lib/works";
+import { siteAtmosphereInit } from "@/lib/siteAtmosphere";
 
 const orbitron = Orbitron({
   subsets: ["latin"],
@@ -42,17 +47,19 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
+        <script id="site-atmosphere-init" dangerouslySetInnerHTML={{ __html: siteAtmosphereInit }} />
         <AdaptiveFavicon />
       </head>
       <body
         className={`${orbitron.variable} ${inter.variable} ${plexMono.variable}`}
       >
+        <SiteAtmosphere />
         <a className="skip-link" href="#main">Skip to content</a>
         <AmbientShape />
         <CircleCursor />
-        <Nav />
+        <Nav gallery={<HeroGallery artwork={getGalleryArtwork(getWorks())} />} />
         <div className="site-scroll-plane" data-site-scroll>
           <main id="main" style={{ flex: 1, display: "flex", flexDirection: "column" }}>{children}</main>
           <Footer />
