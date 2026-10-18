@@ -5,6 +5,7 @@ import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { AmbientShape } from "@/components/AmbientShape";
 import { CircleCursor } from "@/components/CircleCursor";
+import { AdaptiveFavicon } from "@/components/AdaptiveFavicon";
 
 const orbitron = Orbitron({
   subsets: ["latin"],
@@ -32,11 +33,8 @@ export const metadata: Metadata = {
   description:
     "Studio Lab BH is an independent systems studio and research practice founded by Brendon Hawkins. The work moves between theory, research, and application. Affect is its first formal field of inquiry.",
   icons: {
-    icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
-      { url: "/favicon-32.png", type: "image/png", sizes: "32x32" },
-    ],
-    apple: "/apple-touch-icon.png",
+    icon: { url: "/favicon-32.png?v=3", type: "image/png", sizes: "32x32" },
+    apple: "/apple-touch-icon.png?v=3",
   },
 };
 
@@ -45,6 +43,9 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
+      <head>
+        <AdaptiveFavicon />
+      </head>
       <body
         className={`${orbitron.variable} ${inter.variable} ${plexMono.variable}`}
       >
