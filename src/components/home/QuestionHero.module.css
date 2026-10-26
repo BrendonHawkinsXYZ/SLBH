@@ -1,0 +1,18 @@
+.hero {
+  position: relative;
+  flex-shrink: 0;
+  height: calc(100svh - var(--home-nav-height));
+  min-height: 400px;
+}
+.stage { position: absolute; inset: 0; overflow: hidden; touch-action: pan-y pinch-zoom; }
+.artwork { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.questionLink { pointer-events: none; outline: none; }
+.hitArea { fill: transparent; pointer-events: all; }
+.letter { pointer-events: none; transition: filter 160ms ease; }
+.questionLink:hover .letter { filter: brightness(1.15); }
+.questionLink:focus-visible .letter { filter: brightness(1.3) drop-shadow(0 0 3px #f1f1ee88); }
+.preview { position: fixed; left: 0; top: 0; width: 320px; pointer-events: none; z-index: 20; }
+.preview img { display: block; width: 100%; height: 100%; object-fit: contain; }
+@media (hover: none), (pointer: coarse) { .preview { display: none; } }
+@media (max-width: 767px) { .hero { min-height: 440px; } }
+@media (prefers-reduced-motion: reduce) { .letter { transition: none; } }

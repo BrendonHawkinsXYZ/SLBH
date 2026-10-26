@@ -3,16 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LocalReadout } from "./LocalReadout";
-import type { ReactNode } from "react";
+import { HomeHero } from "./home/HomeHero";
+import type { Artwork } from "@/lib/artwork";
 
-export function Nav({ gallery }: { gallery?: ReactNode }) {
+export function Nav({ questionArtwork = [] }: { questionArtwork?: Artwork[] }) {
   const pathname = usePathname();
   const isHome = pathname === "/";
   const isProject = pathname.startsWith("/projects/");
   const parent = pathname.startsWith("/research/") ? "/research" : null;
   return (
     <>
-    {isHome && gallery}
+    {isHome && <HomeHero artwork={questionArtwork} />}
     <header className={`site-header container-page${isHome ? " site-header--home site-surface" : ""}${isProject ? " site-header--essay" : ""}`}>
       <div>
         <Link href="/" className="site-name">STUDIO LAB BH</Link>
