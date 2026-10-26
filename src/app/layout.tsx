@@ -7,7 +7,6 @@ import { AmbientShape } from "@/components/AmbientShape";
 import { CircleCursor } from "@/components/CircleCursor";
 import { AdaptiveFavicon } from "@/components/AdaptiveFavicon";
 import { SiteAtmosphere } from "@/components/SiteAtmosphere";
-import { HeroGallery } from "@/components/home/HeroGallery";
 import { getGalleryArtwork } from "@/lib/artwork";
 import { getWorks } from "@/lib/works";
 import { siteAtmosphereInit } from "@/lib/siteAtmosphere";
@@ -46,6 +45,7 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const artwork = getGalleryArtwork(getWorks());
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -59,7 +59,7 @@ export default function RootLayout({
         <a className="skip-link" href="#main">Skip to content</a>
         <AmbientShape />
         <CircleCursor />
-        <Nav gallery={<HeroGallery artwork={getGalleryArtwork(getWorks())} />} />
+        <Nav questionArtwork={artwork} />
         <div className="site-scroll-plane" data-site-scroll>
           <main id="main" style={{ flex: 1, display: "flex", flexDirection: "column" }}>{children}</main>
           <Footer />
