@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { WorkPreviewLink, WorkPreviewProvider } from "@/components/index/WorkPreviewLink";
+import { WorkPreviewItem, WorkPreviewProvider } from "@/components/index/WorkPreviewLink";
 import { getWorks, type WorkFormat } from "@/lib/works";
 import styles from "@/components/home/HomeBibliography.module.css";
 
@@ -49,13 +49,13 @@ export function HomeBibliography() {
               <h3 id={`${section.id}-title`}>{section.title}</h3>
               <ol className={styles.entries}>
                 {entries.map(work => (
-                  <li key={work.id}>
+                  <WorkPreviewItem key={work.id} work={work}>
                     <span className={styles.year}>{work.year || "—"}</span>
                     <div className={styles.entry}>
-                      <WorkPreviewLink work={work} className={styles.title}>{work.title} <span aria-hidden="true">↗</span></WorkPreviewLink>
+                      <Link href={work.href} className={styles.title}>{work.title} <span aria-hidden="true">↗</span></Link>
                       <p>{work.id === "emotion-as-system" ? "A foundational architecture for affect, meaning, perception, and action." : work.summary}</p>
                     </div>
-                  </li>
+                  </WorkPreviewItem>
                 ))}
               </ol>
             </section>
