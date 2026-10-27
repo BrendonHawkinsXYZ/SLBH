@@ -1,17 +1,16 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import type { Work } from "@/lib/works";
 import styles from "./WorkPreviewLink.module.css";
 
 type PreviewWork = Pick<Work, "href" | "image">;
-type PreviewTarget = { work: PreviewWork; link: HTMLAnchorElement };
+type PreviewTarget = { work: PreviewWork; container: HTMLLIElement };
 type PreviewControls = {
-  show: (work: PreviewWork, link: HTMLAnchorElement, x: number, y: number) => void;
-  move: (link: HTMLAnchorElement, x: number, y: number) => void;
-  hide: (link: HTMLAnchorElement) => void;
+  show: (work: PreviewWork, container: HTMLLIElement, x: number, y: number) => void;
+  move: (container: HTMLLIElement, x: number, y: number) => void;
+  hide: (container: HTMLLIElement) => void;
 };
 const PreviewContext = createContext<PreviewControls | null>(null);
 
@@ -37,8 +36,9 @@ export function WorkPreviewProvider({ children }: { children: ReactNode }) {
     if (!active) return;
     const hide = () => setActive(null);
     const scroll = () => {
-      if (!active.link.matches(":focus-visible")) { hide(); return; }
-      const rect = active.link.getBoundingClientRect();
+      const focused = active.container.querySelector(":focus-visible");
+      if (!focused) { hide(); return; }
+      const rect = focused.getBoundingClientRect();
       pointer.current = { x: rect.right, y: rect.top + rect.height / 2 };
       position();
     };
@@ -53,21 +53,21 @@ export function WorkPreviewProvider({ children }: { children: ReactNode }) {
   }, [active, position]);
 
   const controls: PreviewControls = {
-    show(work, link, x, y) {
+    show(work, container, x, y) {
       if (!work.image || !window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
         setActive(null);
         return;
       }
       pointer.current = { x, y };
-      setActive({ work, link });
+      setActive({ work, container });
     },
-    move(link, x, y) {
-      if (active?.link !== link) return;
+    move(container, x, y) {
+      if (active?.container !== container) return;
       pointer.current = { x, y };
       position();
     },
-    hide(link) {
-      setActive(current => current?.link === link ? null : current);
+    hide(container) {
+      setActive(current => current?.container === container ? null : current);
     },
   };
 
@@ -79,27 +79,31 @@ export function WorkPreviewProvider({ children }: { children: ReactNode }) {
   </PreviewContext.Provider>;
 }
 
-export function WorkPreviewLink({ work, className, children }: {
+export function WorkPreviewItem({ work, children }: {
   work: PreviewWork;
-  className?: string;
   children: ReactNode;
 }) {
   const preview = useContext(PreviewContext);
-  if (!preview) throw new Error("WorkPreviewLink requires WorkPreviewProvider");
+  if (!preview) throw new Error("WorkPreviewItem requires WorkPreviewProvider");
 
-  return <Link href={work.href} className={className}
+  return <li
     onPointerEnter={event => {
       if (event.pointerType === "mouse") preview.show(work, event.currentTarget, event.clientX, event.clientY);
     }}
     onPointerMove={event => preview.move(event.currentTarget, event.clientX, event.clientY)}
     onPointerLeave={event => preview.hide(event.currentTarget)}
     onFocus={event => {
-      if (!event.currentTarget.matches(":focus-visible")) return;
-      const rect = event.currentTarget.getBoundingClientRect();
+      if (!event.target.matches(":focus-visible")) return;
+      const rect = event.target.getBoundingClientRect();
       preview.show(work, event.currentTarget, rect.right, rect.top + rect.height / 2);
     }}
-    onBlur={event => preview.hide(event.currentTarget)} onClick={event => preview.hide(event.currentTarget)}
+    onBlur={event => {
+      if (!event.currentTarget.contains(event.relatedTarget)) preview.hide(event.currentTarget);
+    }}
+    onClick={event => {
+      if (event.target instanceof Element && event.target.closest("a")) preview.hide(event.currentTarget);
+    }}
     onKeyDown={event => { if (event.key === "Escape") preview.hide(event.currentTarget); }}>
     {children}
-  </Link>;
+  </li>;
 }
