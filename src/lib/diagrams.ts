@@ -8,7 +8,8 @@ export type DiagramRecord = {
 };
 
 // Original Studio Lab BH artwork, supplied by Brendon. The sequence moves from
-// definitions to relationships, time, experience, and color.
+// definitions through perspective, practice, scale, relationships, time,
+// experience, and color.
 export const diagrams: DiagramRecord[] = [
   {
     id: "emotional-system-definition",
@@ -57,6 +58,38 @@ export const diagrams: DiagramRecord[] = [
     width: 800,
     height: 1000,
     alt: "Emotion, meaning, perception, and action form a feedback structure. They correspond to field, mass, trajectory, and gradient, alongside affect as energetic substrate.",
+  },
+  {
+    id: "orders-of-perspective",
+    title: "Orders of Perspective",
+    image: "/diagrams/orders-of-perspective.webp",
+    width: 800,
+    height: 1000,
+    alt: "Four widening boxes move from self and immediate experience to observer of self, observer of observer, and externalized mirrors, asking what the world can reveal about us.",
+  },
+  {
+    id: "slbh-generative-cycle",
+    title: "SLBH Generative Cycle",
+    image: "/diagrams/slbh-generative-cycle.webp",
+    width: 800,
+    height: 1000,
+    alt: "A triangle connects theory and philosophy at the top, application at the lower left, and research at the lower right. Curved arrows show exchange between each pair.",
+  },
+  {
+    id: "affective-scale",
+    title: "Affective Scale",
+    image: "/diagrams/affective-scale.webp",
+    width: 800,
+    height: 1000,
+    alt: "A diagonal rises across axes labeled compute and scale, passing through self, group, and population. A separate upward arrow indicates increasing authority risk.",
+  },
+  {
+    id: "terms-and-conditions-of-self",
+    title: "Terms and Conditions of Self",
+    image: "/diagrams/terms-and-conditions-of-self.webp",
+    width: 800,
+    height: 1000,
+    alt: "Red concentric boundary zones surround the self within blue nested square expectation zones. A legend pairs a red ring with boundary zone and a blue square with expectation zone.",
   },
   {
     id: "affective-systems-matrix",

@@ -31,6 +31,12 @@
   gap: 48px 32px;
 }
 
+@media (min-width: 768px) {
+  .diagramsGallery {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 .figure {
   min-width: 0;
   margin: 0;
