@@ -21,7 +21,7 @@ export default function DiagramsPage() {
         </p>
       </header>
 
-      <div className={styles.gallery}>
+      <div className={`${styles.gallery} ${styles.diagramsGallery}`}>
         {diagrams.map((diagram, index) => (
           <figure id={diagram.id} key={diagram.id} className={styles.figure}>
             <a
@@ -36,7 +36,7 @@ export default function DiagramsPage() {
                 alt={diagram.alt}
                 width={diagram.width}
                 height={diagram.height}
-                sizes="(max-width: 680px) calc(100vw - 44px), calc((100vw - 88px) / 2)"
+                sizes="(max-width: 680px) calc(100vw - 48px), (max-width: 767px) calc((100vw - 80px) / 2), calc((100vw - 144px) / 3)"
                 loading={index === 0 ? "eager" : "lazy"}
                 className={styles.image}
               />
