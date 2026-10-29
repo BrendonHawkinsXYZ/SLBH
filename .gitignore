@@ -21,6 +21,7 @@
 # misc
 .DS_Store
 *.pem
+/.media-originals/
 
 # debug
 npm-debug.log*

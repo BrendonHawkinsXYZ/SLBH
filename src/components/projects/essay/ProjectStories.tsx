@@ -10,26 +10,26 @@ export function ACGStory() {
       <h1>Tell Me How<br />You Feel: ACG</h1>
       <p>Emotional data,<br />in shared space.</p>
     </header>
-    <ProjectImage project={projectFiles.acg} file="installation-storefront.png" className={styles.bleed} priority caption="The Space, Upper West Side. April 28–30, 2026." />
+    <ProjectImage project={projectFiles.acg} file="installation-storefront.webp" className={styles.bleed} priority caption="The Space, Upper West Side. April 28–30, 2026." />
     <section className={styles.storyOpening}>
       <h2>Two windows.<br />Two ways of feeling.</h2>
       <p>One field begins with an interpretation of public signals. The other begins with what people in the room choose to express. At a New York storefront, the two are placed beside one another, translated into light.</p>
     </section>
     <div className={`${styles.photoPair} ${styles.bleedPair}`}>
-      <ProjectImage project={projectFiles.acg} file="installation-array-01.png" caption="The public field. American Emotions, rendered as light." />
-      <ProjectImage project={projectFiles.acg} file="installation-array-02.png" caption="The local field. Shaped by the people present." />
+      <ProjectImage project={projectFiles.acg} file="installation-array-01.webp" caption="The public field. American Emotions, rendered as light." />
+      <ProjectImage project={projectFiles.acg} file="installation-array-02.webp" caption="The local field. Shaped by the people present." />
     </div>
     <section className={styles.invitationSpread}>
-      <ProjectImage project={projectFiles.acg} file="activation-prompt.png" />
+      <ProjectImage project={projectFiles.acg} file="activation-prompt.webp" />
       <div><h2>The person looking<br />can become part<br />of the work.</h2><p>A prompt at the storefront invites a response. A visitor’s declared feeling enters the color mapping and contributes to the local field.</p></div>
     </section>
     <section className={styles.roomSpread}>
       <div><h2>Inside,<br />a conversation.</h2><p>Presence, conversation, and participation make the room both the site of the work and one of its inputs.</p></div>
-      <ProjectImage project={projectFiles.acg} file="activation-room.png" />
+      <ProjectImage project={projectFiles.acg} file="activation-room.webp" />
     </section>
     <section className={styles.storyClosing}>
       <div><h2>The difference<br />is part of the reading.</h2><p>In this nighttime view, the public field is blue and the participant field is red. The windows offer a relationship to look at, rather than a single account of how everyone feels.</p></div>
-      <ProjectImage project={projectFiles.acg} file="activation-alignment.png" className={styles.bleed} />
+      <ProjectImage project={projectFiles.acg} file="activation-alignment.webp" className={styles.bleed} />
     </section>
   </>;
 }

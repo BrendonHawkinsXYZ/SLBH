@@ -22,6 +22,12 @@ The four new diagrams total 132.16 KiB as lossless WebP, compared with 276.07 Ki
 
 ## Existing collection
 
-Prioritize the large PNG photographs in Convergent Grammar, ACG, and Affective Sculptural Sketches. Create web exports in a batch, review them beside their sources, then update the shared content records and any authored filenames. Check dynamically resolved cover/thumbnail assets before removing apparent duplicates. Converting only the diagrams will not address most of the storage weight.
+On October 29, 2026, 26 PNG photographs and portrait studies in ACG, Affective Sculptural Sketches, Convergent Grammar, This Is How I’m Feeling: NYC, and the studio portraits were replaced with WebP. Together they fell from 81.36 MiB to 6.53 MiB (92% smaller). Dimensions and alpha channels were preserved. Standard photographs use quality 86; Convergent Grammar uses quality 90 to retain its fine geometric traces. Existing WebP photographs were not recompressed. Illustrations, diagrams, product screenshots, icons, and the animation retain their current formats.
 
-Keep the current Next.js delivery setup while doing this cleanup. Reassess object storage and a media CDN when publishing frequency, deployment weight, or measured image transformation costs justify it. That migration should preserve existing public image URLs and full-resolution links; it is not part of these additions.
+`src/lib/photographs.json` records each old/new path, dimensions, quality, byte counts, original SHA-256, and the new average color. Next.js uses the path pairs for permanent redirects, so existing image URLs continue to work. Authored stories, shared image records, home-gallery ordering, and average colors reference the new files directly; cover and thumbnail discovery already prefers WebP.
+
+Recoverable originals are retained locally under `.media-originals/`, outside `public/` and excluded from Git. They are also available from the existing Git history. The local recovery folder is not a substitute for the studio's backed-up source archive.
+
+The diagrams gallery displays artwork directly, with titles and alt text. Diagram images have no links or separate “Open image” control. Keep three columns at widths of 768px and up, two from 681–767px, and one at 680px and below.
+
+Keep the current Next.js delivery setup. Reassess object storage and a media CDN when publishing frequency, deployment weight, or measured image transformation costs justify it. That storage migration should preserve existing public image URLs; it is not part of this update.
