@@ -23,12 +23,12 @@ export function ResearchStory({ slug, project }: { slug: string; project: Projec
   if (slug === "affective-sculptural-sketches") return <>
     {header}
     <div className={`${styles.photoPair} ${styles.bleedPair}`}>
-      <EssayImage project={project} file="first-date.png" priority caption="First Date. A light, a cord, a wall." sizes="(max-width: 760px) 100vw, 50vw" />
-      <EssayImage project={project} file="affective-infrastructure.png" priority caption="Affective Infrastructure. Light, reflection, and the space between." sizes="(max-width: 760px) 100vw, 50vw" />
+      <EssayImage project={project} file="first-date.webp" priority caption="First Date. A light, a cord, a wall." sizes="(max-width: 760px) 100vw, 50vw" />
+      <EssayImage project={project} file="affective-infrastructure.webp" priority caption="Affective Infrastructure. Light, reflection, and the space between." sizes="(max-width: 760px) 100vw, 50vw" />
     </div>
     <section className={styles.storyOpening}><h2>Light is<br />a material.</h2><p>Color, proportion, and distance can change the way a space feels. Each sketch begins with an affective state and asks what it might be built out of.</p></section>
     <section className={styles.portraitOpening}>
-      <EssayImage project={project} file="temporary-emotional-architectures.png" caption="Temporary Emotional Architectures. A room held in warm light." />
+      <EssayImage project={project} file="temporary-emotional-architectures.webp" caption="Temporary Emotional Architectures. A room held in warm light." />
       <div><h2>A feeling,<br />given a room.</h2><p>A construction begins with the maker’s intention. Someone else enters it with their own experience. The study asks what survives that passage—and what remains private to the maker.</p></div>
     </section>
   </>;
@@ -61,29 +61,29 @@ export function ResearchStory({ slug, project }: { slug: string; project: Projec
   if (slug === "convergent-grammar") return <>
     {header}
     <div className={`${styles.photoPair} ${styles.bleedPair}`}>
-      <EssayImage project={project} file="portrait-01.png" priority caption="A source portrait with geometric relationships traced over it." sizes="(max-width: 760px) 100vw, 50vw" />
-      <EssayImage project={project} file="example.png" priority caption="Geometric traces from the portrait study." sizes="(max-width: 760px) 100vw, 50vw" />
+      <EssayImage project={project} file="portrait-01.webp" priority caption="A source portrait with geometric relationships traced over it." sizes="(max-width: 760px) 100vw, 50vw" />
+      <EssayImage project={project} file="example.webp" priority caption="Geometric traces from the portrait study." sizes="(max-width: 760px) 100vw, 50vw" />
     </div>
     <section className={styles.storyOpening}><h2>A portrait.<br />A spatial proposition.</h2><p>Figures, focal points, and negative space can be described through relationships. The study extracts those relationships and compares them across images, asking what remains when style and subject change.</p></section>
     <div className={`${styles.photoPair} ${styles.offsetPair}`}>
-      <EssayImage project={project} file="portrait-02.png" caption="A second portrait, read through the same geometric reference." sizes="(max-width: 760px) 100vw, 48vw" />
-      <EssayImage project={project} file="portrait-03.png" caption="Different subjects, a shared method of comparison." sizes="(max-width: 760px) 100vw, 48vw" />
+      <EssayImage project={project} file="portrait-02.webp" caption="A second portrait, read through the same geometric reference." sizes="(max-width: 760px) 100vw, 48vw" />
+      <EssayImage project={project} file="portrait-03.webp" caption="Different subjects, a shared method of comparison." sizes="(max-width: 760px) 100vw, 48vw" />
     </div>
     <section className={styles.storyClosing}>
       <div><h2>What survives<br />a change of image?</h2><p>Portraiture is the reference for a wider inquiry into landscapes, interiors, garments, photographs, and generated images. The current study finds that grammar follows the spatial problem a genre addresses.</p></div>
-      <EssayImage project={project} file="hero.png" className={styles.bleed} caption="Portraits in the working corpus." sizes="100vw" />
+      <EssayImage project={project} file="hero.webp" className={styles.bleed} caption="Portraits in the working corpus." sizes="100vw" />
     </section>
   </>;
 
   return <>
     {header}
     <section className={styles.portraitOpening}>
-      <EssayImage project={project} file="cover.png" priority caption="Three studio windows, seen from the street in New York." />
+      <EssayImage project={project} file="cover.webp" priority caption="Three studio windows, seen from the street in New York." />
       <div><h2>One person.<br />Three windows.</h2><p>A daily journal entry became an emotion, then a color. Three networked lights carried the signal into the studio windows, placing a private feeling in public view.</p></div>
     </section>
     <section className={styles.storyClosing}>
       <div><h2>The days change.<br />So does the light.</h2><p>Across the 2025 installation, the windows became a repeated encounter on the street. The premise later expanded into Tell Me How You Feel: ACG, where public signals and participant input share a space.</p></div>
-      <EssayImage project={project} file="hero.png" className={styles.bleed} caption="Day 1, day 3, and day 7. Three views of the installation." sizes="100vw" />
+      <EssayImage project={project} file="hero.webp" className={styles.bleed} caption="Day 1, day 3, and day 7. Three views of the installation." sizes="100vw" />
     </section>
   </>;
 }

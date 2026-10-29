@@ -21,7 +21,7 @@ export function ProjectEssay({ slug }: { slug: EssaySlug }) {
     const relatedSlug = reference.href.slice("/projects/".length);
     const record = projectFor(relatedSlug);
     if (!record) return [];
-    const preferred = relatedSlug === "affective-geometry" ? "plate-rhombus.png" : relatedSlug === "tell-me-how-you-feel-chroma" ? "at-the-table.webp" : relatedSlug === "acg" ? "installation-storefront.png" : null;
+    const preferred = relatedSlug === "affective-geometry" ? "plate-rhombus.png" : relatedSlug === "tell-me-how-you-feel-chroma" ? "at-the-table.webp" : relatedSlug === "acg" ? "installation-storefront.webp" : null;
     const image = record.images.find((image) => preferred && image.src.endsWith(preferred)) ?? record.images[0];
     return image ? [{ ...reference, image }] : [];
   }).slice(0, 3);

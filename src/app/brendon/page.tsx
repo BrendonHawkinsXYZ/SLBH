@@ -173,7 +173,7 @@ export default function BrendonPage() {
           <p className={styles.meta}>Founder</p>
           <figure className={styles.portrait}>
             <Image
-              src="/studio/brendon-hawkins-portrait.png"
+              src="/studio/brendon-hawkins-portrait.webp"
               alt="Portrait of Brendon Hawkins in warm light."
               width={1000}
               height={1000}

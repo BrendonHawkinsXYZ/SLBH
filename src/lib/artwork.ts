@@ -45,7 +45,7 @@ export function getGalleryArtwork(works: Work[]): Artwork[] {
     newYorkTimeLapse.src,
     "/projects/american-emotions/render-2024.png",
     "/projects/affective-geometry/plate-circle.png",
-    "/projects/acg/installation-storefront.png",
+    "/projects/acg/installation-storefront.webp",
     "/projects/tell-me-how-you-feel-chroma/at-the-table.webp",
     "/posters/techno-savior.png",
     "/chroma/collection.png",

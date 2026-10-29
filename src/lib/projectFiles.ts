@@ -60,7 +60,7 @@ export const projectFiles: Record<string, ProjectFileData> = {
       questions: ["What do people read into a match—or a difference—between the windows?", "How does sharing a visual grammar change the way these different sources are understood?", "What remains private or unrepresented when a response becomes a color?"],
       links: [workshopLink],
     }],
-    images: records.map((record) => ({ ...record, src: `/projects/acg/${record.file}.png` })),
+    images: records.map((record) => ({ ...record, src: `/projects/acg/${record.file}` })),
     record: { title: "Activation record", facts: [
       { label: "Site", value: acg.activation.venue },
       { label: "Dates", value: acg.activation.dates },
@@ -125,9 +125,9 @@ export const projectFiles: Record<string, ProjectFileData> = {
       details: [{ title: "Why sketches?", paragraphs: ["The medium resists finish. A room can be specified but not held still: light moves, occupants move, and the same construction reads differently at a different hour. Each sketch is a fixed proposal about something that will not sit still."] }],
     },
     images: documentation("projects/affective-sculptural-sketches", [
-      { file: "first-date.png", title: "First Date", caption: "High Fidelity Sketch: First Date.", width: 1473, height: 1964 },
-      { file: "affective-infrastructure.png", title: "Affective Infrastructure", caption: "High Fidelity Sketch for Affective Infrastructure.", width: 1536, height: 2048 },
-      { file: "temporary-emotional-architectures.png", title: "Temporary Emotional Architectures", caption: "Temporary Emotional Architectures. A proposal for a constructed affective environment.", width: 1512, height: 2016 },
+      { file: "first-date.webp", title: "First Date", caption: "High Fidelity Sketch: First Date.", width: 1473, height: 1964 },
+      { file: "affective-infrastructure.webp", title: "Affective Infrastructure", caption: "High Fidelity Sketch for Affective Infrastructure.", width: 1536, height: 2048 },
+      { file: "temporary-emotional-architectures.webp", title: "Temporary Emotional Architectures", caption: "Temporary Emotional Architectures. A proposal for a constructed affective environment.", width: 1512, height: 2016 },
     ]),
     record: { title: "Study record", facts: [
       { label: "Material", value: "Light, volume, proportion, duration" },
@@ -243,9 +243,9 @@ export const projectFiles: Record<string, ProjectFileData> = {
       details: [{ title: "Research scope", paragraphs: ["Portraiture is the most densely sampled genre and the reference grammar for every other scan. The work widens into other image types and sources, including photographic archives, contemporary image libraries, and machine-generated imagery. Each source tests whether the grammar survives a change of regime."] }],
     },
     images: documentation("projects/convergent-grammar", [
-      { file: "hero.png", title: "Grammar overview", caption: "A collection of source portraits from the working corpus.", width: 2686, height: 1391 },
-      { file: "example.png", title: "Extraction example", caption: "Layered geometric traces from the portrait study.", width: 2048, height: 2728 },
-      ...[1, 2, 3].map((number) => ({ file: `portrait-0${number}.png`, title: `Portrait study ${number}`, caption: `Portrait study ${number}. Source image and extracted relationships between figure, ground, focal point, and negative space.`, width: 2048, height: 2728 })),
+      { file: "hero.webp", title: "Grammar overview", caption: "A collection of source portraits from the working corpus.", width: 2686, height: 1391 },
+      { file: "example.webp", title: "Extraction example", caption: "Layered geometric traces from the portrait study.", width: 2048, height: 2728 },
+      ...[1, 2, 3].map((number) => ({ file: `portrait-0${number}.webp`, title: `Portrait study ${number}`, caption: `Portrait study ${number}. Source image and extracted relationships between figure, ground, focal point, and negative space.`, width: 2048, height: 2728 })),
     ]),
     record: { title: "Research record", facts: [
       { label: "Reference", value: "Portraiture" },
@@ -276,7 +276,7 @@ export const projectFiles: Record<string, ProjectFileData> = {
       paragraphs: ["Each day began with a journal entry. The entry was translated into an emotion and then a color, using the scoring process shared with American Emotions. As the day’s feeling shifted, so did the light."],
       details: [{ title: "Affect as a shared coordinate", paragraphs: ["The work gives a direct form to the lab’s proposition that affect is a field phenomenon: it moves beyond the body and can become visible in shared space. The subsequent work, Tell Me How You Feel: ACG, scales this premise."] }],
     },
-    images: documentation("projects/tihif-nyc", [{ file: "cover.png", title: "A feeling on the street", caption: "Three studio windows glowing red above a New York street at night.", width: 800, height: 1000 }, { file: "hero.png", title: "Three windows at night", caption: "The installation from the street. Three colored windows broadcast a daily feeling as light.", width: 2686, height: 1391 }]),
+    images: documentation("projects/tihif-nyc", [{ file: "cover.webp", title: "A feeling on the street", caption: "Three studio windows glowing red above a New York street at night.", width: 800, height: 1000 }, { file: "hero.webp", title: "Three windows at night", caption: "The installation from the street. Three colored windows broadcast a daily feeling as light.", width: 2686, height: 1391 }]),
     record: { title: "Installation record", facts: [
       { label: "Site", value: "A studio in New York City" },
       { label: "Run", value: "2025 · Complete" },

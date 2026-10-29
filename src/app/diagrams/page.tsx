@@ -24,33 +24,17 @@ export default function DiagramsPage() {
       <div className={`${styles.gallery} ${styles.diagramsGallery}`}>
         {diagrams.map((diagram, index) => (
           <figure id={diagram.id} key={diagram.id} className={styles.figure}>
-            <a
-              href={diagram.image}
-              className={styles.imageLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`Open ${diagram.title} at full resolution`}
-            >
-              <Image
-                src={diagram.image}
-                alt={diagram.alt}
-                width={diagram.width}
-                height={diagram.height}
-                sizes="(max-width: 680px) calc(100vw - 48px), (max-width: 767px) calc((100vw - 80px) / 2), calc((100vw - 144px) / 3)"
-                loading={index === 0 ? "eager" : "lazy"}
-                className={styles.image}
-              />
-            </a>
+            <Image
+              src={diagram.image}
+              alt={diagram.alt}
+              width={diagram.width}
+              height={diagram.height}
+              sizes="(max-width: 680px) calc(100vw - 48px), (max-width: 767px) calc((100vw - 80px) / 2), calc((100vw - 144px) / 3)"
+              loading={index === 0 ? "eager" : "lazy"}
+              className={styles.image}
+            />
             <figcaption className={styles.caption}>
               <h2>{diagram.title}</h2>
-              <a
-                href={diagram.image}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`Open ${diagram.title} at full resolution`}
-              >
-                Open image <span aria-hidden="true">↗</span>
-              </a>
             </figcaption>
           </figure>
         ))}
