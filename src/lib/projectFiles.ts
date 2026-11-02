@@ -2,6 +2,7 @@ import type { DocumentImage, FileLink, ProjectFileData } from "@/components/proj
 import { acg, records, related } from "./acg";
 import { CHROMA_URL } from "./site";
 import { newYorkEmotions } from "./newYorkEmotions";
+import { pitLab } from "./pitLab";
 
 // Project narratives are edited from the existing detail pages. The index keeps
 // its frontmatter source; these records define the richer project documents.
@@ -29,6 +30,7 @@ function documentation(folder: string, items: { file: string; title: string; cap
 
 export const projectFiles: Record<string, ProjectFileData> = {
   "new-york-emotions": newYorkEmotions,
+  "tell-me-how-you-feel-pit-lab": pitLab,
   acg: {
     title: acg.title,
     subtitle: "An installation series within Affective Computational Geometry",

@@ -81,7 +81,7 @@ export function ArtworkTiles({ artwork, index, reducedMotion, onSelect, onHover 
   }, [count]);
 
   return (
-    <div ref={stripRef} className={styles.colorIndex} role="group" aria-label="Choose an artwork"
+    <div ref={stripRef} className={styles.colorIndex} role="group" aria-label="Choose an artwork" data-home-bar
       onPointerDownCapture={event => {
         touchInput.current = event.pointerType === "touch";
         if (touchInput.current) { setHoveredTile(null); onHover(false); }

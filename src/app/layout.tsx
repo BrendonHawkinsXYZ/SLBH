@@ -8,8 +8,8 @@ import { CircleCursor } from "@/components/CircleCursor";
 import { AdaptiveFavicon } from "@/components/AdaptiveFavicon";
 import { SiteAtmosphere } from "@/components/SiteAtmosphere";
 import { getGalleryArtwork } from "@/lib/artwork";
-import { getWorks } from "@/lib/works";
 import { siteAtmosphereInit } from "@/lib/siteAtmosphere";
+import { homeOpeningInit } from "@/lib/homeOpening";
 
 const orbitron = Orbitron({
   subsets: ["latin"],
@@ -45,11 +45,12 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const artwork = getGalleryArtwork(getWorks());
+  const artwork = getGalleryArtwork();
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <script id="site-atmosphere-init" dangerouslySetInnerHTML={{ __html: siteAtmosphereInit }} />
+        <script id="home-opening-init" dangerouslySetInnerHTML={{ __html: homeOpeningInit }} />
         <AdaptiveFavicon />
       </head>
       <body
