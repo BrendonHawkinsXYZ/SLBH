@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { WorkPreviewItem, WorkPreviewProvider } from "@/components/index/WorkPreviewLink";
 import { getWorks, type WorkFormat } from "@/lib/works";
+import { getGalleryArtwork } from "@/lib/artwork";
 import styles from "@/components/home/HomeBibliography.module.css";
 
 const sections: { format: WorkFormat; title: string; id: string }[] = [
@@ -14,7 +15,11 @@ const sections: { format: WorkFormat; title: string; id: string }[] = [
 ];
 
 export function HomeBibliography() {
-  const works = getWorks();
+  const artwork = getGalleryArtwork();
+  const works = getWorks().map(work => ({
+    ...work,
+    image: artwork.find(image => image.href === work.href)?.src,
+  }));
   return (
     <WorkPreviewProvider>
     <div className={`container-page ${styles.document}`}>

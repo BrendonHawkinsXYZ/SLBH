@@ -3,8 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion, useIsPresent } from "motion/react";
-import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
 import type { Artwork } from "@/lib/artwork";
+import { getRandomArtworkIndex } from "@/lib/homeHero";
+import { useHomeOpening } from "./HomeOpening";
 import { ArtworkTiles } from "./ArtworkTiles";
 import styles from "./HeroGallery.module.css";
 
@@ -17,8 +19,8 @@ function subscribeMotion(callback: () => void) {
 const getReducedMotion = () => window.matchMedia(motionQuery).matches;
 const getServerMotion = () => true;
 
-function GallerySlide({ artwork, direction, reducedMotion, active, priority, onHover }: {
-  artwork: Artwork; direction: number; reducedMotion: boolean; active: boolean; priority: boolean; onHover: (value: boolean) => void;
+function GallerySlide({ artwork, direction, reducedMotion, active, priority, onHover, onReady }: {
+  artwork: Artwork; direction: number; reducedMotion: boolean; active: boolean; priority: boolean; onHover: (value: boolean) => void; onReady?: () => void;
 }) {
   const present = useIsPresent();
   return (
@@ -48,6 +50,8 @@ function GallerySlide({ artwork, direction, reducedMotion, active, priority, onH
           height={artwork.height}
           sizes="(max-width: 767px) 100vw, 90vw"
           priority={priority}
+          onLoad={onReady}
+          onError={onReady}
           unoptimized={artwork.src.endsWith(".gif") && active && !reducedMotion}
           draggable={false}
         />
@@ -61,7 +65,21 @@ function GallerySlide({ artwork, direction, reducedMotion, active, priority, onH
 }
 
 export function HeroGallery({ artwork }: { artwork: Artwork[] }) {
-  const [{ index, direction }, setSlide] = useState({ index: 0, direction: 1 });
+  // HomeHero mounts this after reading the browser clock, so the opening
+  // selection is made only on the client, before any image is displayed.
+  const [initialIndex] = useState(() => {
+    let previous = -1;
+    try { previous = Number(sessionStorage.getItem("slbh-artwork-start") ?? -1); } catch { /* Storage is optional. */ }
+    return getRandomArtworkIndex(artwork.length, previous);
+  });
+  const [{ index, direction }, setSlide] = useState({ index: initialIndex, direction: 1 });
+  const [firstLoaded, setFirstLoaded] = useState(false);
+  const { complete, onReady } = useHomeOpening();
+  const firstReady = useCallback(() => { setFirstLoaded(true); onReady(); }, [onReady]);
+
+  useEffect(() => {
+    try { sessionStorage.setItem("slbh-artwork-start", String(initialIndex)); } catch { /* Random selection works without storage. */ }
+  }, [initialIndex]);
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
   const [tilesHovered, setTilesHovered] = useState(false);
@@ -71,7 +89,7 @@ export function HeroGallery({ artwork }: { artwork: Artwork[] }) {
   const galleryRef = useRef<HTMLElement>(null);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const active = inView && pageVisible;
-  const playing = active && !reducedMotion && !hovered && !focused && !tilesHovered;
+  const playing = complete && firstLoaded && active && !reducedMotion && !hovered && !focused && !tilesHovered;
   const current = artwork[index];
 
   useEffect(() => {
@@ -119,7 +137,7 @@ export function HeroGallery({ artwork }: { artwork: Artwork[] }) {
         }
       }}
     >
-      <div className={styles.stage} onTouchStart={event => {
+      <div className={styles.stage} data-home-visual data-home-ready={firstLoaded} onTouchStart={event => {
         const touch = event.touches[0];
         touchStart.current = { x: touch.clientX, y: touch.clientY };
       }}
@@ -132,7 +150,7 @@ export function HeroGallery({ artwork }: { artwork: Artwork[] }) {
         if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) step(dx > 0 ? 1 : -1);
       }}>
         <AnimatePresence initial={false} custom={direction}>
-          <GallerySlide key={current.src} artwork={current} direction={direction} reducedMotion={reducedMotion} active={active} priority={index === 0} onHover={setHovered} />
+          <GallerySlide key={current.src} artwork={current} direction={direction} reducedMotion={reducedMotion} active={active} priority={index === initialIndex} onHover={setHovered} onReady={index === initialIndex ? firstReady : undefined} />
         </AnimatePresence>
       </div>
       <ArtworkTiles artwork={artwork} index={index} reducedMotion={reducedMotion}

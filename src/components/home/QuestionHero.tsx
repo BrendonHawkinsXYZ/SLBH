@@ -7,6 +7,7 @@ import type { Artwork } from "@/lib/artwork";
 import { homeQuestions, questionProjects } from "@/lib/homeQuestions";
 import { layoutQuestion } from "@/lib/questionTypography";
 import styles from "./QuestionHero.module.css";
+import { useHomeOpening } from "./HomeOpening";
 
 const reducedQuery = "(prefers-reduced-motion: reduce)";
 function subscribeMotion(callback: () => void) {
@@ -16,7 +17,7 @@ function subscribeMotion(callback: () => void) {
 }
 const getMotion = () => window.matchMedia(reducedQuery).matches;
 const serverMotion = () => true;
-const interval = 8000;
+const interval = 1500;
 
 export function QuestionHero({ artwork }: { artwork: Artwork[] }) {
   const [index, setIndex] = useState<number | null>(null);
@@ -32,7 +33,8 @@ export function QuestionHero({ artwork }: { artwork: Artwork[] }) {
   const lastPreview = useRef<Record<string, string>>({});
   const touch = useRef<{ x: number; y: number } | null>(null);
   const reduced = useSyncExternalStore(subscribeMotion, getMotion, serverMotion);
-  const playing = !reduced && !hovered && !focused && active && visible;
+  const { complete, onReady } = useHomeOpening();
+  const playing = complete && !reduced && !hovered && !focused && active && visible;
   const question = homeQuestions[index ?? 0];
   const project = questionProjects[question.project];
   const { glyphs, bounds } = useMemo(() => layoutQuestion(question, extent.width, extent.height), [question, extent]);
@@ -54,6 +56,10 @@ export function QuestionHero({ artwork }: { artwork: Artwork[] }) {
     try { sessionStorage.setItem(storageKey, String(start)); } catch { /* Storage is optional. */ }
     setIndex(start);
   }, []);
+
+  useEffect(() => {
+    if (index !== null) onReady();
+  }, [index, onReady]);
 
   function positionPreview(image: Artwork, x: number, y: number) {
     const element = previewRef.current;
@@ -123,7 +129,7 @@ export function QuestionHero({ artwork }: { artwork: Artwork[] }) {
           event.preventDefault(); step(event.key === "ArrowRight" ? 1 : -1);
         }
       }}>
-      <div ref={stageRef} className={styles.stage}
+      <div ref={stageRef} className={styles.stage} data-home-visual data-home-ready={index !== null}
         onTouchStart={event => { const point = event.touches[0]; touch.current = { x: point.clientX, y: point.clientY }; }}
         onTouchEnd={event => {
           if (!touch.current) return;
@@ -135,7 +141,7 @@ export function QuestionHero({ artwork }: { artwork: Artwork[] }) {
         <AnimatePresence mode="wait" initial={false}>
           {index !== null && <motion.svg key={question.id} className={styles.artwork} viewBox={`0 0 ${extent.width} ${extent.height}`}
             role="group" aria-label={`Question ${question.id} of ${homeQuestions.length}`} data-question={question.id} data-treatment={question.treatment}
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reduced ? 0 : .16 }}>
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reduced ? 0 : .08 }}>
             <a href={project.href} className={styles.questionLink} aria-label={`${question.text} — ${project.title}`} data-question-link="true"
               onPointerEnter={event => { setHovered(true); if (event.pointerType === "mouse") showPreview(event.clientX, event.clientY); }}
               onPointerMove={event => { if (preview?.questionId === question.id) positionPreview(preview.image, event.clientX, event.clientY); }}

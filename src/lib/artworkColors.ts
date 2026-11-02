@@ -1,6 +1,13 @@
 // Average RGB of each original artwork, composited on the gallery background.
 // Precomputed so the gallery never downloads images just to draw the color index.
 export const artworkColors: Record<string, string> = {
+  "/projects/tell-me-how-you-feel-pit-lab/cover.webp": "#756660",
+  "/projects/tell-me-how-you-feel-pit-lab/drawing.webp": "#777067",
+  "/projects/tell-me-how-you-feel-pit-lab/at-the-table.webp": "#81776d",
+  "/projects/tell-me-how-you-feel-pit-lab/conversation.webp": "#746958",
+  "/projects/tell-me-how-you-feel-pit-lab/tea-and-cookies.webp": "#585049",
+  "/projects/tell-me-how-you-feel-pit-lab/inspired.webp": "#917f65",
+  "/projects/tell-me-how-you-feel-pit-lab/hurt.webp": "#99866f",
   "/projects/new-york-emotions/six-hours.gif": "#444444",
   "/projects/american-emotions/render-2024.png": "#c69e88",
   "/projects/affective-geometry/plate-circle.png": "#1e4646",
