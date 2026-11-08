@@ -70,7 +70,8 @@ export const newYorkEmotions: ProjectFileData = {
   }, {
     id: "continuation", title: "From New York Emotions to ACG",
     paragraphs: [
-      "American Emotions, and later Global Emotions, develop autonomous systems that infer emotional states from public signals. New York Emotions opened a participatory line of inquiry by asking people directly and placing their responses beside the inference.",
+      "Wall of Truth had already explored public vulnerability through an anonymous digital confessional in 2024. New York Emotions developed a more specific invitation: describe how you feel, and encounter that response beside an inferred emotional field.",
+      "American Emotions, and later Global Emotions, develop autonomous systems that infer emotional states from public signals. New York Emotions brought participant responses into direct comparison with that inference.",
       "Tell Me How You Feel: ACG carried that comparison into a shared physical environment. The relationship between inferred states and feelings expressed in person became an installation in light.",
     ],
     links: [{ title: "Tell Me How You Feel: ACG", href: "/projects/acg", role: "The comparison continues in shared space" }],
@@ -91,6 +92,7 @@ export const newYorkEmotions: ProjectFileData = {
   references: [
     { title: "American Emotions", href: "/projects/american-emotions", role: "The earlier inquiry into inferred emotion" },
     { title: "Tell Me How You Feel: ACG", href: "/projects/acg", role: "The direct continuation of the live comparison" },
+    { title: "Wall of Truth", href: "/projects/wall-of-truth", role: "The earlier inquiry into public vulnerability" },
     { title: "Global Emotions", href: "/projects/global-emotions", role: "The autonomous inquiry across locations" },
   ],
 };

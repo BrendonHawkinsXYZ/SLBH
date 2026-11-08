@@ -28,7 +28,7 @@ export function ACGStory() {
       <ProjectImage project={projectFiles.acg} file="activation-room.webp" />
     </section>
     <section className={styles.storyClosing}>
-      <div><h2>The difference<br />is part of the reading.</h2><p>In this nighttime view, the public field is blue and the participant field is red. The windows offer a relationship to look at, rather than a single account of how everyone feels.</p></div>
+      <div><h2>The difference<br />is part of the reading.</h2><div><p>In this nighttime view, the public field is blue and the participant field is red. The windows offer a relationship to look at, rather than a single account of how everyone feels.</p><p className={styles.lineageNote}>Two 2024 studies opened parts of this inquiry: <a href="/projects/affective-lighting">Affective Lighting</a> brought emotional data into an object and a room; <a href="/projects/wall-of-truth">Wall of Truth</a> offered a public invitation to disclose something.</p></div></div>
       <ProjectImage project={projectFiles.acg} file="activation-alignment.webp" className={styles.bleed} />
     </section>
   </>;

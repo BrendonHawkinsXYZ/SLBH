@@ -3,6 +3,7 @@ import { acg, records, related } from "./acg";
 import { CHROMA_URL } from "./site";
 import { newYorkEmotions } from "./newYorkEmotions";
 import { pitLab } from "./pitLab";
+import { affectiveLighting, wallOfTruth } from "./earlyProjects";
 
 // Project narratives are edited from the existing detail pages. The index keeps
 // its frontmatter source; these records define the richer project documents.
@@ -15,6 +16,8 @@ const tihifLink: FileLink = { title: "This Is How I’m Feeling: NYC", role: "Pr
 const workshopLink: FileLink = { title: "Tell Me How You Feel: Chroma", role: "Drawing, florals, food, and conversation", href: "/projects/tell-me-how-you-feel-chroma" };
 const globalLink: FileLink = { title: "Global Emotions", role: "Public signals interpreted across locations", href: "/projects/global-emotions" };
 const chromaLink: FileLink = { title: "Chroma", role: "A private emotional journal", href: CHROMA_URL };
+const lightingLink: FileLink = { title: "Affective Lighting", role: "An early translation into an environmental object", href: "/projects/affective-lighting" };
+const wallLink: FileLink = { title: "Wall of Truth", role: "An early invitation to public vulnerability", href: "/projects/wall-of-truth" };
 
 function documentation(folder: string, items: { file: string; title: string; caption: string; width: number; height: number; alt?: string }[]): DocumentImage[] {
   return items.map((item, index) => ({
@@ -29,6 +32,8 @@ function documentation(folder: string, items: { file: string; title: string; cap
 }
 
 export const projectFiles: Record<string, ProjectFileData> = {
+  "affective-lighting": affectiveLighting,
+  "wall-of-truth": wallOfTruth,
   "new-york-emotions": newYorkEmotions,
   "tell-me-how-you-feel-pit-lab": pitLab,
   acg: {
@@ -43,6 +48,7 @@ export const projectFiles: Record<string, ProjectFileData> = {
     ],
     summary: "What happens when different descriptions of affect are rendered into the same shared environment?",
     abstract: [
+      "Two 2024 studies opened different parts of this inquiry: Affective Lighting translated American Emotions data into an environmental object, while Wall of Truth investigated public vulnerability through an anonymous confessional.",
       "New York Emotions first placed a daily inferred field beside live participant responses during a six-hour study in 2025. Tell Me How You Feel: ACG developed that comparison into an installation in light.",
       "The first storefront activation placed two fields beside one another: one drawn from American Emotions, and another shaped by visitor input. Both were translated into light.",
       "Affective Computational Geometry is the broader thesis and conceptual program. Tell Me How You Feel: ACG is an installation series within it—one way to encounter its questions in shared space.",
@@ -70,7 +76,7 @@ export const projectFiles: Record<string, ProjectFileData> = {
       { label: "Format", value: acg.activation.format },
       { label: "Series", value: "Ongoing · Next activation to be announced" },
     ] },
-    references: [newYorkLink, ...related, workshopLink],
+    references: [newYorkLink, lightingLink, wallLink, ...related, workshopLink],
   },
 
   "affective-geometry": {
@@ -167,7 +173,7 @@ export const projectFiles: Record<string, ProjectFileData> = {
     sections: [{
       id: "questions-opened", title: "What the experiment opened",
       paragraphs: ["The 2024 experiment opened questions about the distance between a public signal, an emotional interpretation, and a visual form. What can attention stand in for? What does the model introduce? What can color communicate that a label cannot?", "That line of inquiry later informed Emotion as System, Chroma, and the ACG installation series. Chroma gives the person authority to name a feeling; the installation places participant input beside interpreted public signals. Each returns the original question in a different form."],
-      links: [newYorkLink, theory, chromaLink, acgLink],
+      links: [lightingLink, newYorkLink, theory, chromaLink, acgLink],
     }, {
       id: "continuation", title: "From American Emotions to Global Emotions",
       paragraphs: ["Global Emotions continues this inquiry across locations in a daily field interface. The instrument is a later development, not a live replay of the 2024 American Emotions system. Its model and coverage should be read through its own dated records."],
@@ -182,7 +188,7 @@ export const projectFiles: Record<string, ProjectFileData> = {
       { label: "Related work", value: "New York Emotions · 2025 mayoral-election period" },
       { label: "Continuation", value: "Global Emotions · Location-based instrument" },
     ] },
-    references: [newYorkLink, theory, chromaLink, acgLink, globalLink, tihifLink, { title: "American Emotions archive", role: "Historical documentation", href: "https://www.instagram.com/americanemotions" }],
+    references: [newYorkLink, lightingLink, acgLink, theory, chromaLink, globalLink, tihifLink, { title: "American Emotions archive", role: "Historical documentation", href: "https://www.instagram.com/americanemotions" }],
   },
 
   "global-emotions": {

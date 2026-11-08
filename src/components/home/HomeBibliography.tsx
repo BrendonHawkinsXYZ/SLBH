@@ -9,6 +9,7 @@ const sections: { format: WorkFormat; title: string; id: string }[] = [
   { format: "Product", title: "Products", id: "products" },
   { format: "Instrument", title: "Instruments", id: "instruments" },
   { format: "Study", title: "Studies", id: "studies" },
+  { format: "Sculpture", title: "Sculpture & spatial studies", id: "sculpture" },
   { format: "Installation", title: "Installations", id: "installations" },
   { format: "Program / Workshop", title: "Programs & workshops", id: "programs" },
   { format: "Visual Work", title: "Visual work", id: "visual-work" },
@@ -18,7 +19,7 @@ export function HomeBibliography() {
   const artwork = getGalleryArtwork();
   const works = getWorks().map(work => ({
     ...work,
-    image: artwork.find(image => image.href === work.href)?.src,
+    image: artwork.find(image => image.href === work.href)?.src ?? work.image,
   }));
   return (
     <WorkPreviewProvider>

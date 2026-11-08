@@ -1,0 +1,145 @@
+{
+  "card": {
+    "descendants": [
+      {
+        "bg": "rgb(246, 246, 246)",
+        "borderLeft": "0px none rgb(0, 0, 0)",
+        "class": "thumbnail",
+        "h": 347.5,
+        "padding": "0px",
+        "tag": "A",
+        "w": 347.5,
+        "x": 10,
+        "y": 508.71875
+      },
+      {
+        "bg": "rgba(0, 0, 0, 0)",
+        "borderLeft": "1px solid rgb(157, 157, 157)",
+        "class": "row",
+        "h": 41.390625,
+        "padding": "0px 0px 0px 10px",
+        "tag": "DIV",
+        "w": 347.5,
+        "x": 10,
+        "y": 866.21875
+      }
+    ],
+    "h": 398.890625,
+    "id": "product-10723431907667",
+    "w": 347.5,
+    "x": 10,
+    "y": 508.71875
+  },
+  "filters": [
+    {
+      "class": "archive-col search-artists",
+      "h": 341.125,
+      "w": 347.5,
+      "x": 10,
+      "y": 83.796875
+    },
+    {
+      "class": "archive-col archive-col-1",
+      "h": 341.125,
+      "w": 347.5,
+      "x": 367.5,
+      "y": 83.796875
+    },
+    {
+      "class": "archive-col archive-col-2",
+      "h": 341.125,
+      "w": 347.5,
+      "x": 725,
+      "y": 83.796875
+    },
+    {
+      "class": "archive-col search-book",
+      "h": 341.125,
+      "w": 347.5,
+      "x": 1082.5,
+      "y": 83.796875
+    }
+  ],
+  "header": {
+    "h": 33.796875,
+    "w": 1440,
+    "x": 0,
+    "y": 0
+  },
+  "viewport": [
+    1440,
+    1000
+  ],
+  "wrappers": [
+    {
+      "class": "header",
+      "id": "header",
+      "tag": "HEADER"
+    },
+    {
+      "class": "menu-pop-up",
+      "id": "menu",
+      "tag": "DIV"
+    },
+    {
+      "class": "archive-search",
+      "id": "",
+      "tag": "DIV"
+    },
+    {
+      "class": "",
+      "id": "",
+      "tag": "SCRIPT"
+    },
+    {
+      "class": "",
+      "id": "web-pixels-manager-sandbox-container",
+      "tag": "DIV"
+    },
+    {
+      "class": "collection-header",
+      "id": "",
+      "tag": "DIV"
+    },
+    {
+      "class": "",
+      "id": "products",
+      "tag": "DIV"
+    },
+    {
+      "class": "pagination",
+      "id": "",
+      "tag": "DIV"
+    },
+    {
+      "class": "movil-search",
+      "id": "",
+      "tag": "DIV"
+    },
+    {
+      "class": "",
+      "id": "",
+      "tag": "SCRIPT"
+    },
+    {
+      "class": "",
+      "id": "",
+      "tag": "STYLE"
+    },
+    {
+      "class": "",
+      "id": "",
+      "tag": "FOOTER"
+    },
+    {
+      "class": "",
+      "id": "",
+      "tag": "SCRIPT"
+    },
+    {
+      "class": "",
+      "id": "",
+      "tag": "SCRIPT"
+    }
+  ]
+}

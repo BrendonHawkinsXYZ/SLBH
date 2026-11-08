@@ -10,7 +10,7 @@ export function WorkIndex({ works, filters = false }: { works: Work[]; filters?:
   const [active, setActive] = useState<Work | null>(null);
   const [filter, setFilter] = useState<WorkFormat | "All">("All");
   const previewRef = useRef<HTMLElement>(null);
-  const formats: WorkFormat[] = ["Paper", "Product", "Study", "Instrument", "Installation", "Visual Work", "Program / Workshop"];
+  const formats: WorkFormat[] = ["Paper", "Product", "Study", "Instrument", "Sculpture", "Installation", "Visual Work", "Program / Workshop"];
   const visible = works.filter(work => filter === "All" || work.formats.includes(filter));
   function position(x: number, y: number) {
     const preview = previewRef.current;

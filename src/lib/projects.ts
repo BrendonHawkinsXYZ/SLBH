@@ -16,6 +16,7 @@ export type ProjectType =
   | "Product"
   | "Instrument"
   | "Installation"
+  | "Sculpture"
   | "Study"
   | "Paper"
   | "Visual Work"
