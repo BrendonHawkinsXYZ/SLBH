@@ -10,6 +10,7 @@ import { SiteAtmosphere } from "@/components/SiteAtmosphere";
 import { getGalleryArtwork } from "@/lib/artwork";
 import { siteAtmosphereInit } from "@/lib/siteAtmosphere";
 import { homeOpeningInit } from "@/lib/homeOpening";
+import { DefaultSiteChrome } from "@/components/DefaultSiteChrome";
 
 const orbitron = Orbitron({
   subsets: ["latin"],
@@ -60,10 +61,10 @@ export default function RootLayout({
         <a className="skip-link" href="#main">Skip to content</a>
         <AmbientShape />
         <CircleCursor />
-        <Nav questionArtwork={artwork} />
+        <DefaultSiteChrome><Nav questionArtwork={artwork} /></DefaultSiteChrome>
         <div className="site-scroll-plane" data-site-scroll>
           <main id="main" style={{ flex: 1, display: "flex", flexDirection: "column" }}>{children}</main>
-          <Footer />
+          <DefaultSiteChrome><Footer /></DefaultSiteChrome>
         </div>
       </body>
     </html>

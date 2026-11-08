@@ -2,7 +2,7 @@ import { CHROMA_URL } from "@/lib/site";
 import { getAllProjects } from "./projects";
 import { getAllResearchPapers } from "./research";
 
-export type WorkFormat = "Paper" | "Product" | "Study" | "Instrument" | "Installation" | "Visual Work" | "Program / Workshop";
+export type WorkFormat = "Paper" | "Product" | "Study" | "Instrument" | "Sculpture" | "Installation" | "Visual Work" | "Program / Workshop";
 export type Work = {
   id: string;
   title: string;
@@ -70,7 +70,7 @@ export function getWorks(): Work[] {
     question: "Visual studies in language, attention, technology, and culture.",
     image: "/posters/techno-savior.png", status: "", related: [],
   };
-  const rank = ["emotion-as-system", "chroma", "tell-me-how-you-feel-pit-lab", "tell-me-how-you-feel-chroma", "acg", "affective-geometry", "american-emotions", "new-york-emotions", "affective-sculptural-sketches", "global-emotions", "convergent-grammar", "tihif-nyc"];
+  const rank = ["emotion-as-system", "chroma", "tell-me-how-you-feel-pit-lab", "tell-me-how-you-feel-chroma", "acg", "affective-geometry", "american-emotions", "affective-lighting", "wall-of-truth", "new-york-emotions", "affective-sculptural-sketches", "global-emotions", "convergent-grammar", "tihif-nyc"];
   return [...papers, chroma, ...projects, diagramCollection, posterCollection].sort((a, b) => {
     const aRank = rank.indexOf(a.id), bRank = rank.indexOf(b.id);
     return (aRank < 0 ? rank.length : aRank) - (bRank < 0 ? rank.length : bRank);

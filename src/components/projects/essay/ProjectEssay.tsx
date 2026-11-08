@@ -5,11 +5,12 @@ import { chromaWorkshop } from "@/lib/chromaWorkshop";
 import { ACGStory, GeometryStory, WorkshopStory } from "./ProjectStories";
 import { NewYorkEmotionsStory } from "./NewYorkEmotionsStory";
 import { PitLabStory } from "./PitLabStory";
+import { AffectiveLightingStory, WallOfTruthStory } from "./EarlyProjectStories";
 import { ResearchStory } from "./ResearchStories";
 import { ProjectDetails } from "./ProjectDetails";
 import styles from "./ProjectEssay.module.css";
 
-export type EssaySlug = "new-york-emotions" | "acg" | "affective-geometry" | "tell-me-how-you-feel-chroma" | "tell-me-how-you-feel-pit-lab" | "affective-sculptural-sketches" | "american-emotions" | "global-emotions" | "convergent-grammar" | "tihif-nyc";
+export type EssaySlug = "new-york-emotions" | "acg" | "affective-geometry" | "tell-me-how-you-feel-chroma" | "tell-me-how-you-feel-pit-lab" | "affective-sculptural-sketches" | "american-emotions" | "global-emotions" | "convergent-grammar" | "tihif-nyc" | "affective-lighting" | "wall-of-truth";
 
 function projectFor(slug: string) {
   return slug === "tell-me-how-you-feel-chroma" ? chromaWorkshop : projectFiles[slug];
@@ -28,7 +29,7 @@ export function ProjectEssay({ slug }: { slug: EssaySlug }) {
   }).slice(0, 3);
 
   return <article className={styles.essayPage}>
-    {slug === "new-york-emotions" ? <NewYorkEmotionsStory /> : slug === "acg" ? <ACGStory /> : slug === "affective-geometry" ? <GeometryStory /> : slug === "tell-me-how-you-feel-chroma" ? <WorkshopStory /> : slug === "tell-me-how-you-feel-pit-lab" ? <PitLabStory /> : <ResearchStory slug={slug} project={project} />}
+    {slug === "affective-lighting" ? <AffectiveLightingStory /> : slug === "wall-of-truth" ? <WallOfTruthStory /> : slug === "new-york-emotions" ? <NewYorkEmotionsStory /> : slug === "acg" ? <ACGStory /> : slug === "affective-geometry" ? <GeometryStory /> : slug === "tell-me-how-you-feel-chroma" ? <WorkshopStory /> : slug === "tell-me-how-you-feel-pit-lab" ? <PitLabStory /> : <ResearchStory slug={slug} project={project} />}
     <ProjectDetails project={project} />
     {!!related.length && <section className={styles.furtherWork} aria-labelledby="related-work-title">
       <div className={styles.sectionTopline}><h2 id="related-work-title">Related work</h2><Link href="/#work">All work →</Link></div>

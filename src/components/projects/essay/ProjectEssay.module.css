@@ -13,6 +13,7 @@
 .essayHeader > p { flex-shrink: 0; font-size: 24px; line-height: 1.4; letter-spacing: -.02em; padding-bottom: 8px; white-space: pre-line; }
 .picture { min-width: 0; }
 .picture > img { width: 100%; height: auto; border: 0; padding: 0; }
+.essayFilm { display: block; width: 100%; height: auto; }
 .picture > figcaption { color: var(--muted); font-size: 14px; line-height: 1.6; padding-top: 16px; max-width: 64ch; }
 .bleed { margin-inline: calc(-1 * var(--gutter)) !important; }
 .bleed > figcaption { padding-inline: var(--gutter); }
@@ -36,6 +37,7 @@
 .storyClosing > div { display: grid; grid-template-columns: 1.5fr 1fr; gap: 96px; align-items: end; padding-bottom: 48px; }
 .storyClosing h2 { font-size: clamp(40px, 5vw, 80px); line-height: 1.04; }
 .storyClosing p { font-size: 18px; max-width: 40ch; color: var(--muted); }
+.storyClosing .lineageNote { margin-top: 24px; }
 .geometryHero { display: grid; grid-template-columns: 1.4fr 1fr; gap: 64px; align-items: center; }
 .geometryHero img, .geometryPlates img, .geometryCoda > .picture img { mix-blend-mode: lighten; }
 .geometryHero > .picture:last-child { margin-top: 128px; }
