@@ -5,9 +5,8 @@ import { usePathname } from "next/navigation";
 import { LocalReadout } from "./LocalReadout";
 import { HomeHero } from "./home/HomeHero";
 import { HomeOpening } from "./home/HomeOpening";
-import type { Artwork } from "@/lib/artwork";
 
-export function Nav({ questionArtwork = [] }: { questionArtwork?: Artwork[] }) {
+export function Nav() {
   const pathname = usePathname();
   const isHome = pathname === "/";
   const isProject = pathname.startsWith("/projects/");
@@ -27,6 +26,6 @@ export function Nav({ questionArtwork = [] }: { questionArtwork?: Artwork[] }) {
     </header>
   );
   return isHome
-    ? <HomeOpening><HomeHero artwork={questionArtwork} />{header}</HomeOpening>
+    ? <HomeOpening><HomeHero />{header}</HomeOpening>
     : header;
 }
