@@ -28,7 +28,7 @@ function q(id: number, project: HomeQuestion["project"], treatment: QuestionTrea
   return { id, project, treatment, text: copy.replaceAll("|", " "), lines: copy.split("|"), emphasis: emphasis.split(" ").filter(Boolean) };
 }
 
-// Evening questions for Tell Me How You Feel. Related follow-ups stay together.
+// Arrival questions for Tell Me How You Feel. Each homepage visit selects one.
 export const homeQuestions: HomeQuestion[] = [
   q(1, "pitLab", "condensed", "Who gets to participate|in society simply|due to proximity?", "proximity"),
   q(2, "acg", "split", "Who is left out|of technology’s|representation?", "representation"),

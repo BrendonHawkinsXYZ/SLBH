@@ -29,7 +29,7 @@ export function LocalReadout({ home = false }: { home?: boolean }) {
     const timeFormat = new Intl.DateTimeFormat("en-GB", {
       hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23",
     });
-    const dateFormat = new Intl.DateTimeFormat("en-GB", {
+    const dateFormat = new Intl.DateTimeFormat("en-US", {
       day: "2-digit", month: "2-digit", year: "numeric",
     });
     let timer = 0;

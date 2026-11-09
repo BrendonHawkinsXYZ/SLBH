@@ -1,19 +1,46 @@
-export const SITE_BLACKS = [
-  { name: "Blue black", color: "#0D121E", startHour: 0 },
-  { name: "Violet black", color: "#17101C", startHour: 4 },
-  { name: "Green black", color: "#0D1915", startHour: 8 },
-  { name: "Ochre black", color: "#1E1B10", startHour: 12 },
-  { name: "Sienna black", color: "#21170F", startHour: 16 },
-  { name: "Red black", color: "#211116", startHour: 20 },
+// One authored color for each hour of the visitor's local day, starting at 00:00.
+export const SITE_HOURS = [
+  { name: "Midnight blue", color: "#7186B9" },
+  { name: "Iris", color: "#7A80BA" },
+  { name: "Violet", color: "#8D80BD" },
+  { name: "Mauve", color: "#A28AC7" },
+  { name: "Lilac", color: "#BD99CE" },
+  { name: "Rose", color: "#D7A0B7" },
+  { name: "Blush", color: "#E8AEAB" },
+  { name: "Peach", color: "#EDBA91" },
+  { name: "Honey", color: "#E6BC69" },
+  { name: "Straw", color: "#DDD17A" },
+  { name: "Sage", color: "#BACD98" },
+  { name: "Sea glass", color: "#91C8B6" },
+  { name: "Sky", color: "#73BDCC" },
+  { name: "Cerulean", color: "#83B4D6" },
+  { name: "Periwinkle", color: "#9CAAD9" },
+  { name: "Wisteria", color: "#BDA4D0" },
+  { name: "Coral rose", color: "#DCA4B4" },
+  { name: "Apricot", color: "#E9916E" },
+  { name: "Terracotta", color: "#D9856B" },
+  { name: "Clay rose", color: "#C67A79" },
+  { name: "Wine", color: "#B8758F" },
+  { name: "Mulberry", color: "#9D7BA4" },
+  { name: "Amethyst", color: "#8A85B5" },
+  { name: "Twilight blue", color: "#7989B8" },
 ] as const;
 
-export function getSiteBlack(date: Date) {
-  return SITE_BLACKS[Math.floor(date.getHours() / 4)];
+export function getSiteHorizon(date: Date) {
+  const hour = date.getHours();
+  const current = SITE_HOURS[hour].color;
+  const next = SITE_HOURS[(hour + 1) % SITE_HOURS.length].color;
+  return `color-mix(in oklab, ${current} ${100 - date.getMinutes() / 60 * 100}%, ${next})`;
 }
 
-// Select the visitor's local color before the first paint, using the same palette
-// as the client updater. No server time zone or location lookup is involved.
+// Match getSiteHorizon before the first paint, including the minute's blend.
+// The client updater keeps it current without a server time zone or location lookup.
 export const siteAtmosphereInit = `(() => {
-  const colors = ${JSON.stringify(SITE_BLACKS.map(({ color }) => color))};
-  document.documentElement.style.setProperty("--paper", colors[Math.floor(new Date().getHours() / 4)]);
+  const colors = ${JSON.stringify(SITE_HOURS.map(({ color }) => color))};
+  const date = new Date();
+  const hour = date.getHours();
+  const current = colors[hour];
+  const next = colors[(hour + 1) % colors.length];
+  const color = "color-mix(in oklab, " + current + " " + (100 - date.getMinutes() / 60 * 100) + "%, " + next + ")";
+  document.documentElement.style.setProperty("--paper-horizon", color);
 })();`;

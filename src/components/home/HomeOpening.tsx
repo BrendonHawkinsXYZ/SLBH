@@ -1,11 +1,11 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { HOME_OPENING_STORAGE_KEY } from "@/lib/homeOpening";
+import { getOpeningQuestionDuration, getRandomOpeningQuestion, HOME_OPENING_FAILSAFE_MS } from "@/lib/homeOpening";
+import { homeQuestions, type HomeQuestion } from "@/lib/homeQuestions";
 
-type Phase = "pending" | "intro" | "out" | "nav" | "bar" | "waiting" | "image" | "ready";
+type Phase = "pending" | "intro" | "out" | "nav" | "waiting" | "image" | "ready";
 const HomeOpeningContext = createContext({ complete: true, onReady: () => {} });
-let seenThisVisit = false;
 
 export function useHomeOpening() {
   return useContext(HomeOpeningContext);
@@ -14,32 +14,51 @@ export function useHomeOpening() {
 export function HomeOpening({ children }: { children: ReactNode }) {
   const [phase, setPhase] = useState<Phase>("pending");
   const [assetReady, setAssetReady] = useState(false);
-  const shouldPlay = useRef<boolean | null>(null);
+  const question = useRef<HomeQuestion | null>(null);
+  const failsafe = useRef(0);
   const onReady = useCallback(() => setAssetReady(true), []);
+  const finish = useCallback(() => {
+    window.clearTimeout(failsafe.current);
+    document.documentElement.dataset.homeOpening = "ready";
+    setPhase("ready");
+  }, []);
+  const showQuestion = useCallback((selected: HomeQuestion) => {
+    const root = document.documentElement;
+    if (root.dataset.homeQuestion) root.style.removeProperty(`--home-question-${root.dataset.homeQuestion}`);
+    question.current = selected;
+    root.dataset.homeQuestion = String(selected.id);
+    root.style.setProperty(`--home-question-${selected.id}`, "block");
+    root.dataset.homeOpening = "intro";
+    window.clearTimeout(failsafe.current);
+    failsafe.current = window.setTimeout(finish, HOME_OPENING_FAILSAFE_MS);
+    setPhase("intro");
+  }, [finish]);
 
   useLayoutEffect(() => {
     const root = document.documentElement;
-    if (shouldPlay.current === null) {
-      let seen = seenThisVisit;
-      try { seen ||= localStorage.getItem(HOME_OPENING_STORAGE_KEY) === "1"; } catch { /* Keep the in-memory preference when storage is unavailable. */ }
-      shouldPlay.current = !seen && !window.location.hash && root.dataset.homeOpening !== "ready" && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      seenThisVisit = true;
-      try { localStorage.setItem(HOME_OPENING_STORAGE_KEY, "1"); } catch { /* Storage is optional. */ }
-    }
-    const initial = shouldPlay.current ? "intro" : "ready";
-    root.dataset.homeOpening = initial;
-    setPhase(initial);
-    return () => { delete root.dataset.homeOpening; };
-  }, []);
+    window.clearTimeout(Number(root.dataset.homeOpeningTimer));
+    delete root.dataset.homeOpeningTimer;
+    // Reuse the pre-paint selection on a full load. Client-side returns to the
+    // homepage select afresh; the ref only stabilizes React's effect replay.
+    const prepared = homeQuestions.find(item => String(item.id) === root.dataset.homeQuestion);
+    showQuestion(question.current ?? prepared ?? getRandomOpeningQuestion());
+    return () => {
+      window.clearTimeout(failsafe.current);
+      if (root.dataset.homeQuestion) root.style.removeProperty(`--home-question-${root.dataset.homeQuestion}`);
+      delete root.dataset.homeQuestion;
+      delete root.dataset.homeOpening;
+    };
+  }, [showQuestion]);
 
   useEffect(() => {
     if (phase === "pending") return;
     document.documentElement.dataset.homeOpening = phase;
+    if (phase === "ready") window.clearTimeout(failsafe.current);
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const next: Partial<Record<Phase, [number, Phase]>> = {
-      intro: [1100, "out"],
+      intro: [getOpeningQuestionDuration(question.current!), reduced ? "waiting" : "out"],
       out: [450, "nav"],
-      nav: [180, "bar"],
-      bar: [320, "waiting"],
+      nav: [180, "waiting"],
       image: [700, "ready"],
     };
     const transition = next[phase];
@@ -49,15 +68,16 @@ export function HomeOpening({ children }: { children: ReactNode }) {
   }, [phase]);
 
   useEffect(() => {
-    if (phase === "waiting" && assetReady) setPhase("image");
+    if (phase === "waiting" && assetReady) {
+      setPhase(window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "ready" : "image");
+    }
   }, [phase, assetReady]);
 
   useEffect(() => {
-    const finish = () => setPhase("ready");
     const keydown = (event: KeyboardEvent) => {
       if (event.key === "Escape" || event.key === "Tab") finish();
     };
-    const pageshow = (event: PageTransitionEvent) => { if (event.persisted) finish(); };
+    const pageshow = (event: PageTransitionEvent) => { if (event.persisted) showQuestion(getRandomOpeningQuestion()); };
     document.addEventListener("slbh-home-opening-skip", finish);
     document.addEventListener("keydown", keydown);
     window.addEventListener("pageshow", pageshow);
@@ -66,11 +86,14 @@ export function HomeOpening({ children }: { children: ReactNode }) {
       document.removeEventListener("keydown", keydown);
       window.removeEventListener("pageshow", pageshow);
     };
-  }, []);
+  }, [finish, showQuestion]);
 
   return <HomeOpeningContext.Provider value={{ complete: phase === "ready", onReady }}>
     <div className="home-intro site-surface" aria-hidden={phase !== "pending" && phase !== "intro"}>
-      <p>Tell me<br />how you feel</p>
+      <div className="home-intro-copy">
+        {homeQuestions.map(item => <p key={item.id} data-opening-question={item.id} style={{ display: `var(--home-question-${item.id}, none)` }}>{item.text}</p>)}
+      </div>
+      <button type="button" className="home-intro-enter" aria-label="Enter Studio Lab BH" tabIndex={phase === "intro" ? 0 : -1} onClick={finish} />
     </div>
     {children}
   </HomeOpeningContext.Provider>;

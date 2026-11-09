@@ -1,6 +1,6 @@
 # Image strategy
 
-The site uses `next/image` for the diagrams, posters, home gallery, and shared Essay imagery. Keep responsive `sizes`, intrinsic dimensions, and lazy loading. Eager loading is reserved for the opening image. The home gallery's color index uses precomputed colors rather than downloading every image.
+The site uses `next/image` for the diagrams, posters, home gallery, and shared Essay imagery. Keep responsive `sizes`, intrinsic dimensions, and lazy loading. Eager loading is reserved for the opening image. The home hero displays the supplied participant drawings without a color index or captions, fetching just one drawing ahead for its 1.5-second instant changes.
 
 Next.js optimizes delivery on demand, but the source assets still occupy Git history and deployment storage. Source size and visitor download size are separate measurements. See the [Next.js Image reference](https://nextjs.org/docs/app/api-reference/components/image).
 
@@ -21,6 +21,8 @@ The four new diagrams total 132.16 KiB as lossless WebP, compared with 276.07 Ki
 - Use `next/image` with `sizes` matched to the actual layout. Leave offscreen images lazy. Do not preload an entire collection. The existing GIF/still handling remains separate because animation needs different delivery.
 
 ## Existing collection
+
+The November 9 homepage drawings are lossless WebP exports of the twenty PNGs supplied in `blank`. Keep the original 1200 × 1500 dimensions, colors, and alpha channels. The source masters remain in the studio archive; site exports live in `public/home/participant-drawings/` and their dimensions and alt text in `src/lib/homeDrawings.ts`.
 
 On October 29, 2026, 26 PNG photographs and portrait studies in ACG, Affective Sculptural Sketches, Convergent Grammar, This Is How I’m Feeling: NYC, and the studio portraits were replaced with WebP. Together they fell from 81.36 MiB to 6.53 MiB (92% smaller). Dimensions and alpha channels were preserved. Standard photographs use quality 86; Convergent Grammar uses quality 90 to retain its fine geometric traces. Existing WebP photographs were not recompressed. Illustrations, diagrams, product screenshots, icons, and the animation retain their current formats.
 

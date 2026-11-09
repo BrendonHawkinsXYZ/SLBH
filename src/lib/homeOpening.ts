@@ -1,18 +1,30 @@
-export const HOME_OPENING_STORAGE_KEY = "slbh-home-intro-seen";
+import { homeQuestions, type HomeQuestion } from "./homeQuestions";
 
-// Runs in the head, before the homepage can paint. No server cookie or request
-// is needed for this browser-local preference; returning visits skip the intro.
+export const HOME_OPENING_FAILSAFE_MS = 15_000;
+
+export function getRandomOpeningQuestion(random = Math.random): HomeQuestion {
+  return homeQuestions[Math.floor(random() * homeQuestions.length)];
+}
+
+export function getOpeningQuestionDuration(question: HomeQuestion) {
+  const words = question.text.trim().split(/\s+/).length;
+  return Math.min(8000, Math.max(3000, 1000 + words * 260));
+}
+
+// Choose a question before paint on every homepage load. Only transient DOM
+// state is used; no cookie, storage, or saved visit preference gates the opening.
 export const homeOpeningInit = `(() => {
   if (window.location.pathname !== "/") return;
   const root = document.documentElement;
-  let seen = false;
-  try { seen = localStorage.getItem(${JSON.stringify(HOME_OPENING_STORAGE_KEY)}) === "1"; } catch {}
-  const skip = seen || !!window.location.hash || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  root.dataset.homeOpening = skip ? "ready" : "intro";
-  if (!skip) window.setTimeout(() => {
+  const questions = ${JSON.stringify(homeQuestions.map(({ id }) => id))};
+  const question = questions[Math.floor(Math.random() * questions.length)];
+  root.dataset.homeQuestion = String(question);
+  root.style.setProperty("--home-question-" + question, "block");
+  root.dataset.homeOpening = "intro";
+  root.dataset.homeOpeningTimer = String(window.setTimeout(() => {
     if (root.dataset.homeOpening && root.dataset.homeOpening !== "ready") {
       root.dataset.homeOpening = "ready";
       document.dispatchEvent(new Event("slbh-home-opening-skip"));
     }
-  }, 10000);
+  }, ${HOME_OPENING_FAILSAFE_MS}));
 })();`;

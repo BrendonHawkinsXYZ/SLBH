@@ -1,13 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  /* Six local-time blacks; the browser selects --paper before first paint. */
-  --ground: #F1F1EE;
-  --paper: #0D121E;
+  /* Warm paper and a 24-hour horizon, selected from the local clock before paint. */
+  --ground: #17131C;
+  --paper: #FDF9F8;
+  --paper-horizon: #7186B9;
+  --paper-gradient: linear-gradient(180deg, var(--paper) 0%, var(--paper) 23%, color-mix(in oklab, var(--paper) 60%, var(--paper-horizon)) 63%, var(--paper-horizon) 100%);
   --paper-grain: url("/textures/grain.svg");
   --paper-grain-size: 128px 128px;
   --paper-grain-blend: soft-light;
-  --muted: #969693;
+  --muted: #211B24;
   --signal: #F5F5F3;
   --graphite: #1B1B1F;
 
@@ -21,8 +23,8 @@
   --status-bg: #DCE7F5;
 
   /* Borders */
-  --hairline: rgba(241, 241, 238, 0.16);
-  --hairline-strong: rgba(241, 241, 238, 0.32);
+  --hairline: rgba(23, 19, 28, 0.16);
+  --hairline-strong: rgba(23, 19, 28, 0.32);
 
   /* Type scale — display & headings */
   --display: clamp(28px, 3vw, 36px);
@@ -87,7 +89,7 @@
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
   color: var(--ground);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -392,15 +394,24 @@ body { isolation: isolate; }
 }
 .floating-shape--visible { opacity: 1; visibility: visible; transition-delay: 0s; }
 
-/* Every route inherits this backdrop from the root layout. Route containers
-   stay transparent; opaque UI surfaces opt into the same style with this class. */
+/* One gradient spans the full document and travels with native scrolling.
+   The unchanged grain is a background layer, never an overlay on content. */
 html, body, .site-surface {
   background-color: var(--paper);
-  background-image: var(--paper-grain);
-  background-size: var(--paper-grain-size);
-  background-repeat: repeat;
-  background-blend-mode: var(--paper-grain-blend);
+  background-image: var(--paper-grain), var(--paper-gradient);
+  background-size: var(--paper-grain-size), 100% 100%;
+  background-repeat: repeat, no-repeat;
+  background-position: 0 0;
+  background-attachment: scroll;
+  background-blend-mode: var(--paper-grain-blend), normal;
 }
+/* Opaque UI samples its position in the document instead of restarting the
+   gradient. SiteAtmosphere also updates these offsets when a header sticks. */
+.site-surface {
+  background-size: var(--paper-grain-size), 100vw var(--paper-height, 0px);
+  background-position: var(--paper-offset-x, 0px) var(--paper-offset-y, 0px);
+}
+
 @media (max-width: 767px) {
   :root { --home-nav-height: calc(96px + env(safe-area-inset-bottom)); }
   .site-header--home { padding: 24px var(--pad-x-mobile); padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
@@ -410,7 +421,7 @@ html, body, .site-surface {
   .floating-shape { transition: none; }
 }
 
-/* First-visit homepage opening. The head script selects this before paint. */
+/* Every homepage arrival selects one random question before paint. */
 .home-intro {
   display: none;
   position: fixed;
@@ -418,16 +429,20 @@ html, body, .site-surface {
   z-index: 100;
   place-items: center;
   padding: 32px;
-  pointer-events: none;
   opacity: 1;
 }
+.home-intro-copy { width: 100%; }
 .home-intro p {
   margin: 0;
+  margin-inline: auto;
+  max-width: 22ch;
   color: var(--ground);
-  font: 300 clamp(48px, 7.5vw, 120px)/1.02 var(--font-inter), Arial, sans-serif;
-  letter-spacing: -.05em;
+  font: 300 clamp(32px, 5vw, 88px)/1.1 var(--font-inter), Arial, sans-serif;
+  letter-spacing: -.04em;
   text-align: center;
 }
+.home-intro-enter { position: absolute; inset: 0; width: 100%; border: 0; border-radius: 0; padding: 0; background: transparent; cursor: pointer; }
+.home-intro-enter:focus-visible { outline-offset: -8px; }
 html[data-home-opening="intro"] .home-intro,
 html[data-home-opening="out"] .home-intro { display: grid; }
 html[data-home-opening="out"] .home-intro { opacity: 0; transition: opacity 450ms var(--ease-out); }
@@ -456,7 +471,7 @@ html[data-home-opening]:not([data-home-opening="image"]):not([data-home-opening=
   pointer-events: none;
 }
 @media (prefers-reduced-motion: reduce) {
-  .home-intro { display: none !important; }
+  .home-intro { transition: none !important; }
   [data-home-bar], [data-home-visual] { transition: none; }
   .site-header--home { animation: none !important; }
 }
