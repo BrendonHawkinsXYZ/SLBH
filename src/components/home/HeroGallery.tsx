@@ -49,8 +49,11 @@ export function HeroGallery({ artwork }: { artwork: HeroDrawing[] }) {
   // HomeHero mounts this after hydration, so the opening
   // selection is made only on the client, before any image is displayed.
   const [initialIndex] = useState(() => {
-    let previous = -1;
-    try { previous = Number(sessionStorage.getItem("slbh-drawing-start") ?? -1); } catch { /* Storage is optional. */ }
+    let previous: number[] = [];
+    try {
+      const last = sessionStorage.getItem("slbh-drawing-last");
+      previous = [artwork.findIndex(drawing => drawing.src === last), Number(sessionStorage.getItem("slbh-drawing-start") ?? -1)];
+    } catch { /* Storage is optional. */ }
     return getRandomArtworkIndex(artwork.length, previous);
   });
   const [index, setIndex] = useState(initialIndex);
@@ -71,6 +74,11 @@ export function HeroGallery({ artwork }: { artwork: HeroDrawing[] }) {
   const active = inView && pageVisible;
   const playing = complete && firstLoaded && active && !reducedMotion && !hovered && !focused;
   const current = artwork[index];
+
+  useEffect(() => {
+    if (!complete || !firstLoaded || !active || !current) return;
+    try { sessionStorage.setItem("slbh-drawing-last", current.src); } catch { /* Random selection works without storage. */ }
+  }, [complete, firstLoaded, active, current]);
 
   useEffect(() => {
     const gallery = galleryRef.current;

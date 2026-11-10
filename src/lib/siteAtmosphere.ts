@@ -33,6 +33,10 @@ export function getSiteHorizon(date: Date) {
   return `color-mix(in oklab, ${current} ${100 - date.getMinutes() / 60 * 100}%, ${next})`;
 }
 
+export function getSiteDayProgress(date: Date) {
+  return (date.getHours() * 60 + date.getMinutes()) / 1440;
+}
+
 // Match getSiteHorizon before the first paint, including the minute's blend.
 // The client updater keeps it current without a server time zone or location lookup.
 export const siteAtmosphereInit = `(() => {
@@ -43,4 +47,5 @@ export const siteAtmosphereInit = `(() => {
   const next = colors[(hour + 1) % colors.length];
   const color = "color-mix(in oklab, " + current + " " + (100 - date.getMinutes() / 60 * 100) + "%, " + next + ")";
   document.documentElement.style.setProperty("--paper-horizon", color);
+  document.documentElement.style.setProperty("--site-day-progress", String((hour * 60 + date.getMinutes()) / 1440));
 })();`;

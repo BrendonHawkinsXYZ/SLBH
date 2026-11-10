@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { getSiteHorizon } from "@/lib/siteAtmosphere";
+import { getSiteDayProgress, getSiteHorizon } from "@/lib/siteAtmosphere";
 
 export function SiteAtmosphere() {
   useEffect(() => {
@@ -51,9 +51,13 @@ export function SiteAtmosphere() {
       window.clearTimeout(timer);
       const date = new Date();
       const color = getSiteHorizon(date);
+      const progress = String(getSiteDayProgress(date));
       const root = document.documentElement;
       if (root.style.getPropertyValue("--paper-horizon") !== color) {
         root.style.setProperty("--paper-horizon", color);
+      }
+      if (root.style.getPropertyValue("--site-day-progress") !== progress) {
+        root.style.setProperty("--site-day-progress", progress);
       }
       // Re-read local time each minute to handle day boundaries, daylight saving,
       // and device-clock changes while a page remains open.
