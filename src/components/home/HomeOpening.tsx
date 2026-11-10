@@ -4,8 +4,8 @@ import { createContext, useCallback, useContext, useEffect, useLayoutEffect, use
 import { getOpeningQuestionDuration, getRandomOpeningQuestion, HOME_OPENING_FAILSAFE_MS } from "@/lib/homeOpening";
 import { homeQuestions, type HomeQuestion } from "@/lib/homeQuestions";
 
-type Phase = "pending" | "intro" | "out" | "nav" | "waiting" | "image" | "ready";
-const HomeOpeningContext = createContext({ complete: true, onReady: () => {} });
+type Phase = "pending" | "intro" | "out" | "waiting" | "image" | "ready";
+const HomeOpeningContext = createContext({ complete: true, onReady: () => {}, visit: 0 });
 
 export function useHomeOpening() {
   return useContext(HomeOpeningContext);
@@ -14,6 +14,7 @@ export function useHomeOpening() {
 export function HomeOpening({ children }: { children: ReactNode }) {
   const [phase, setPhase] = useState<Phase>("pending");
   const [assetReady, setAssetReady] = useState(false);
+  const [visit, setVisit] = useState(0);
   const question = useRef<HomeQuestion | null>(null);
   const failsafe = useRef(0);
   const onReady = useCallback(() => setAssetReady(true), []);
@@ -21,6 +22,10 @@ export function HomeOpening({ children }: { children: ReactNode }) {
     window.clearTimeout(failsafe.current);
     document.documentElement.dataset.homeOpening = "ready";
     setPhase("ready");
+  }, []);
+  const reveal = useCallback(() => {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setPhase(previous => previous === "intro" || previous === "pending" ? reduced ? "waiting" : "out" : previous);
   }, []);
   const showQuestion = useCallback((selected: HomeQuestion) => {
     const root = document.documentElement;
@@ -31,6 +36,8 @@ export function HomeOpening({ children }: { children: ReactNode }) {
     root.dataset.homeOpening = "intro";
     window.clearTimeout(failsafe.current);
     failsafe.current = window.setTimeout(finish, HOME_OPENING_FAILSAFE_MS);
+    setAssetReady(false);
+    setVisit(previous => previous + 1);
     setPhase("intro");
   }, [finish]);
 
@@ -57,8 +64,7 @@ export function HomeOpening({ children }: { children: ReactNode }) {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const next: Partial<Record<Phase, [number, Phase]>> = {
       intro: [getOpeningQuestionDuration(question.current!), reduced ? "waiting" : "out"],
-      out: [450, "nav"],
-      nav: [180, "waiting"],
+      out: [450, "waiting"],
       image: [700, "ready"],
     };
     const transition = next[phase];
@@ -75,7 +81,7 @@ export function HomeOpening({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const keydown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" || event.key === "Tab") finish();
+      if (event.key === "Escape" || event.key === "Tab") reveal();
     };
     const pageshow = (event: PageTransitionEvent) => { if (event.persisted) showQuestion(getRandomOpeningQuestion()); };
     document.addEventListener("slbh-home-opening-skip", finish);
@@ -86,14 +92,14 @@ export function HomeOpening({ children }: { children: ReactNode }) {
       document.removeEventListener("keydown", keydown);
       window.removeEventListener("pageshow", pageshow);
     };
-  }, [finish, showQuestion]);
+  }, [finish, reveal, showQuestion]);
 
-  return <HomeOpeningContext.Provider value={{ complete: phase === "ready", onReady }}>
-    <div className="home-intro site-surface" aria-hidden={phase !== "pending" && phase !== "intro"}>
+  return <HomeOpeningContext.Provider value={{ complete: phase === "ready", onReady, visit }}>
+    <div className="home-intro site-surface" role="dialog" aria-label="A question from Studio Lab BH" aria-modal={phase === "pending" || phase === "intro" ? true : undefined} aria-hidden={phase !== "pending" && phase !== "intro"}>
       <div className="home-intro-copy">
         {homeQuestions.map(item => <p key={item.id} data-opening-question={item.id} style={{ display: `var(--home-question-${item.id}, none)` }}>{item.text}</p>)}
       </div>
-      <button type="button" className="home-intro-enter" aria-label="Enter Studio Lab BH" tabIndex={phase === "intro" ? 0 : -1} onClick={finish} />
+      <button type="button" className="home-intro-enter" aria-label="Enter Studio Lab BH" tabIndex={phase === "intro" ? 0 : -1} onClick={reveal} />
     </div>
     {children}
   </HomeOpeningContext.Provider>;
