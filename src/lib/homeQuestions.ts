@@ -46,5 +46,9 @@ export const homeQuestions: HomeQuestion[] = [
   q(14, "workshop", "quiet", "Should|it?", "should"),
   q(15, "acg", "outlined", "Does technology enhance|representation|possibilities?", "representation"),
   q(16, "acg", "split", "How much of the frictions|of life should be|automated away?", "automated"),
-  q(17, "pitLab", "editorial", "As a society increases|in complexity and size,|what are the requirements|for that system to maintain and grow?", "complexity grow"),
+  q(17, "pitLab", "editorial", "How do a system’s complexity|and scale shape|what it requires?", "complexity scale requires"),
+  q(18, "acg", "editorial", "What are we dragging|into the future|that does not want to come?", "future"),
+  q(19, "acg", "serif", "How might we transcribe|languages waiting|to be read?", "languages read"),
+  q(20, "workshop", "quiet", "How might we bring|texture|to time?", "texture time"),
+  q(21, "pitLab", "split", "How might something be used|beyond what it is built for?|What are the consequences?", "beyond consequences"),
 ];

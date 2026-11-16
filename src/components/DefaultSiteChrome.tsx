@@ -6,5 +6,5 @@ import type { ReactNode } from "react";
 /** The landing study supplies its own navigation and footer. */
 export function DefaultSiteChrome({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  return pathname === "/preview" ? null : children;
+  return pathname === "/preview" || pathname.startsWith("/private/wellthy") ? null : children;
 }
